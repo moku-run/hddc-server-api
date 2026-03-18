@@ -50,6 +50,7 @@ enum class ApiResponseCode(
     PROFILE_SOCIAL_NOT_FOUND(HttpStatus.NOT_FOUND, false, "P005", "소셜 링크를 찾을 수 없습니다."),
     PROFILE_SOCIAL_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, false, "P006", "소셜 링크는 최대 8개까지 가능합니다."),
     PROFILE_SOCIAL_DUPLICATE_PLATFORM(HttpStatus.CONFLICT, false, "P007", "이미 등록된 플랫폼입니다."),
+    PROFILE_INVALID_FIELD(HttpStatus.BAD_REQUEST, false, "P008", "유효하지 않은 프로필 설정값입니다."),
 
     // Hot Deal
     HOT_DEAL_NOT_FOUND(HttpStatus.NOT_FOUND, false, "H001", "핫딜을 찾을 수 없습니다."),

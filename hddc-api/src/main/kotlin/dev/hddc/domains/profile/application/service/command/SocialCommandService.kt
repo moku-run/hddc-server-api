@@ -6,6 +6,7 @@ import dev.hddc.domains.profile.application.ports.input.command.UpdateSocialComm
 import dev.hddc.domains.profile.application.ports.output.command.ProfileSocialCommandPort
 import dev.hddc.domains.profile.application.ports.output.query.ProfileQueryPort
 import dev.hddc.domains.profile.domain.model.SocialLinkModel
+import dev.hddc.domains.profile.domain.spec.ProfileFieldSpec
 import dev.hddc.framework.api.response.ApiResponseCode
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -24,6 +25,10 @@ class SocialCommandService(
 
         val count = profileSocialCommandPort.countByProfileId(profile.id!!)
         require(count < 8) { ApiResponseCode.PROFILE_SOCIAL_LIMIT_EXCEEDED.code }
+
+        require(ProfileFieldSpec.validateSocialPlatform(command.platform)) {
+            ApiResponseCode.PROFILE_INVALID_FIELD.code
+        }
 
         require(!profileSocialCommandPort.existsByProfileIdAndPlatform(profile.id!!, command.platform)) {
             ApiResponseCode.PROFILE_SOCIAL_DUPLICATE_PLATFORM.code

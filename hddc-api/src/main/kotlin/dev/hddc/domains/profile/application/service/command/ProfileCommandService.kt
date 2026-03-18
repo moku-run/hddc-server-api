@@ -7,6 +7,7 @@ import dev.hddc.domains.profile.application.ports.output.query.ProfileQueryPort
 import dev.hddc.domains.profile.domain.model.ProfileLinkModel
 import dev.hddc.domains.profile.domain.model.ProfileModel
 import dev.hddc.domains.profile.domain.model.SocialLinkModel
+import dev.hddc.domains.profile.domain.spec.ProfileFieldSpec
 import dev.hddc.framework.api.response.ApiResponseCode
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -25,6 +26,23 @@ class ProfileCommandService(
 
         if (profile.slug != command.slug && profileQueryPort.existsBySlug(command.slug)) {
             throw IllegalArgumentException(ApiResponseCode.PROFILE_SLUG_DUPLICATE.code)
+        }
+
+        ProfileFieldSpec.validateProfileFields(
+            colorTheme = command.colorTheme,
+            fontFamily = command.fontFamily,
+            linkLayout = command.linkLayout,
+            linkStyle = command.linkStyle,
+            headerLayout = command.headerLayout,
+            linkAnimation = command.linkAnimation,
+        )?.let { invalidField ->
+            throw IllegalArgumentException(ApiResponseCode.PROFILE_INVALID_FIELD.code)
+        }
+
+        command.socials.forEach { socialCmd ->
+            require(ProfileFieldSpec.validateSocialPlatform(socialCmd.platform)) {
+                ApiResponseCode.PROFILE_INVALID_FIELD.code
+            }
         }
 
         val now = Instant.now()
