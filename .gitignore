@@ -1,0 +1,32 @@
+### Gradle ###
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+/out/
+!**/adapter/out/
+
+### OS ###
+.DS_Store
+Thumbs.db
+
+### Application ###
+*.log
+generated/
+
+### Secrets ###
+**/secret/
+application-dev.yml
+application-prod.yml
+application-local.yml
+
+### Claude ###
+.claude/
+
+### Uploads ###
+uploads/

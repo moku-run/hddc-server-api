@@ -1,0 +1,11 @@
+dependencies {
+    implementation(JooqLibs.JOOQ)
+    implementation(JooqLibs.JOOQ_KOTLIN)
+    implementation(JooqLibs.JOOQ_KOTLIN_COROUTINES)
+    implementation(JooqLibs.JOOQ_META)
+    implementation(JooqLibs.JOOQ_CODEGEN)
+
+    jooqGenerator(JooqLibs.JOOQ_META)
+    jooqGenerator(JooqLibs.JOOQ_CODEGEN)
+    jooqGenerator(JooqLibs.JOOQ_POSTGRESQL_CONNECTOR)
+}

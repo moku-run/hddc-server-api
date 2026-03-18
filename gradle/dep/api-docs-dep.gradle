@@ -1,0 +1,13 @@
+dependencies {
+    implementation(ApiDocsLibs.SWAGGER)
+    implementation(ApiDocsLibs.SWAGGER_ANNOTATION_JAKARTA)
+}
+
+configurations.configureEach {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "io.swagger.core.v3") {
+            useVersion(ApiDocsLibs.SWAGGER_ANNOTATION_JAKARTA_VERSION)
+            because("springdoc-openapi와 호환되는 swagger-annotations 버전 강제 적용")
+        }
+    }
+}

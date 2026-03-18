@@ -1,0 +1,42 @@
+def jdbcUrl      = findProperty('dbUrl')      ?: System.getenv("DB_URL")      ?: "jdbc:postgresql://localhost:5432/hddc"
+def jdbcUser     = findProperty('dbUser')     ?: System.getenv("DB_USER")     ?: "hddc"
+def jdbcPassword = findProperty('dbPassword') ?: System.getenv("DB_PASSWORD") ?: "hddc"
+
+jooq {
+    configurations {
+        main {
+            generationTool {
+                logging = org.jooq.meta.jaxb.Logging.WARN
+
+                jdbc {
+                    url = jdbcUrl
+                    user = jdbcUser
+                    password = jdbcPassword
+                    driver = "org.postgresql.Driver"
+                }
+
+                generator {
+                    name = "org.jooq.codegen.KotlinGenerator"
+                    strategy {
+                        name = JooqLibs.STRATEGY_NAME
+                    }
+                    database {
+                        name = "org.jooq.meta.postgres.PostgresDatabase"
+                        inputSchema = "public"
+                    }
+                    generate {
+                        deprecated = false
+                        records = true
+                        immutablePojos = false
+                        fluentSetters = true
+                        javaTimeTypes = true
+                    }
+                    target {
+                        packageName = JooqLibs.TARGET_PACKAGE_NAME
+                        directory = JooqLibs.DEFAULT_DIRECTORY
+                    }
+                }
+            }
+        }
+    }
+}

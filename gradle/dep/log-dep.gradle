@@ -1,0 +1,6 @@
+dependencies {
+    implementation(LogLibs.ACTUATOR)
+    implementation(LogLibs.LOKI_LOGBACK_APPENDER)
+
+    runtimeOnly(LogLibs.PROMETHEUS)
+}

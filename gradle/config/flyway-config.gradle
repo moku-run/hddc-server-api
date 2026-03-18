@@ -1,0 +1,14 @@
+def flywayUrl      = findProperty('dbUrl')      ?: System.getenv("DB_URL")      ?: "jdbc:postgresql://localhost:5432/hddc"
+def flywayUser     = findProperty('dbUser')     ?: System.getenv("DB_USER")     ?: "hddc"
+def flywayPassword = findProperty('dbPassword') ?: System.getenv("DB_PASSWORD") ?: "hddc"
+def flywaySchemas  = ["public"]
+
+flyway {
+    url = flywayUrl
+    user = flywayUser
+    password = flywayPassword
+    schemas = flywaySchemas
+    locations = ["filesystem:src/main/resources/db/migration"]
+    defaultSchema = "public"
+    cleanDisabled = false
+}
