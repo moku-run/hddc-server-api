@@ -2,6 +2,7 @@ package dev.hddc.domains.user.application.service.command
 
 import dev.hddc.domains.user.application.ports.input.command.EmailVerificationUsecase
 import dev.hddc.domains.user.application.ports.output.command.EmailSendPort
+import org.slf4j.LoggerFactory
 import dev.hddc.domains.user.application.ports.output.command.VerificationCachePort
 import dev.hddc.domains.user.application.ports.output.query.UserQueryPort
 import dev.hddc.domains.user.domain.policy.VerificationCodeGenerator
@@ -15,6 +16,7 @@ class EmailVerificationService(
     private val verificationCachePort: VerificationCachePort,
     private val emailSendPort: EmailSendPort,
 ) : EmailVerificationUsecase {
+    private val log = LoggerFactory.getLogger(javaClass)
 
     override fun send(email: String) {
         require(!userQueryPort.existsByEmail(email)) {
@@ -29,6 +31,7 @@ class EmailVerificationService(
         try {
             emailSendPort.sendVerificationCode(email, code)
         } catch (e: Exception) {
+            log.error("이메일 발송 실패 - toEmail: {}", email, e)
             verificationCachePort.delete(cacheKey)
             throw IllegalStateException(ApiResponseCode.VERIFICATION_MAIL_SEND_FAILED.code)
         }

@@ -23,15 +23,6 @@ abstract class BaseAuditEntity : BaseEntity() {
     @Column(name = "deleted_at")
     var deletedAt: Instant? = null
 
-    @Column(name = "remark1", length = 500)
-    var remark1: String? = null
-
-    @Column(name = "remark2", length = 500)
-    var remark2: String? = null
-
-    @Column(name = "remark3", length = 500)
-    var remark3: String? = null
-
     @PrePersist
     fun onAuditPrePersist() {
         val now = Instant.now()

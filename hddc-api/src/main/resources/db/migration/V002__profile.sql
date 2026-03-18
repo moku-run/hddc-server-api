@@ -28,9 +28,6 @@ CREATE TABLE mst_profile
     updated_by             BIGINT       NOT NULL DEFAULT 0,
     is_deleted             BOOLEAN      NOT NULL DEFAULT FALSE,
     deleted_at             TIMESTAMPTZ,
-    remark1                VARCHAR(500),
-    remark2                VARCHAR(500),
-    remark3                VARCHAR(500),
 
     CONSTRAINT fk_mst_profile_mst_user
         FOREIGN KEY (user_id) REFERENCES mst_user (id)
@@ -75,9 +72,6 @@ CREATE TABLE mst_profile_link
     updated_by  BIGINT       NOT NULL DEFAULT 0,
     is_deleted  BOOLEAN      NOT NULL DEFAULT FALSE,
     deleted_at  TIMESTAMPTZ,
-    remark1     VARCHAR(500),
-    remark2     VARCHAR(500),
-    remark3     VARCHAR(500),
 
     CONSTRAINT fk_mst_profile_link_mst_profile
         FOREIGN KEY (profile_id) REFERENCES mst_profile (id)
@@ -111,9 +105,6 @@ CREATE TABLE mst_profile_social
     updated_by BIGINT       NOT NULL DEFAULT 0,
     is_deleted BOOLEAN      NOT NULL DEFAULT FALSE,
     deleted_at TIMESTAMPTZ,
-    remark1    VARCHAR(500),
-    remark2    VARCHAR(500),
-    remark3    VARCHAR(500),
 
     CONSTRAINT fk_mst_profile_social_mst_profile
         FOREIGN KEY (profile_id) REFERENCES mst_profile (id)

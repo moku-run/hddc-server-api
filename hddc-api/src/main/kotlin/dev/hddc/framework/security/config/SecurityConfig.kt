@@ -32,6 +32,7 @@ class SecurityConfig(
             "/api/auth/email-verifications/verify",
             "/api/auth/sign-up",
             "/api/auth/login",
+            "/api/auth/check-nickname",
             "/api/auth/password-reset/**",
             "/api/profiles/{slug}",
             "/api/hot-deals",
@@ -45,6 +46,18 @@ class SecurityConfig(
             "/swagger-ui.html",
             "/actuator/health",
             "/actuator/prometheus",
+            "/public/**",
+        )
+
+        val SKIP_JWT_URLS = arrayOf(
+            "/api/auth/**",
+            "/api/profiles/curated",
+            "/api/click",
+            "/api/view",
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "/swagger-ui.html",
+            "/actuator/**",
             "/public/**",
         )
     }

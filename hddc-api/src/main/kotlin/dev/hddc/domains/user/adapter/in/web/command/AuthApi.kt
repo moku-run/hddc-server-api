@@ -12,6 +12,8 @@ import dev.hddc.domains.user.application.ports.input.command.LoginResult
 import dev.hddc.domains.user.application.ports.input.command.LoginUsecase
 import dev.hddc.domains.user.application.ports.input.command.PasswordResetUsecase
 import dev.hddc.domains.user.application.ports.input.command.SignUpUsecase
+import dev.hddc.domains.user.application.ports.input.query.CheckNicknameResult
+import dev.hddc.domains.user.application.ports.input.query.CheckNicknameUsecase
 import dev.hddc.framework.api.response.ApiResponse
 import dev.hddc.framework.api.response.ApiResponseCode
 import dev.hddc.framework.security.jwt.JwtService
@@ -22,9 +24,11 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @Tag(name = "Auth", description = "인증 API")
@@ -34,6 +38,7 @@ class AuthApi(
     private val signUpUsecase: SignUpUsecase,
     private val loginUsecase: LoginUsecase,
     private val passwordResetUsecase: PasswordResetUsecase,
+    private val checkNicknameUsecase: CheckNicknameUsecase,
     private val jwtService: JwtService,
 ) {
     @Operation(summary = "회원가입 - 이메일 인증 코드 발송")
@@ -106,6 +111,13 @@ class AuthApi(
         passwordResetUsecase.reset(request.toCommand())
         return ApiResponse.of(ApiResponseCode.UPDATED)
     }
+
+    @Operation(summary = "닉네임 중복 확인")
+    @GetMapping("/api/auth/check-nickname")
+    fun checkNickname(
+        @RequestParam nickname: String,
+    ): ResponseEntity<ApiResponse<CheckNicknameResult>> =
+        ApiResponse.of(ApiResponseCode.OK, checkNicknameUsecase.execute(nickname))
 
     @Operation(summary = "로그아웃")
     @PostMapping("/api/auth/logout")

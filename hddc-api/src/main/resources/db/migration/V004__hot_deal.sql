@@ -26,9 +26,6 @@ CREATE TABLE mst_hot_deal
     updated_by         BIGINT        NOT NULL DEFAULT 0,
     is_deleted         BOOLEAN       NOT NULL DEFAULT FALSE,
     deleted_at         TIMESTAMPTZ,
-    remark1            VARCHAR(500),
-    remark2            VARCHAR(500),
-    remark3            VARCHAR(500),
 
     CONSTRAINT fk_mst_hot_deal_mst_user
         FOREIGN KEY (user_id) REFERENCES mst_user (id)
@@ -90,9 +87,6 @@ CREATE TABLE mst_hot_deal_comment
     updated_by BIGINT        NOT NULL DEFAULT 0,
     is_deleted BOOLEAN       NOT NULL DEFAULT FALSE,
     deleted_at TIMESTAMPTZ,
-    remark1    VARCHAR(500),
-    remark2    VARCHAR(500),
-    remark3    VARCHAR(500),
 
     CONSTRAINT fk_mst_hot_deal_comment_deal
         FOREIGN KEY (deal_id) REFERENCES mst_hot_deal (id)

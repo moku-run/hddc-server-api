@@ -17,6 +17,9 @@ class UserPersistenceAdapter(
     override fun existsByEmail(email: String): Boolean =
         userRepository.existsByEmailAndIsDeletedFalse(email)
 
+    override fun existsByNickname(nickname: String): Boolean =
+        userRepository.existsByNicknameAndIsDeletedFalse(nickname)
+
     override fun save(model: UserModel): UserModel {
         val entity = if (model.id != null) {
             val existing = userRepository.findById(model.id).orElse(null)
