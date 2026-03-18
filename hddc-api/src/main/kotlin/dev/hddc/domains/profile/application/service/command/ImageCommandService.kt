@@ -3,13 +3,13 @@ package dev.hddc.domains.profile.application.service.command
 import dev.hddc.domains.profile.application.ports.input.command.ImageCommandUsecase
 import dev.hddc.domains.profile.application.ports.input.command.ImageUrlResult
 import dev.hddc.domains.profile.application.ports.output.FileUploadPort
+import dev.hddc.domains.profile.application.ports.output.UploadableFile
 import dev.hddc.domains.profile.application.ports.output.command.ProfileCommandPort
 import dev.hddc.domains.profile.application.ports.output.command.ProfileLinkCommandPort
 import dev.hddc.domains.profile.application.ports.output.query.ProfileQueryPort
 import dev.hddc.framework.api.response.ApiResponseCode
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.multipart.MultipartFile
 import java.time.Instant
 
 @Service
@@ -21,7 +21,7 @@ class ImageCommandService(
 ) : ImageCommandUsecase {
 
     @Transactional
-    override fun uploadAvatar(userId: Long, file: MultipartFile): ImageUrlResult {
+    override fun uploadAvatar(userId: Long, file: UploadableFile): ImageUrlResult {
         validateImage(file, maxSizeMb = 2)
         val profile = profileQueryPort.findByUserId(userId)
             ?: throw IllegalArgumentException(ApiResponseCode.PROFILE_NOT_FOUND.code)
@@ -38,7 +38,7 @@ class ImageCommandService(
     }
 
     @Transactional
-    override fun uploadBackground(userId: Long, file: MultipartFile): ImageUrlResult {
+    override fun uploadBackground(userId: Long, file: UploadableFile): ImageUrlResult {
         validateImage(file, maxSizeMb = 5)
         val profile = profileQueryPort.findByUserId(userId)
             ?: throw IllegalArgumentException(ApiResponseCode.PROFILE_NOT_FOUND.code)
@@ -55,7 +55,7 @@ class ImageCommandService(
     }
 
     @Transactional
-    override fun uploadLinkImage(userId: Long, linkId: Long, file: MultipartFile): ImageUrlResult {
+    override fun uploadLinkImage(userId: Long, linkId: Long, file: UploadableFile): ImageUrlResult {
         validateImage(file, maxSizeMb = 2)
         val profile = profileQueryPort.findByUserId(userId)
             ?: throw IllegalArgumentException(ApiResponseCode.PROFILE_NOT_FOUND.code)
@@ -81,7 +81,7 @@ class ImageCommandService(
         profileLinkCommandPort.save(link.copy(imageUrl = null, updatedAt = Instant.now()))
     }
 
-    private fun validateImage(file: MultipartFile, maxSizeMb: Int) {
+    private fun validateImage(file: UploadableFile, maxSizeMb: Int) {
         val allowedTypes = setOf("image/jpeg", "image/png", "image/gif", "image/webp")
         require(!file.isEmpty) { ApiResponseCode.UPLOAD_FILE_EMPTY.code }
         require(file.size <= maxSizeMb * 1024 * 1024L) { ApiResponseCode.UPLOAD_FILE_TOO_LARGE.code }

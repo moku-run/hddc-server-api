@@ -5,6 +5,7 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.MappedSuperclass
+import jakarta.persistence.PrePersist
 import java.time.Instant
 
 @MappedSuperclass
@@ -15,4 +16,9 @@ abstract class BaseEntity {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     var createdAt: Instant = Instant.now()
+
+    @PrePersist
+    fun onBasePrePersist() {
+        createdAt = Instant.now()
+    }
 }

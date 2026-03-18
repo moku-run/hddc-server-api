@@ -2,6 +2,7 @@ package dev.hddc.domains.profile.adapter.`in`.web.command
 
 import dev.hddc.domains.profile.application.ports.input.command.ImageCommandUsecase
 import dev.hddc.domains.profile.application.ports.input.command.ImageUrlResult
+import dev.hddc.domains.profile.application.ports.output.UploadableFile
 import dev.hddc.framework.api.response.ApiResponse
 import dev.hddc.framework.api.response.ApiResponseCode
 import dev.hddc.framework.security.authentication.UserAuthenticationDTO
@@ -28,7 +29,7 @@ class ImageCommandApi(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @RequestParam("file") file: MultipartFile,
     ): ResponseEntity<ApiResponse<ImageUrlResult>> =
-        ApiResponse.of(ApiResponseCode.OK, imageCommandUsecase.uploadAvatar(user.userId, file))
+        ApiResponse.of(ApiResponseCode.OK, imageCommandUsecase.uploadAvatar(user.userId, file.toUploadable()))
 
     @Operation(summary = "아바타 삭제")
     @DeleteMapping("/api/profiles/me/avatar")
@@ -45,7 +46,7 @@ class ImageCommandApi(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @RequestParam("file") file: MultipartFile,
     ): ResponseEntity<ApiResponse<ImageUrlResult>> =
-        ApiResponse.of(ApiResponseCode.OK, imageCommandUsecase.uploadBackground(user.userId, file))
+        ApiResponse.of(ApiResponseCode.OK, imageCommandUsecase.uploadBackground(user.userId, file.toUploadable()))
 
     @Operation(summary = "배경 이미지 삭제")
     @DeleteMapping("/api/profiles/me/background")
@@ -63,7 +64,7 @@ class ImageCommandApi(
         @PathVariable linkId: Long,
         @RequestParam("file") file: MultipartFile,
     ): ResponseEntity<ApiResponse<ImageUrlResult>> =
-        ApiResponse.of(ApiResponseCode.OK, imageCommandUsecase.uploadLinkImage(user.userId, linkId, file))
+        ApiResponse.of(ApiResponseCode.OK, imageCommandUsecase.uploadLinkImage(user.userId, linkId, file.toUploadable()))
 
     @Operation(summary = "링크 이미지 삭제")
     @DeleteMapping("/api/profiles/me/links/{linkId}/image")
@@ -74,4 +75,11 @@ class ImageCommandApi(
         imageCommandUsecase.deleteLinkImage(user.userId, linkId)
         return ApiResponse.of(ApiResponseCode.DELETED)
     }
+
+    private fun MultipartFile.toUploadable() = UploadableFile(
+        inputStream = inputStream,
+        contentType = contentType,
+        size = size,
+        originalFilename = originalFilename,
+    )
 }

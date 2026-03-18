@@ -66,7 +66,6 @@ class LinkCommandService(
         val profile = profileQueryPort.findByUserId(userId)
             ?: throw IllegalArgumentException(ApiResponseCode.PROFILE_NOT_FOUND.code)
         val links = profileLinkCommandPort.findAllByProfileId(profile.id!!)
-        val linksById = links.associateBy { it.id }
         val reordered = links.map { link ->
             val newOrder = orderedIds.indexOf(link.id)
             if (newOrder >= 0) link.copy(sortOrder = newOrder, updatedAt = Instant.now()) else link

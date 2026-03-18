@@ -23,6 +23,8 @@ class SecurityConfig(
     private val jwtAuthenticationFilter: JwtAuthenticationFilter,
     private val apiAuthenticationEntryPoint: ApiAuthenticationEntryPoint,
     private val apiAccessDeniedHandler: ApiAccessDeniedHandler,
+    @org.springframework.beans.factory.annotation.Value("\${cors.allowed-origins:http://localhost:3000}")
+    private val corsAllowedOrigins: String,
 ) {
     companion object {
         val PERMIT_ALL_URLS = arrayOf(
@@ -32,7 +34,6 @@ class SecurityConfig(
             "/api/auth/login",
             "/api/auth/password-reset/**",
             "/api/profiles/{slug}",
-            "/api/profiles/check-slug",
             "/api/hot-deals",
             "/api/hot-deals/search",
             "/api/hot-deals/*/comments",
@@ -76,7 +77,7 @@ class SecurityConfig(
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
         val config = CorsConfiguration().apply {
-            allowedOriginPatterns = listOf("*")
+            allowedOriginPatterns = corsAllowedOrigins.split(",").map { it.trim() }
             allowedMethods = listOf("HEAD", "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
             allowedHeaders = listOf("*")
             exposedHeaders = listOf("Authorization", "Set-Cookie")

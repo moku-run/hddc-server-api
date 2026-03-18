@@ -2,6 +2,8 @@ package dev.hddc.framework.jpa
 
 import jakarta.persistence.Column
 import jakarta.persistence.MappedSuperclass
+import jakarta.persistence.PrePersist
+import jakarta.persistence.PreUpdate
 import java.time.Instant
 
 @MappedSuperclass
@@ -29,4 +31,19 @@ abstract class BaseAuditEntity : BaseEntity() {
 
     @Column(name = "remark3", length = 500)
     var remark3: String? = null
+
+    @PrePersist
+    fun onAuditPrePersist() {
+        val now = Instant.now()
+        updatedAt = now
+        val userId = AuditContextHolder.getCurrentUserId()
+        createdBy = userId
+        updatedBy = userId
+    }
+
+    @PreUpdate
+    fun onAuditPreUpdate() {
+        updatedAt = Instant.now()
+        updatedBy = AuditContextHolder.getCurrentUserId()
+    }
 }

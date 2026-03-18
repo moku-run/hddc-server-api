@@ -1,5 +1,6 @@
 package dev.hddc.domains.profile.application.service
 
+import dev.hddc.domains.profile.application.ports.output.command.CreateDefaultProfilePort
 import dev.hddc.domains.profile.application.ports.output.command.ProfileCommandPort
 import dev.hddc.domains.profile.application.ports.output.query.ProfileQueryPort
 import dev.hddc.domains.profile.domain.model.ProfileModel
@@ -10,7 +11,7 @@ import java.util.UUID
 class DefaultProfileCreator(
     private val profileQueryPort: ProfileQueryPort,
     private val profileCommandPort: ProfileCommandPort,
-) : dev.hddc.domains.profile.application.ports.output.command.CreateDefaultProfilePort {
+) : CreateDefaultProfilePort {
 
     override fun createDefaultProfile(userId: Long, nickname: String) {
         val slug = generateUniqueSlug(nickname)
@@ -30,7 +31,11 @@ class DefaultProfileCreator(
 
         if (!profileQueryPort.existsBySlug(base)) return base
 
-        val suffix = UUID.randomUUID().toString().take(6)
-        return "${base}-$suffix"
+        repeat(5) {
+            val candidate = "${base}-${UUID.randomUUID().toString().take(6)}"
+            if (!profileQueryPort.existsBySlug(candidate)) return candidate
+        }
+
+        return "${base}-${UUID.randomUUID()}"
     }
 }

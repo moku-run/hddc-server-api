@@ -1,11 +1,12 @@
 package dev.hddc.framework.upload
 
 import dev.hddc.domains.profile.application.ports.output.FileUploadPort
+import dev.hddc.domains.profile.application.ports.output.UploadableFile
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import org.springframework.web.multipart.MultipartFile
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
 import java.util.UUID
 
 @Component
@@ -17,7 +18,7 @@ class LocalFileUploadAdapter(
     private val baseUrl: String,
 ) : FileUploadPort {
 
-    override fun upload(file: MultipartFile, directory: String): String {
+    override fun upload(file: UploadableFile, directory: String): String {
         val dir = Paths.get(uploadPath, directory)
         Files.createDirectories(dir)
 
@@ -29,7 +30,9 @@ class LocalFileUploadAdapter(
         val filename = "${UUID.randomUUID()}.$extension"
         val targetPath = dir.resolve(filename)
 
-        file.transferTo(targetPath.toFile())
+        file.inputStream.use { input ->
+            Files.copy(input, targetPath, StandardCopyOption.REPLACE_EXISTING)
+        }
 
         return "$baseUrl/$directory/$filename"
     }
