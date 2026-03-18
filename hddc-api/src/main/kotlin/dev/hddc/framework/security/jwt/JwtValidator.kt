@@ -11,10 +11,9 @@ class JwtValidator(
 ) {
     fun isValid(token: String): Boolean {
         return try {
-            val rawToken = jwtParser.removePrefix(token)
-            if (isBlacklisted(rawToken)) return false
+            if (isBlacklisted(token)) return false
 
-            val claims = jwtParser.getClaims(rawToken)
+            val claims = jwtParser.getClaims(token)
             val username = claims.get(JwtSpec.CLAIM_USERNAME, String::class.java)
 
             !username.isNullOrBlank()

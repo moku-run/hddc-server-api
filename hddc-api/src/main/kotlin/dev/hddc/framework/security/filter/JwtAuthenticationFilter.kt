@@ -43,6 +43,6 @@ class JwtAuthenticationFilter(
 
     private fun resolveToken(request: HttpServletRequest): String? {
         val bearer = request.getHeader(JwtSpec.TOKEN_HEADER) ?: return null
-        return if (bearer.startsWith(JwtSpec.TOKEN_PREFIX)) bearer else null
+        return if (bearer.startsWith(JwtSpec.TOKEN_PREFIX)) bearer.removePrefix(JwtSpec.TOKEN_PREFIX) else null
     }
 }

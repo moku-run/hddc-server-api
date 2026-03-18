@@ -1,8 +1,8 @@
 package dev.hddc.domains.hotdeal.application.service.query
 
-import dev.hddc.domains.hotdeal.adapter.`in`.web.response.HotDealPageResponse
-import dev.hddc.domains.hotdeal.adapter.`in`.web.response.HotDealResponse
+import dev.hddc.domains.hotdeal.application.ports.input.query.HotDealPageResult
 import dev.hddc.domains.hotdeal.application.ports.input.query.HotDealQueryUsecase
+import dev.hddc.domains.hotdeal.application.ports.input.query.HotDealWithUserState
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommentPort
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealExpiredVotePort
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealLikePort
@@ -24,24 +24,24 @@ class HotDealQueryService(
 ) : HotDealQueryUsecase {
 
     @Transactional(readOnly = true)
-    override fun getDeals(userId: Long?, sort: String, page: Int, size: Int): HotDealPageResponse {
+    override fun getDeals(userId: Long?, sort: String, page: Int, size: Int): HotDealPageResult {
         val pageable = PageRequest.of(page, size, resolveSort(sort))
         val dealPage = hotDealQueryPort.findActive(pageable)
-        return toPageResponse(dealPage, userId)
+        return toPageResult(dealPage, userId)
     }
 
     @Transactional(readOnly = true)
-    override fun search(userId: Long?, query: String, page: Int, size: Int): HotDealPageResponse {
+    override fun search(userId: Long?, query: String, page: Int, size: Int): HotDealPageResult {
         val pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"))
         val dealPage = hotDealQueryPort.search(query, pageable)
-        return toPageResponse(dealPage, userId)
+        return toPageResult(dealPage, userId)
     }
 
     @Transactional(readOnly = true)
     override fun getComments(dealId: Long): List<HotDealCommentModel> =
         hotDealCommentPort.findAllByDealId(dealId)
 
-    private fun toPageResponse(dealPage: Page<HotDealModel>, userId: Long?): HotDealPageResponse {
+    private fun toPageResult(dealPage: Page<HotDealModel>, userId: Long?): HotDealPageResult {
         val dealIds = dealPage.content.map { it.id!! }
 
         val likedIds = userId?.let { uid ->
@@ -53,14 +53,14 @@ class HotDealQueryService(
         } ?: emptySet()
 
         val content = dealPage.content.map { deal ->
-            HotDealResponse.from(
-                model = deal,
+            HotDealWithUserState(
+                deal = deal,
                 isLiked = deal.id!! in likedIds,
                 isVotedExpired = deal.id!! in votedExpiredIds,
             )
         }
 
-        return HotDealPageResponse(
+        return HotDealPageResult(
             content = content,
             page = dealPage.number,
             size = dealPage.size,

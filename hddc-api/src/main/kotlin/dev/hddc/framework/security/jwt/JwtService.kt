@@ -13,14 +13,14 @@ class JwtService(
         jwtCreator.create(username, role)
 
     fun getUsername(token: String): String =
-        jwtParser.getUsername(jwtParser.removePrefix(token))
+        jwtParser.getUsername(token)
 
     fun getRole(token: String): String =
-        jwtParser.getRole(jwtParser.removePrefix(token))
+        jwtParser.getRole(token)
 
     fun isValid(token: String): Boolean =
         jwtValidator.isValid(token)
 
     fun remove(token: String) =
-        jwtRemover.remove(jwtParser.removePrefix(token))
+        jwtRemover.remove(token)
 }

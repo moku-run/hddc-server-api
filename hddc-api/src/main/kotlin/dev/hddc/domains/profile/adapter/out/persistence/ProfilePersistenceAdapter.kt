@@ -4,7 +4,6 @@ import dev.hddc.domains.profile.application.ports.output.command.ProfileCommandP
 import dev.hddc.domains.profile.application.ports.output.query.ProfileQueryPort
 import dev.hddc.domains.profile.domain.model.ProfileModel
 import org.springframework.stereotype.Repository
-import java.time.Instant
 
 @Repository
 class ProfilePersistenceAdapter(
@@ -15,10 +14,10 @@ class ProfilePersistenceAdapter(
         profileRepository.findByUserId(userId)?.toDomain()
 
     override fun findByUserIdWithDetails(userId: Long): ProfileModel? =
-        profileRepository.findByUserIdWithLinksAndSocials(userId)?.toDomain()
+        profileRepository.findByUserIdWithLinksAndSocials(userId)?.toDomainWithDetails()
 
     override fun findBySlugWithDetails(slug: String): ProfileModel? =
-        profileRepository.findBySlugWithLinksAndSocials(slug)?.toDomain()
+        profileRepository.findBySlugWithLinksAndSocials(slug)?.toDomainWithDetails()
 
     override fun existsBySlug(slug: String): Boolean =
         profileRepository.existsBySlug(slug)
@@ -46,18 +45,10 @@ class ProfilePersistenceAdapter(
                     customPrimaryColor = model.customPrimaryColor
                     customSecondaryColor = model.customSecondaryColor
                     darkMode = model.darkMode
-                    updatedAt = Instant.now()
                 }
 
-                existing.links.clear()
-                model.links.forEach { linkModel ->
-                    existing.links.add(linkModel.toEntity(existing))
-                }
-
-                existing.socials.clear()
-                model.socials.forEach { socialModel ->
-                    existing.socials.add(socialModel.toEntity(existing))
-                }
+                syncLinks(existing, model)
+                syncSocials(existing, model)
 
                 existing
             } else {
@@ -68,5 +59,54 @@ class ProfilePersistenceAdapter(
         }
 
         return profileRepository.save(entity).toDomain()
+    }
+
+    private fun syncLinks(existing: ProfileEntity, model: ProfileModel) {
+        val incomingById = model.links.filter { it.id != null }.associateBy { it.id }
+        val existingById = existing.links.associateBy { it.id }
+
+        existing.links.removeIf { it.id !in incomingById && it.id != null }
+
+        incomingById.forEach { (id, linkModel) ->
+            val entity = existingById[id]
+            if (entity != null) {
+                entity.title = linkModel.title
+                entity.url = linkModel.url
+                entity.imageUrl = linkModel.imageUrl
+                entity.description = linkModel.description
+                entity.sortOrder = linkModel.sortOrder
+                entity.enabled = linkModel.enabled
+                entity.isDeleted = linkModel.isDeleted
+            } else {
+                existing.links.add(linkModel.toEntity(existing))
+            }
+        }
+
+        model.links.filter { it.id == null }.forEach { linkModel ->
+            existing.links.add(linkModel.toEntity(existing))
+        }
+    }
+
+    private fun syncSocials(existing: ProfileEntity, model: ProfileModel) {
+        val incomingById = model.socials.filter { it.id != null }.associateBy { it.id }
+        val existingById = existing.socials.associateBy { it.id }
+
+        existing.socials.removeIf { it.id !in incomingById && it.id != null }
+
+        incomingById.forEach { (id, socialModel) ->
+            val entity = existingById[id]
+            if (entity != null) {
+                entity.platform = socialModel.platform
+                entity.url = socialModel.url
+                entity.sortOrder = socialModel.sortOrder
+                entity.isDeleted = socialModel.isDeleted
+            } else {
+                existing.socials.add(socialModel.toEntity(existing))
+            }
+        }
+
+        model.socials.filter { it.id == null }.forEach { socialModel ->
+            existing.socials.add(socialModel.toEntity(existing))
+        }
     }
 }

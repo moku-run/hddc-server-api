@@ -42,8 +42,8 @@ data class ProfileResponse(
             customPrimaryColor = model.customPrimaryColor,
             customSecondaryColor = model.customSecondaryColor,
             darkMode = model.darkMode,
-            links = model.links.filter { !it.isDeleted }.map { ProfileLinkResponse.from(it) },
-            socials = model.socials.filter { !it.isDeleted }.map { SocialLinkResponse.from(it) },
+            links = model.links.map { ProfileLinkResponse.from(it) },
+            socials = model.socials.map { SocialLinkResponse.from(it) },
             createdAt = model.createdAt.toString(),
             updatedAt = model.updatedAt.toString(),
         )

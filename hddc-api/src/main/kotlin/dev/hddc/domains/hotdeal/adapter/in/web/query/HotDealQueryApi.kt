@@ -2,6 +2,8 @@ package dev.hddc.domains.hotdeal.adapter.`in`.web.query
 
 import dev.hddc.domains.hotdeal.adapter.`in`.web.response.CommentResponse
 import dev.hddc.domains.hotdeal.adapter.`in`.web.response.HotDealPageResponse
+import dev.hddc.domains.hotdeal.adapter.`in`.web.response.HotDealResponse
+import dev.hddc.domains.hotdeal.application.ports.input.query.HotDealPageResult
 import dev.hddc.domains.hotdeal.application.ports.input.query.HotDealQueryUsecase
 import dev.hddc.framework.api.response.ApiResponse
 import dev.hddc.framework.api.response.ApiResponseCode
@@ -28,7 +30,7 @@ class HotDealQueryApi(
         @RequestParam(defaultValue = "0") page: Int,
         @RequestParam(defaultValue = "20") limit: Int,
     ): ResponseEntity<ApiResponse<HotDealPageResponse>> =
-        ApiResponse.of(ApiResponseCode.OK, hotDealQueryUsecase.getDeals(user?.userId, sort, page, limit))
+        ApiResponse.of(ApiResponseCode.OK, hotDealQueryUsecase.getDeals(user?.userId, sort, page, limit).toResponse())
 
     @Operation(summary = "딜 검색")
     @GetMapping("/api/hot-deals/search")
@@ -38,7 +40,7 @@ class HotDealQueryApi(
         @RequestParam(defaultValue = "0") page: Int,
         @RequestParam(defaultValue = "20") limit: Int,
     ): ResponseEntity<ApiResponse<HotDealPageResponse>> =
-        ApiResponse.of(ApiResponseCode.OK, hotDealQueryUsecase.search(user?.userId, q, page, limit))
+        ApiResponse.of(ApiResponseCode.OK, hotDealQueryUsecase.search(user?.userId, q, page, limit).toResponse())
 
     @Operation(summary = "댓글 목록 조회")
     @GetMapping("/api/hot-deals/{dealId}/comments")
@@ -46,4 +48,12 @@ class HotDealQueryApi(
         @PathVariable dealId: Long,
     ): ResponseEntity<ApiResponse<List<CommentResponse>>> =
         ApiResponse.of(ApiResponseCode.OK, hotDealQueryUsecase.getComments(dealId).map { CommentResponse.from(it) })
+
+    private fun HotDealPageResult.toResponse() = HotDealPageResponse(
+        content = content.map { HotDealResponse.from(it.deal, it.isLiked, it.isVotedExpired) },
+        page = page,
+        size = size,
+        totalElements = totalElements,
+        totalPages = totalPages,
+    )
 }

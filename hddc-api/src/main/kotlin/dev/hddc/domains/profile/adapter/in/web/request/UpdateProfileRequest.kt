@@ -29,7 +29,7 @@ data class UpdateProfileRequest(
     val fontFamily: String = "pretendard",
     val headerLayout: String = "center",
     val linkAnimation: String = "none",
-    val colorTheme: String = "teal",
+    val colorTheme: String = "default",
     val customPrimaryColor: String? = null,
     val customSecondaryColor: String? = null,
     val darkMode: Boolean = false,

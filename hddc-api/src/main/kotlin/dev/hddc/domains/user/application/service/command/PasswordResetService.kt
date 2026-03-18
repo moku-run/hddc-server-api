@@ -7,6 +7,7 @@ import dev.hddc.domains.user.application.ports.output.command.UserCommandPort
 import dev.hddc.domains.user.application.ports.output.command.VerificationCachePort
 import dev.hddc.domains.user.application.ports.output.query.UserQueryPort
 import dev.hddc.domains.user.domain.spec.PasswordSpec
+import dev.hddc.domains.user.domain.policy.VerificationCodeGenerator
 import dev.hddc.domains.user.domain.spec.VerificationSpec
 import dev.hddc.framework.api.response.ApiResponseCode
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -27,7 +28,7 @@ class PasswordResetService(
             ApiResponseCode.USER_NOT_FOUND.code
         }
 
-        val code = dev.hddc.domains.user.domain.policy.VerificationCodeGenerator.generate()
+        val code = VerificationCodeGenerator.generate()
         val cacheKey = VerificationSpec.resetPasswordKey(email)
         val attemptsKey = VerificationSpec.resetPasswordAttemptsKey(email)
 

@@ -1,5 +1,6 @@
 package dev.hddc.framework.api.response
 
+import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -7,6 +8,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
+    private val log = LoggerFactory.getLogger(javaClass)
 
     @ExceptionHandler(IllegalArgumentException::class)
     fun handleIllegalArgument(e: IllegalArgumentException): ResponseEntity<ApiResponse<Nothing>> {
@@ -39,6 +41,8 @@ class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception::class)
-    fun handleException(e: Exception): ResponseEntity<ApiResponse<Nothing>> =
-        ApiResponse.error(ApiResponseCode.INTERNAL_SERVER_ERROR)
+    fun handleException(e: Exception): ResponseEntity<ApiResponse<Nothing>> {
+        log.error("Unhandled exception", e)
+        return ApiResponse.error(ApiResponseCode.INTERNAL_SERVER_ERROR)
+    }
 }

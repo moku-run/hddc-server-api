@@ -1,6 +1,7 @@
 package dev.hddc.domains.profile.domain.model
 
 enum class ColorTheme(val value: String) {
+    DEFAULT("default"),
     TEAL("teal"),
     ORANGE("orange"),
     BLUE("blue"),

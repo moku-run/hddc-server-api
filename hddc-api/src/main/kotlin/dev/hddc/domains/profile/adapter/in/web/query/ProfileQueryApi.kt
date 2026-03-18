@@ -1,11 +1,11 @@
 package dev.hddc.domains.profile.adapter.`in`.web.query
 
 import dev.hddc.domains.profile.adapter.`in`.web.response.ProfileResponse
+import dev.hddc.domains.profile.application.ports.input.query.GetCuratedProfilesUsecase
 import dev.hddc.domains.profile.application.ports.input.query.GetMyProfileUsecase
 import dev.hddc.domains.profile.application.ports.input.query.GetPublicProfileUsecase
 import dev.hddc.domains.profile.application.ports.input.query.ValidateSlugResult
 import dev.hddc.domains.profile.application.ports.input.query.ValidateSlugUsecase
-import dev.hddc.domains.profile.application.ports.output.query.ProfileQueryPort
 import dev.hddc.framework.api.response.ApiResponse
 import dev.hddc.framework.api.response.ApiResponseCode
 import dev.hddc.framework.security.authentication.UserAuthenticationDTO
@@ -24,7 +24,7 @@ class ProfileQueryApi(
     private val getMyProfileUsecase: GetMyProfileUsecase,
     private val getPublicProfileUsecase: GetPublicProfileUsecase,
     private val validateSlugUsecase: ValidateSlugUsecase,
-    private val profileQueryPort: ProfileQueryPort,
+    private val getCuratedProfilesUsecase: GetCuratedProfilesUsecase,
 ) {
     @Operation(summary = "내 프로필 조회")
     @GetMapping("/api/profiles/me")
@@ -51,7 +51,7 @@ class ProfileQueryApi(
     @Operation(summary = "피드에 노출할 추천 프로필")
     @GetMapping("/api/profiles/curated")
     fun getCuratedProfiles(): ResponseEntity<ApiResponse<List<CuratedProfileResponse>>> {
-        val profiles = profileQueryPort.findCuratedProfiles(6)
+        val profiles = getCuratedProfilesUsecase.execute(6)
         val result = profiles.map {
             CuratedProfileResponse(
                 slug = it.slug,

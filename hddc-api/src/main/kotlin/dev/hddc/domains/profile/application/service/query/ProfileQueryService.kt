@@ -3,6 +3,7 @@ package dev.hddc.domains.profile.application.service.query
 import dev.hddc.domains.profile.application.ports.input.query.GetMyProfileUsecase
 import dev.hddc.domains.profile.application.ports.input.query.GetPublicProfileUsecase
 import dev.hddc.domains.profile.application.ports.input.query.ValidateSlugResult
+import dev.hddc.domains.profile.application.ports.input.query.GetCuratedProfilesUsecase
 import dev.hddc.domains.profile.application.ports.input.query.ValidateSlugUsecase
 import dev.hddc.domains.profile.application.ports.output.query.ProfileQueryPort
 import dev.hddc.domains.profile.domain.model.ProfileModel
@@ -13,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class ProfileQueryService(
     private val profileQueryPort: ProfileQueryPort,
-) : GetMyProfileUsecase, GetPublicProfileUsecase, ValidateSlugUsecase {
+) : GetMyProfileUsecase, GetPublicProfileUsecase, ValidateSlugUsecase, GetCuratedProfilesUsecase {
 
     @Transactional(readOnly = true)
     override fun execute(userId: Long): ProfileModel {
@@ -36,4 +37,8 @@ class ProfileQueryService(
         val exists = profileQueryPort.existsBySlug(slug)
         return ValidateSlugResult(available = !exists, slug = slug)
     }
+
+    @Transactional(readOnly = true)
+    override fun execute(limit: Int): List<ProfileModel> =
+        profileQueryPort.findCuratedProfiles(limit)
 }
