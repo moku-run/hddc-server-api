@@ -33,6 +33,7 @@ interface HotDealCommentRepository : JpaRepository<HotDealCommentEntity, Long> {
 interface HotDealExpiredVoteRepository : JpaRepository<HotDealExpiredVoteEntity, Long> {
     fun existsByDealIdAndUserId(dealId: Long, userId: Long): Boolean
     fun findByDealIdAndUserId(dealId: Long, userId: Long): HotDealExpiredVoteEntity?
+    fun findAllByUserIdAndDealIdIn(userId: Long, dealIds: List<Long>): List<HotDealExpiredVoteEntity>
 }
 
 interface HotDealReportRepository : JpaRepository<HotDealReportEntity, Long>

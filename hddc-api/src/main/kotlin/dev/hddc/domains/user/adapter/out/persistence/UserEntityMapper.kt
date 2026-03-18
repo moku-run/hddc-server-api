@@ -16,17 +16,12 @@ fun UserEntity.toDomain(): UserModel = UserModel(
     updatedAt = updatedAt,
 )
 
-fun UserModel.toEntity(): UserEntity = UserEntity(
+fun UserModel.toNewEntity(): UserEntity = UserEntity(
     email = email,
     password = password,
     nickname = nickname,
     role = role,
-    isDeleted = isDeleted,
     isLocked = isLocked,
     loginAttemptCount = loginAttemptCount,
     lastLoginAt = lastLoginAt,
-    updatedAt = updatedAt,
-).also {
-    it.id = id
-    it.createdAt = createdAt
-}
+)

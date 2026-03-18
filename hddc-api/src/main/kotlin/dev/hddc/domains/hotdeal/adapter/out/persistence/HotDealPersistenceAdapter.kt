@@ -166,6 +166,11 @@ class HotDealExpiredVotePersistenceAdapter(
             HotDealExpiredVoteModel(id = it.id, dealId = it.dealId, userId = it.userId, createdAt = it.createdAt)
         }
 
+    override fun findAllByUserIdAndDealIds(userId: Long, dealIds: List<Long>): List<HotDealExpiredVoteModel> =
+        hotDealExpiredVoteRepository.findAllByUserIdAndDealIdIn(userId, dealIds).map {
+            HotDealExpiredVoteModel(id = it.id, dealId = it.dealId, userId = it.userId, createdAt = it.createdAt)
+        }
+
     override fun save(model: HotDealExpiredVoteModel): HotDealExpiredVoteModel {
         val entity = HotDealExpiredVoteEntity(dealId = model.dealId, userId = model.userId)
         val saved = hotDealExpiredVoteRepository.save(entity)

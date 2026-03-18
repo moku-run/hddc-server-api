@@ -1,7 +1,7 @@
 package dev.hddc.domains.user.adapter.out.persistence
 
 import dev.hddc.domains.user.domain.model.UserRole
-import dev.hddc.framework.jpa.BaseEntity
+import dev.hddc.framework.jpa.BaseAuditEntity
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Table
@@ -22,9 +22,6 @@ class UserEntity(
     @Column(nullable = false, length = 20)
     var role: String = UserRole.USER.name,
 
-    @Column(name = "is_deleted", nullable = false)
-    var isDeleted: Boolean = false,
-
     @Column(name = "is_locked", nullable = false)
     var isLocked: Boolean = false,
 
@@ -33,7 +30,4 @@ class UserEntity(
 
     @Column(name = "last_login_at")
     var lastLoginAt: Instant? = null,
-
-    @Column(name = "updated_at", nullable = false)
-    var updatedAt: Instant = Instant.now(),
-) : BaseEntity()
+) : BaseAuditEntity()
