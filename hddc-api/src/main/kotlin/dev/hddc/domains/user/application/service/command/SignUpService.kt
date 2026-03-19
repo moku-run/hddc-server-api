@@ -31,6 +31,10 @@ class SignUpService(
             ApiResponseCode.USER_DUPLICATE_EMAIL.code
         }
 
+        require(!userQueryPort.existsByNickname(command.nickname)) {
+            ApiResponseCode.USER_DUPLICATE_NICKNAME.code
+        }
+
         val model = UserModel(
             email = command.email,
             password = passwordEncoder.encode(command.password),
