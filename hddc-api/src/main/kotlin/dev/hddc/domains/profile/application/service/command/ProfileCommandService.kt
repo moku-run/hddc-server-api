@@ -61,6 +61,7 @@ class ProfileCommandService(
             colorTheme = command.colorTheme,
             customPrimaryColor = command.customPrimaryColor,
             customSecondaryColor = command.customSecondaryColor,
+            fontColor = command.fontColor,
             darkMode = command.darkMode,
             updatedAt = now,
             links = command.links.map { linkCmd ->

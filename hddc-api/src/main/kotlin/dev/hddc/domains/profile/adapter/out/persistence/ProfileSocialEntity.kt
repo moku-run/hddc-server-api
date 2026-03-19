@@ -23,4 +23,12 @@ class ProfileSocialEntity(
 
     @Column(name = "sort_order", nullable = false)
     var sortOrder: Int = 0,
-) : BaseAuditEntity()
+) : BaseAuditEntity() {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is ProfileSocialEntity) return false
+        return id != null && id == other.id
+    }
+
+    override fun hashCode(): Int = javaClass.hashCode()
+}

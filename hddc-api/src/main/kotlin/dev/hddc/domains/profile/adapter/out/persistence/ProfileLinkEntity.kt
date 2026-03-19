@@ -32,4 +32,12 @@ class ProfileLinkEntity(
 
     @Column(nullable = false)
     var enabled: Boolean = true,
-) : BaseAuditEntity()
+) : BaseAuditEntity() {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is ProfileLinkEntity) return false
+        return id != null && id == other.id
+    }
+
+    override fun hashCode(): Int = javaClass.hashCode()
+}

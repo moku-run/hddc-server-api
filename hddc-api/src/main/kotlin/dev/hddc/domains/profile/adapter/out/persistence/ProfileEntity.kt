@@ -57,14 +57,17 @@ class ProfileEntity(
     @Column(name = "custom_secondary_color", length = 20)
     var customSecondaryColor: String? = null,
 
+    @Column(name = "font_color", length = 20)
+    var fontColor: String? = null,
+
     @Column(name = "dark_mode", nullable = false)
     var darkMode: Boolean = false,
 
     @OneToMany(mappedBy = "profile", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.LAZY)
     @OrderBy("sortOrder ASC")
-    var links: MutableList<ProfileLinkEntity> = mutableListOf(),
+    var links: MutableSet<ProfileLinkEntity> = LinkedHashSet(),
 
     @OneToMany(mappedBy = "profile", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.LAZY)
     @OrderBy("sortOrder ASC")
-    var socials: MutableList<ProfileSocialEntity> = mutableListOf(),
+    var socials: MutableSet<ProfileSocialEntity> = LinkedHashSet(),
 ) : BaseAuditEntity()

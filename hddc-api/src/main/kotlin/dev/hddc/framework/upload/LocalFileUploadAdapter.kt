@@ -1,6 +1,7 @@
 package dev.hddc.framework.upload
 
 import dev.hddc.domains.profile.application.ports.output.FileUploadPort
+import dev.hddc.domains.profile.application.ports.output.PresignedUrlResult
 import dev.hddc.domains.profile.application.ports.output.UploadableFile
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -35,5 +36,14 @@ class LocalFileUploadAdapter(
         }
 
         return "$baseUrl/$directory/$filename"
+    }
+
+    override fun generatePresignedPutUrl(directory: String, extension: String, contentType: String): PresignedUrlResult {
+        throw UnsupportedOperationException("LocalFileUploadAdapter does not support pre-signed URLs")
+    }
+
+    override fun delete(key: String) {
+        val path = Paths.get(uploadPath, key)
+        Files.deleteIfExists(path)
     }
 }

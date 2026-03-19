@@ -19,6 +19,7 @@ data class ProfileModel(
     val colorTheme: String = "default",
     val customPrimaryColor: String? = null,
     val customSecondaryColor: String? = null,
+    val fontColor: String? = null,
     val darkMode: Boolean = false,
     val links: List<ProfileLinkModel> = emptyList(),
     val socials: List<SocialLinkModel> = emptyList(),

@@ -1,6 +1,5 @@
 package dev.hddc.domains.user.application.service.command
 
-import dev.hddc.domains.profile.application.ports.output.command.CreateDefaultProfilePort
 import dev.hddc.domains.user.application.ports.input.command.SignUpCommand
 import dev.hddc.domains.user.application.ports.input.command.SignUpUsecase
 import dev.hddc.domains.user.application.ports.output.command.UserCommandPort
@@ -20,7 +19,6 @@ class SignUpService(
     private val userCommandPort: UserCommandPort,
     private val verificationCachePort: VerificationCachePort,
     private val passwordEncoder: PasswordEncoder,
-    private val createDefaultProfilePort: CreateDefaultProfilePort,
 ) : SignUpUsecase {
 
     @Transactional
@@ -44,8 +42,6 @@ class SignUpService(
 
         val userId = userCommandPort.save(model).id!!
         verificationCachePort.delete(VerificationSpec.signUpKey(command.email))
-
-        createDefaultProfilePort.createDefaultProfile(userId, command.nickname)
 
         return userId
     }

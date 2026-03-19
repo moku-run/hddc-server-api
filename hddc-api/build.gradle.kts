@@ -25,6 +25,7 @@ apply {
     from("$root/${MessagingLibs.PATH}")
     from("$root/${CacheLibs.PATH}")
     from("$root/${LogLibs.PATH}")
+    from("$root/${StorageLibs.PATH}")
 }
 
 tasks.named("generateJooq") {

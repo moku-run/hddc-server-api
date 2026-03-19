@@ -11,6 +11,14 @@ data class UploadableFile(
     val isEmpty: Boolean get() = size == 0L
 }
 
+data class PresignedUrlResult(
+    val uploadUrl: String,
+    val imageUrl: String,
+    val key: String,
+)
+
 interface FileUploadPort {
     fun upload(file: UploadableFile, directory: String): String
+    fun generatePresignedPutUrl(directory: String, extension: String, contentType: String): PresignedUrlResult
+    fun delete(key: String)
 }

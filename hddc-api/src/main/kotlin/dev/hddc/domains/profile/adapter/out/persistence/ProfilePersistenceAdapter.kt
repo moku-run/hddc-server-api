@@ -44,6 +44,7 @@ class ProfilePersistenceAdapter(
                     colorTheme = model.colorTheme
                     customPrimaryColor = model.customPrimaryColor
                     customSecondaryColor = model.customSecondaryColor
+                    fontColor = model.fontColor
                     darkMode = model.darkMode
                 }
 
