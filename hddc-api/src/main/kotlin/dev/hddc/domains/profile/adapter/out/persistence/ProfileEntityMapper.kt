@@ -22,6 +22,7 @@ fun ProfileEntity.toDomain(): ProfileModel = ProfileModel(
     customPrimaryColor = customPrimaryColor,
     customSecondaryColor = customSecondaryColor,
     fontColor = fontColor,
+    linkRound = linkRound,
     darkMode = darkMode,
     createdAt = createdAt,
     updatedAt = updatedAt,
@@ -93,6 +94,7 @@ fun ProfileModel.toEntity(): ProfileEntity = ProfileEntity(
     customPrimaryColor = customPrimaryColor,
     customSecondaryColor = customSecondaryColor,
     fontColor = fontColor,
+    linkRound = linkRound,
     darkMode = darkMode,
 ).also {
     it.id = id

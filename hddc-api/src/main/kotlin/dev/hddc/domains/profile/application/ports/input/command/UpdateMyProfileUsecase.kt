@@ -18,6 +18,7 @@ data class UpdateProfileCommand(
     val customPrimaryColor: String?,
     val customSecondaryColor: String?,
     val fontColor: String?,
+    val linkRound: String,
     val darkMode: Boolean,
     val links: List<ProfileLinkCommand>,
     val socials: List<SocialLinkCommand>,

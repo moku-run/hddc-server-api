@@ -60,6 +60,9 @@ class ProfileEntity(
     @Column(name = "font_color", length = 20)
     var fontColor: String? = null,
 
+    @Column(name = "link_round", nullable = false, length = 10)
+    var linkRound: String = "sm",
+
     @Column(name = "dark_mode", nullable = false)
     var darkMode: Boolean = false,
 

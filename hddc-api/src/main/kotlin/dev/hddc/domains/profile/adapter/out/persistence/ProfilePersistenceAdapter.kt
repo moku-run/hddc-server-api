@@ -45,6 +45,7 @@ class ProfilePersistenceAdapter(
                     customPrimaryColor = model.customPrimaryColor
                     customSecondaryColor = model.customSecondaryColor
                     fontColor = model.fontColor
+                    linkRound = model.linkRound
                     darkMode = model.darkMode
                 }
 

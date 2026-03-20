@@ -33,6 +33,7 @@ data class UpdateProfileRequest(
     val customPrimaryColor: String? = null,
     val customSecondaryColor: String? = null,
     val fontColor: String? = null,
+    val linkRound: String = "sm",
     val darkMode: Boolean = false,
 
     @field:Valid
@@ -59,6 +60,7 @@ data class UpdateProfileRequest(
         customPrimaryColor = customPrimaryColor,
         customSecondaryColor = customSecondaryColor,
         fontColor = fontColor,
+        linkRound = linkRound,
         darkMode = darkMode,
         links = links.map { it.toCommand() },
         socials = socials.map { it.toCommand() },
