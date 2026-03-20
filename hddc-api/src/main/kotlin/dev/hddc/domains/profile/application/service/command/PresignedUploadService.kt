@@ -16,7 +16,7 @@ class PresignedUploadService(
         "image/jpeg", "image/png", "image/gif", "image/webp",
     )
     private val allowedDirectories = setOf(
-        "avatars", "backgrounds", "links",
+        "link/avatars", "link/backgrounds", "link/profiles",
     )
     private val maxExtensionLength = 10
 

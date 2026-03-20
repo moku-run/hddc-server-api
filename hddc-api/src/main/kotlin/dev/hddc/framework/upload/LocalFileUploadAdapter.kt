@@ -42,6 +42,10 @@ class LocalFileUploadAdapter(
         throw UnsupportedOperationException("LocalFileUploadAdapter does not support pre-signed URLs")
     }
 
+    override fun generatePresignedGetUrl(key: String): String {
+        throw UnsupportedOperationException("LocalFileUploadAdapter does not support pre-signed URLs")
+    }
+
     override fun delete(key: String) {
         val path = Paths.get(uploadPath, key)
         Files.deleteIfExists(path)

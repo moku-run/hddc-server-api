@@ -21,31 +21,19 @@ class ProfileCommandService(
 
     @Transactional
     override fun execute(userId: Long, command: UpdateProfileCommand): ProfileModel {
-        val profile = profileQueryPort.findByUserIdWithDetails(userId)
-            ?: throw IllegalArgumentException(ApiResponseCode.PROFILE_NOT_FOUND.code)
+        validateFields(command)
 
-        if (profile.slug != command.slug && profileQueryPort.existsBySlug(command.slug)) {
+        val existing = profileQueryPort.findByUserIdWithDetails(userId)
+
+        if (existing != null && existing.slug != command.slug && profileQueryPort.existsBySlug(command.slug)) {
+            throw IllegalArgumentException(ApiResponseCode.PROFILE_SLUG_DUPLICATE.code)
+        }
+        if (existing == null && profileQueryPort.existsBySlug(command.slug)) {
             throw IllegalArgumentException(ApiResponseCode.PROFILE_SLUG_DUPLICATE.code)
         }
 
-        ProfileFieldSpec.validateProfileFields(
-            colorTheme = command.colorTheme,
-            fontFamily = command.fontFamily,
-            linkLayout = command.linkLayout,
-            linkStyle = command.linkStyle,
-            headerLayout = command.headerLayout,
-            linkAnimation = command.linkAnimation,
-        )?.let { invalidField ->
-            throw IllegalArgumentException(ApiResponseCode.PROFILE_INVALID_FIELD.code)
-        }
+        val profile = existing ?: ProfileModel(userId = userId, slug = command.slug, nickname = command.nickname)
 
-        command.socials.forEach { socialCmd ->
-            require(ProfileFieldSpec.validateSocialPlatform(socialCmd.platform)) {
-                ApiResponseCode.PROFILE_INVALID_FIELD.code
-            }
-        }
-
-        val now = Instant.now()
         val updated = profile.copy(
             slug = command.slug,
             nickname = command.nickname,
@@ -63,7 +51,7 @@ class ProfileCommandService(
             customSecondaryColor = command.customSecondaryColor,
             fontColor = command.fontColor,
             darkMode = command.darkMode,
-            updatedAt = now,
+            updatedAt = Instant.now(),
             links = command.links.map { linkCmd ->
                 ProfileLinkModel(
                     id = linkCmd.id,
@@ -87,5 +75,24 @@ class ProfileCommandService(
         )
 
         return profileCommandPort.save(updated)
+    }
+
+    private fun validateFields(command: UpdateProfileCommand) {
+        ProfileFieldSpec.validateProfileFields(
+            colorTheme = command.colorTheme,
+            fontFamily = command.fontFamily,
+            linkLayout = command.linkLayout,
+            linkStyle = command.linkStyle,
+            headerLayout = command.headerLayout,
+            linkAnimation = command.linkAnimation,
+        )?.let {
+            throw IllegalArgumentException(ApiResponseCode.PROFILE_INVALID_FIELD.code)
+        }
+
+        command.socials.forEach { socialCmd ->
+            require(ProfileFieldSpec.validateSocialPlatform(socialCmd.platform)) {
+                ApiResponseCode.PROFILE_INVALID_FIELD.code
+            }
+        }
     }
 }

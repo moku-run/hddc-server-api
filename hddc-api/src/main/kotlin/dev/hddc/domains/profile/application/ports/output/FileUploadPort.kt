@@ -20,5 +20,6 @@ data class PresignedUrlResult(
 interface FileUploadPort {
     fun upload(file: UploadableFile, directory: String): String
     fun generatePresignedPutUrl(directory: String, extension: String, contentType: String): PresignedUrlResult
+    fun generatePresignedGetUrl(key: String): String
     fun delete(key: String)
 }
