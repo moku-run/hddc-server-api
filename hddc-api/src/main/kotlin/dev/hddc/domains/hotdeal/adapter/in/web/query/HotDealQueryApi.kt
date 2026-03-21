@@ -59,11 +59,18 @@ class HotDealQueryApi(
         return ApiResponse.of(ApiResponseCode.OK, response)
     }
 
-    private fun HotDealPageResult.toResponse() = HotDealPageResponse(
-        content = content.map { HotDealResponse.from(it.deal, it.isLiked, it.isVotedExpired) },
-        page = page,
-        size = size,
-        totalElements = totalElements,
-        totalPages = totalPages,
-    )
+    private fun HotDealPageResult.toResponse(): HotDealPageResponse {
+        val userIds = content.map { it.deal.userId }.distinct()
+        val nicknames = userQueryPort.findNicknamesByIds(userIds)
+
+        return HotDealPageResponse(
+            content = content.map {
+                HotDealResponse.from(it.deal, nicknames[it.deal.userId] ?: "알 수 없음", it.isLiked, it.isVotedExpired)
+            },
+            page = page,
+            size = size,
+            totalElements = totalElements,
+            totalPages = totalPages,
+        )
+    }
 }

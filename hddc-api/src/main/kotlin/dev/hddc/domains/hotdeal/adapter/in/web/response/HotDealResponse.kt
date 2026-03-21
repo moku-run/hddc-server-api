@@ -6,6 +6,7 @@ import dev.hddc.domains.hotdeal.domain.model.HotDealModel
 data class HotDealResponse(
     val id: Long,
     val userId: Long,
+    val nickname: String,
     val title: String,
     val description: String?,
     val url: String,
@@ -24,9 +25,10 @@ data class HotDealResponse(
     val createdAt: String,
 ) {
     companion object {
-        fun from(model: HotDealModel, isLiked: Boolean = false, isVotedExpired: Boolean = false) = HotDealResponse(
+        fun from(model: HotDealModel, nickname: String, isLiked: Boolean = false, isVotedExpired: Boolean = false) = HotDealResponse(
             id = model.id!!,
             userId = model.userId,
+            nickname = nickname,
             title = model.title,
             description = model.description,
             url = model.url,
