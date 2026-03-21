@@ -20,6 +20,9 @@ class UserPersistenceAdapter(
     override fun existsByNickname(nickname: String): Boolean =
         userRepository.existsByNicknameAndIsDeletedFalse(nickname)
 
+    override fun findNicknamesByIds(userIds: List<Long>): Map<Long, String> =
+        userRepository.findAllByIdIn(userIds).associate { it.id!! to it.nickname }
+
     override fun save(model: UserModel): UserModel {
         val entity = if (model.id != null) {
             val existing = userRepository.findById(model.id).orElse(null)

@@ -59,15 +59,17 @@ data class CommentResponse(
     val id: Long,
     val dealId: Long,
     val userId: Long,
+    val nickname: String,
     val parentId: Long?,
     val content: String,
     val createdAt: String,
 ) {
     companion object {
-        fun from(model: HotDealCommentModel) = CommentResponse(
+        fun from(model: HotDealCommentModel, nickname: String) = CommentResponse(
             id = model.id!!,
             dealId = model.dealId,
             userId = model.userId,
+            nickname = nickname,
             parentId = model.parentId,
             content = model.content,
             createdAt = model.createdAt.toString(),

@@ -6,4 +6,5 @@ interface UserRepository : JpaRepository<UserEntity, Long> {
     fun findByEmailAndIsDeletedFalse(email: String): UserEntity?
     fun existsByEmailAndIsDeletedFalse(email: String): Boolean
     fun existsByNicknameAndIsDeletedFalse(nickname: String): Boolean
+    fun findAllByIdIn(ids: List<Long>): List<UserEntity>
 }

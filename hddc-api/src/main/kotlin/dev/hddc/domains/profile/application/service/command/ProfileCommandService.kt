@@ -86,6 +86,7 @@ class ProfileCommandService(
             linkStyle = command.linkStyle,
             headerLayout = command.headerLayout,
             linkAnimation = command.linkAnimation,
+            linkRound = command.linkRound,
         )?.let {
             throw IllegalArgumentException(ApiResponseCode.PROFILE_INVALID_FIELD.code)
         }

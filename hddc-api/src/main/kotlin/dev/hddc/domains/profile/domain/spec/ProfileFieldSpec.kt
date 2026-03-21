@@ -17,6 +17,7 @@ object ProfileFieldSpec {
     private val HEADER_LAYOUTS = HeaderLayout.entries.map { it.value }.toSet()
     private val LINK_ANIMATIONS = LinkAnimation.entries.map { it.value }.toSet()
     private val SOCIAL_PLATFORMS = SocialPlatform.entries.map { it.value }.toSet()
+    private val LINK_ROUNDS = setOf("none", "sm", "md", "lg")
 
     fun validateColorTheme(value: String): Boolean = value in COLOR_THEMES
     fun validateFontFamily(value: String): Boolean = value in FONT_FAMILIES
@@ -25,6 +26,7 @@ object ProfileFieldSpec {
     fun validateHeaderLayout(value: String): Boolean = value in HEADER_LAYOUTS
     fun validateLinkAnimation(value: String): Boolean = value in LINK_ANIMATIONS
     fun validateSocialPlatform(value: String): Boolean = value in SOCIAL_PLATFORMS
+    fun validateLinkRound(value: String): Boolean = value in LINK_ROUNDS
 
     fun validateProfileFields(
         colorTheme: String,
@@ -33,6 +35,7 @@ object ProfileFieldSpec {
         linkStyle: String,
         headerLayout: String,
         linkAnimation: String,
+        linkRound: String,
     ): String? {
         if (!validateColorTheme(colorTheme)) return "colorTheme: $colorTheme"
         if (!validateFontFamily(fontFamily)) return "fontFamily: $fontFamily"
@@ -40,6 +43,7 @@ object ProfileFieldSpec {
         if (!validateLinkStyle(linkStyle)) return "linkStyle: $linkStyle"
         if (!validateHeaderLayout(headerLayout)) return "headerLayout: $headerLayout"
         if (!validateLinkAnimation(linkAnimation)) return "linkAnimation: $linkAnimation"
+        if (!validateLinkRound(linkRound)) return "linkRound: $linkRound"
         return null
     }
 }

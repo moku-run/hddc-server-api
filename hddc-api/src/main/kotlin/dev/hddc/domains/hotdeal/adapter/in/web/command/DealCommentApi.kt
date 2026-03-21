@@ -28,11 +28,10 @@ class DealCommentApi(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @PathVariable dealId: Long,
         @Valid @RequestBody request: AddCommentRequest,
-    ): ResponseEntity<ApiResponse<CommentResponse>> =
-        ApiResponse.of(
-            ApiResponseCode.CREATED,
-            CommentResponse.from(dealCommentUsecase.addComment(user.userId, dealId, request.content, request.parentId)),
-        )
+    ): ResponseEntity<ApiResponse<CommentResponse>> {
+        val comment = dealCommentUsecase.addComment(user.userId, dealId, request.content, request.parentId)
+        return ApiResponse.of(ApiResponseCode.CREATED, CommentResponse.from(comment, user.nickname))
+    }
 
     @Operation(summary = "댓글 삭제")
     @DeleteMapping("/api/hot-deals/{dealId}/comments/{commentId}")

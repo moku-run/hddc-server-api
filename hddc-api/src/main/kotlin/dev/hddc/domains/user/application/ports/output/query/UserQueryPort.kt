@@ -6,4 +6,5 @@ interface UserQueryPort {
     fun findByEmail(email: String): UserModel?
     fun existsByEmail(email: String): Boolean
     fun existsByNickname(nickname: String): Boolean
+    fun findNicknamesByIds(userIds: List<Long>): Map<Long, String>
 }
