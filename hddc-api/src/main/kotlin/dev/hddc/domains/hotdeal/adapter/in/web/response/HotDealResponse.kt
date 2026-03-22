@@ -61,6 +61,12 @@ data class HotDealPageResponse(
     val totalPages: Int,
 )
 
+data class CommentCursorResponse(
+    val comments: List<CommentResponse>,
+    val nextCursor: Long?,
+    val hasNext: Boolean,
+)
+
 data class CommentResponse(
     val id: Long,
     val dealId: Long,
@@ -70,18 +76,23 @@ data class CommentResponse(
     val content: String,
     val likeCount: Int,
     val isLiked: Boolean,
+    val isDeleted: Boolean,
     val createdAt: String,
 ) {
     companion object {
+        private const val DELETED_CONTENT = "삭제된 메시지입니다."
+        private const val DELETED_NICKNAME = ""
+
         fun from(model: HotDealCommentModel, nickname: String, isLiked: Boolean = false) = CommentResponse(
             id = model.id!!,
             dealId = model.dealId,
             userId = model.userId,
-            nickname = nickname,
+            nickname = if (model.isDeleted) DELETED_NICKNAME else nickname,
             parentId = model.parentId,
-            content = model.content,
-            likeCount = model.likeCount,
-            isLiked = isLiked,
+            content = if (model.isDeleted) DELETED_CONTENT else model.content,
+            likeCount = if (model.isDeleted) 0 else model.likeCount,
+            isLiked = if (model.isDeleted) false else isLiked,
+            isDeleted = model.isDeleted,
             createdAt = model.createdAt.toString(),
         )
     }

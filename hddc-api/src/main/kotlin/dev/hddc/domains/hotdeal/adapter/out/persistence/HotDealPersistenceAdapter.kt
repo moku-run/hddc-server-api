@@ -15,6 +15,7 @@ import dev.hddc.domains.hotdeal.domain.model.HotDealLikeModel
 import dev.hddc.domains.hotdeal.domain.model.HotDealModel
 import dev.hddc.domains.hotdeal.domain.model.HotDealReportModel
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Repository
 import java.time.Instant
@@ -162,6 +163,26 @@ class HotDealCommentPersistenceAdapter(
     override fun findAllByDealId(dealId: Long): List<HotDealCommentModel> =
         hotDealCommentRepository.findAllByDealIdAndIsDeletedFalseOrderByCreatedAtAsc(dealId)
             .map { it.toDomain() }
+
+    override fun findAllByDealIdIncludingDeleted(dealId: Long): List<HotDealCommentModel> =
+        hotDealCommentRepository.findAllByDealIdOrderByCreatedAtAsc(dealId)
+            .map { it.toDomain() }
+
+    override fun findRootComments(dealId: Long, afterId: Long?, size: Int): List<HotDealCommentModel> {
+        val pageable = PageRequest.of(0, size)
+        val entities = if (afterId != null) {
+            hotDealCommentRepository.findRootCommentsAfter(dealId, afterId, pageable)
+        } else {
+            hotDealCommentRepository.findRootComments(dealId, pageable)
+        }
+        return entities.map { it.toDomain() }
+    }
+
+    override fun findRepliesByParentIds(parentIds: List<Long>): List<HotDealCommentModel> {
+        if (parentIds.isEmpty()) return emptyList()
+        return hotDealCommentRepository.findAllByParentIdInOrderByCreatedAtAsc(parentIds)
+            .map { it.toDomain() }
+    }
 }
 
 @Repository

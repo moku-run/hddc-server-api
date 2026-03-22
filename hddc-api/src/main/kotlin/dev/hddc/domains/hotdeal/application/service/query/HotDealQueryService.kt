@@ -1,5 +1,6 @@
 package dev.hddc.domains.hotdeal.application.service.query
 
+import dev.hddc.domains.hotdeal.application.ports.input.query.CommentCursorResult
 import dev.hddc.domains.hotdeal.application.ports.input.query.HotDealPageResult
 import dev.hddc.domains.hotdeal.application.ports.input.query.HotDealQueryUsecase
 import dev.hddc.domains.hotdeal.application.ports.input.query.HotDealWithUserState
@@ -7,7 +8,6 @@ import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommentP
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealExpiredVotePort
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealLikePort
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealQueryPort
-import dev.hddc.domains.hotdeal.domain.model.HotDealCommentModel
 import dev.hddc.domains.hotdeal.domain.model.HotDealModel
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
@@ -38,8 +38,44 @@ class HotDealQueryService(
     }
 
     @Transactional(readOnly = true)
-    override fun getComments(dealId: Long): List<HotDealCommentModel> =
-        hotDealCommentPort.findAllByDealId(dealId)
+    override fun getComments(dealId: Long, afterId: Long?, size: Int): CommentCursorResult {
+        // size+1개 조회하여 다음 페이지 존재 여부 판단
+        val rootComments = hotDealCommentPort.findRootComments(dealId, afterId, size + 1)
+        val hasNext = rootComments.size > size
+        val pagedRoots = if (hasNext) rootComments.take(size) else rootComments
+
+        // 루트 댓글들의 대댓글 일괄 조회
+        val rootIds = pagedRoots.mapNotNull { it.id }
+        val replies = hotDealCommentPort.findRepliesByParentIds(rootIds)
+
+        // 대댓글이 존재하는 부모 ID 집합
+        val parentIdsWithReplies = replies
+            .filter { it.parentId != null }
+            .map { it.parentId!! }
+            .toSet()
+
+        // 삭제된 루트 댓글 중 대댓글 없으면 제외
+        val filteredRoots = pagedRoots.filter { root ->
+            !root.isDeleted || root.id in parentIdsWithReplies
+        }
+
+        // 삭제된 대댓글 제외
+        val filteredReplies = replies.filter { !it.isDeleted }
+
+        // 루트 + 대댓글을 flat list로 합산 (루트 순서 유지, 각 루트 아래 대댓글 배치)
+        val comments = filteredRoots.flatMap { root ->
+            val rootReplies = filteredReplies.filter { it.parentId == root.id }
+            listOf(root) + rootReplies
+        }
+
+        val nextCursor = if (hasNext) pagedRoots.last().id else null
+
+        return CommentCursorResult(
+            comments = comments,
+            nextCursor = nextCursor,
+            hasNext = hasNext,
+        )
+    }
 
     private fun toPageResult(dealPage: Page<HotDealModel>, userId: Long?): HotDealPageResult {
         val dealIds = dealPage.content.map { it.id!! }

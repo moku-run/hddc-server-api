@@ -1,5 +1,6 @@
 package dev.hddc.domains.hotdeal.adapter.`in`.web.query
 
+import dev.hddc.domains.hotdeal.adapter.`in`.web.response.CommentCursorResponse
 import dev.hddc.domains.hotdeal.adapter.`in`.web.response.CommentResponse
 import dev.hddc.domains.hotdeal.adapter.`in`.web.response.HotDealPageResponse
 import dev.hddc.domains.hotdeal.adapter.`in`.web.response.HotDealResponse
@@ -46,27 +47,37 @@ class HotDealQueryApi(
     ): ResponseEntity<ApiResponse<HotDealPageResponse>> =
         ApiResponse.of(ApiResponseCode.OK, hotDealQueryUsecase.search(user?.userId, q, page, limit).toResponse())
 
-    @Operation(summary = "댓글 목록 조회")
+    @Operation(summary = "댓글 목록 조회 (커서 기반)")
     @GetMapping("/api/hot-deals/{dealId}/comments")
     fun getComments(
         @AuthenticationPrincipal user: UserAuthenticationDTO?,
         @PathVariable dealId: Long,
-    ): ResponseEntity<ApiResponse<List<CommentResponse>>> {
-        val comments = hotDealQueryUsecase.getComments(dealId)
+        @RequestParam(required = false) after: Long?,
+        @RequestParam(defaultValue = "20") size: Int,
+    ): ResponseEntity<ApiResponse<CommentCursorResponse>> {
+        val result = hotDealQueryUsecase.getComments(dealId, after, size)
+        val comments = result.comments
+
         val userIds = comments.map { it.userId }.distinct()
         val nicknames = userQueryPort.findNicknamesByIds(userIds)
 
         val likedCommentIds = if (user != null) {
-            val commentIds = comments.mapNotNull { it.id }
-            hotDealCommentLikePort.findAllByUserIdAndCommentIds(user.userId, commentIds)
-                .map { it.commentId }.toSet()
+            val commentIds = comments.filter { !it.isDeleted }.mapNotNull { it.id }
+            if (commentIds.isNotEmpty()) {
+                hotDealCommentLikePort.findAllByUserIdAndCommentIds(user.userId, commentIds)
+                    .map { it.commentId }.toSet()
+            } else emptySet()
         } else {
             emptySet()
         }
 
-        val response = comments.map {
-            CommentResponse.from(it, nicknames[it.userId] ?: "알 수 없음", it.id in likedCommentIds)
-        }
+        val response = CommentCursorResponse(
+            comments = comments.map {
+                CommentResponse.from(it, nicknames[it.userId] ?: "알 수 없음", it.id in likedCommentIds)
+            },
+            nextCursor = result.nextCursor,
+            hasNext = result.hasNext,
+        )
         return ApiResponse.of(ApiResponseCode.OK, response)
     }
 

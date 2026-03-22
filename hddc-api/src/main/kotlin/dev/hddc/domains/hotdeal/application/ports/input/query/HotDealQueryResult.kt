@@ -1,5 +1,6 @@
 package dev.hddc.domains.hotdeal.application.ports.input.query
 
+import dev.hddc.domains.hotdeal.domain.model.HotDealCommentModel
 import dev.hddc.domains.hotdeal.domain.model.HotDealModel
 
 data class HotDealWithUserState(
@@ -14,4 +15,10 @@ data class HotDealPageResult(
     val size: Int,
     val totalElements: Long,
     val totalPages: Int,
+)
+
+data class CommentCursorResult(
+    val comments: List<HotDealCommentModel>,
+    val nextCursor: Long?,
+    val hasNext: Boolean,
 )

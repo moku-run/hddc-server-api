@@ -7,4 +7,7 @@ interface HotDealCommentPort {
     fun existsById(commentId: Long): Boolean
     fun save(model: HotDealCommentModel): HotDealCommentModel
     fun findAllByDealId(dealId: Long): List<HotDealCommentModel>
+    fun findAllByDealIdIncludingDeleted(dealId: Long): List<HotDealCommentModel>
+    fun findRootComments(dealId: Long, afterId: Long?, size: Int): List<HotDealCommentModel>
+    fun findRepliesByParentIds(parentIds: List<Long>): List<HotDealCommentModel>
 }

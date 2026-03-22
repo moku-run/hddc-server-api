@@ -28,6 +28,27 @@ interface HotDealLikeRepository : JpaRepository<HotDealLikeEntity, Long> {
 
 interface HotDealCommentRepository : JpaRepository<HotDealCommentEntity, Long> {
     fun findAllByDealIdAndIsDeletedFalseOrderByCreatedAtAsc(dealId: Long): List<HotDealCommentEntity>
+    fun findAllByDealIdOrderByCreatedAtAsc(dealId: Long): List<HotDealCommentEntity>
+
+    @Query(
+        """
+        SELECT c FROM HotDealCommentEntity c
+        WHERE c.dealId = :dealId AND c.parentId IS NULL
+        ORDER BY c.id ASC
+        """
+    )
+    fun findRootComments(dealId: Long, pageable: Pageable): List<HotDealCommentEntity>
+
+    @Query(
+        """
+        SELECT c FROM HotDealCommentEntity c
+        WHERE c.dealId = :dealId AND c.parentId IS NULL AND c.id > :afterId
+        ORDER BY c.id ASC
+        """
+    )
+    fun findRootCommentsAfter(dealId: Long, afterId: Long, pageable: Pageable): List<HotDealCommentEntity>
+
+    fun findAllByParentIdInOrderByCreatedAtAsc(parentIds: List<Long>): List<HotDealCommentEntity>
 }
 
 interface HotDealExpiredVoteRepository : JpaRepository<HotDealExpiredVoteEntity, Long> {
