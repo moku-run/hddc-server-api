@@ -5,6 +5,7 @@ import dev.hddc.domains.hotdeal.adapter.`in`.web.response.HotDealPageResponse
 import dev.hddc.domains.hotdeal.adapter.`in`.web.response.HotDealResponse
 import dev.hddc.domains.hotdeal.application.ports.input.query.HotDealPageResult
 import dev.hddc.domains.hotdeal.application.ports.input.query.HotDealQueryUsecase
+import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommentLikePort
 import dev.hddc.domains.user.application.ports.output.query.UserQueryPort
 import dev.hddc.framework.api.response.ApiResponse
 import dev.hddc.framework.api.response.ApiResponseCode
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController
 class HotDealQueryApi(
     private val hotDealQueryUsecase: HotDealQueryUsecase,
     private val userQueryPort: UserQueryPort,
+    private val hotDealCommentLikePort: HotDealCommentLikePort,
 ) {
     @Operation(summary = "딜 목록 조회")
     @GetMapping("/api/hot-deals")
@@ -47,14 +49,23 @@ class HotDealQueryApi(
     @Operation(summary = "댓글 목록 조회")
     @GetMapping("/api/hot-deals/{dealId}/comments")
     fun getComments(
+        @AuthenticationPrincipal user: UserAuthenticationDTO?,
         @PathVariable dealId: Long,
     ): ResponseEntity<ApiResponse<List<CommentResponse>>> {
         val comments = hotDealQueryUsecase.getComments(dealId)
         val userIds = comments.map { it.userId }.distinct()
         val nicknames = userQueryPort.findNicknamesByIds(userIds)
 
+        val likedCommentIds = if (user != null) {
+            val commentIds = comments.mapNotNull { it.id }
+            hotDealCommentLikePort.findAllByUserIdAndCommentIds(user.userId, commentIds)
+                .map { it.commentId }.toSet()
+        } else {
+            emptySet()
+        }
+
         val response = comments.map {
-            CommentResponse.from(it, nicknames[it.userId] ?: "알 수 없음")
+            CommentResponse.from(it, nicknames[it.userId] ?: "알 수 없음", it.id in likedCommentIds)
         }
         return ApiResponse.of(ApiResponseCode.OK, response)
     }

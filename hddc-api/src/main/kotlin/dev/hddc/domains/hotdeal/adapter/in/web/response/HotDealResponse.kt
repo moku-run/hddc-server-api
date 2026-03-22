@@ -68,16 +68,20 @@ data class CommentResponse(
     val nickname: String,
     val parentId: Long?,
     val content: String,
+    val likeCount: Int,
+    val isLiked: Boolean,
     val createdAt: String,
 ) {
     companion object {
-        fun from(model: HotDealCommentModel, nickname: String) = CommentResponse(
+        fun from(model: HotDealCommentModel, nickname: String, isLiked: Boolean = false) = CommentResponse(
             id = model.id!!,
             dealId = model.dealId,
             userId = model.userId,
             nickname = nickname,
             parentId = model.parentId,
             content = model.content,
+            likeCount = model.likeCount,
+            isLiked = isLiked,
             createdAt = model.createdAt.toString(),
         )
     }

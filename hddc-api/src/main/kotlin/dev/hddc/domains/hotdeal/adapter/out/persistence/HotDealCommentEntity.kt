@@ -19,4 +19,7 @@ class HotDealCommentEntity(
 
     @Column(nullable = false, length = 1000)
     var content: String,
+
+    @Column(name = "like_count", nullable = false)
+    var likeCount: Int = 0,
 ) : BaseAuditEntity()

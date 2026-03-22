@@ -1,11 +1,13 @@
 package dev.hddc.domains.hotdeal.adapter.out.persistence
 
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommandPort
+import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommentLikePort
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommentPort
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealExpiredVotePort
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealLikePort
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealReportPort
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealQueryPort
+import dev.hddc.domains.hotdeal.domain.model.HotDealCommentLikeModel
 import dev.hddc.domains.hotdeal.domain.model.HotDealCommentModel
 import dev.hddc.domains.hotdeal.domain.model.HotDealCommentReportModel
 import dev.hddc.domains.hotdeal.domain.model.HotDealExpiredVoteModel
@@ -134,6 +136,7 @@ class HotDealCommentPersistenceAdapter(
             if (existing != null) {
                 existing.apply {
                     content = model.content
+                    likeCount = model.likeCount
                     isDeleted = model.isDeleted
                     if (model.isDeleted && deletedAt == null) deletedAt = Instant.now()
                     updatedAt = Instant.now()
@@ -143,12 +146,14 @@ class HotDealCommentPersistenceAdapter(
                 HotDealCommentEntity(
                     dealId = model.dealId, userId = model.userId,
                     parentId = model.parentId, content = model.content,
+                    likeCount = model.likeCount,
                 )
             }
         } else {
             HotDealCommentEntity(
                 dealId = model.dealId, userId = model.userId,
                 parentId = model.parentId, content = model.content,
+                likeCount = model.likeCount,
             )
         }
         return hotDealCommentRepository.save(entity).toDomain()
@@ -205,4 +210,33 @@ class HotDealReportPersistenceAdapter(
         val saved = hotDealCommentReportRepository.save(entity)
         return HotDealCommentReportModel(id = saved.id, commentId = saved.commentId, userId = saved.userId, reason = saved.reason, createdAt = saved.createdAt)
     }
+}
+
+@Repository
+class HotDealCommentLikePersistenceAdapter(
+    private val hotDealCommentLikeRepository: HotDealCommentLikeRepository,
+) : HotDealCommentLikePort {
+
+    override fun existsByCommentIdAndUserId(commentId: Long, userId: Long): Boolean =
+        hotDealCommentLikeRepository.existsByCommentIdAndUserId(commentId, userId)
+
+    override fun findByCommentIdAndUserId(commentId: Long, userId: Long): HotDealCommentLikeModel? =
+        hotDealCommentLikeRepository.findByCommentIdAndUserId(commentId, userId)?.let {
+            HotDealCommentLikeModel(id = it.id, commentId = it.commentId, userId = it.userId, createdAt = it.createdAt)
+        }
+
+    override fun save(model: HotDealCommentLikeModel): HotDealCommentLikeModel {
+        val entity = HotDealCommentLikeEntity(commentId = model.commentId, userId = model.userId)
+        val saved = hotDealCommentLikeRepository.save(entity)
+        return HotDealCommentLikeModel(id = saved.id, commentId = saved.commentId, userId = saved.userId, createdAt = saved.createdAt)
+    }
+
+    override fun delete(model: HotDealCommentLikeModel) {
+        model.id?.let { hotDealCommentLikeRepository.deleteById(it) }
+    }
+
+    override fun findAllByUserIdAndCommentIds(userId: Long, commentIds: List<Long>): List<HotDealCommentLikeModel> =
+        hotDealCommentLikeRepository.findAllByUserIdAndCommentIdIn(userId, commentIds).map {
+            HotDealCommentLikeModel(id = it.id, commentId = it.commentId, userId = it.userId, createdAt = it.createdAt)
+        }
 }

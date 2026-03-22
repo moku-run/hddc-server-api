@@ -17,6 +17,11 @@ interface DealExpiredVoteUsecase {
     fun unvote(userId: Long, dealId: Long)
 }
 
+interface DealCommentLikeUsecase {
+    fun like(userId: Long, commentId: Long)
+    fun unlike(userId: Long, commentId: Long)
+}
+
 interface DealReportUsecase {
     fun reportDeal(userId: Long, dealId: Long, reason: String)
     fun reportComment(userId: Long, dealId: Long, commentId: Long, reason: String)

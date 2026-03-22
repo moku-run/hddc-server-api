@@ -8,6 +8,7 @@ data class HotDealCommentModel(
     val userId: Long,
     val parentId: Long? = null,
     val content: String,
+    val likeCount: Int = 0,
     val isDeleted: Boolean = false,
     val createdAt: Instant = Instant.now(),
     val updatedAt: Instant = Instant.now(),

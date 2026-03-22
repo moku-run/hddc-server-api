@@ -31,6 +31,7 @@ fun HotDealCommentEntity.toDomain(): HotDealCommentModel = HotDealCommentModel(
     userId = userId,
     parentId = parentId,
     content = content,
+    likeCount = likeCount,
     isDeleted = isDeleted,
     createdAt = createdAt,
     updatedAt = updatedAt,
