@@ -65,6 +65,9 @@ class HotDealPersistenceAdapter(
     override fun search(query: String, pageable: Pageable): Page<HotDealModel> =
         hotDealRepository.search(query, pageable).map { it.toDomain() }
 
+    override fun findAll(pageable: Pageable): Page<HotDealModel> =
+        hotDealRepository.findAll(pageable).map { it.toDomain() }
+
     private fun toNewEntity(model: HotDealModel) = HotDealEntity(
         userId = model.userId,
         title = model.title,

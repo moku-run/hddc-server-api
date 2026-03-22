@@ -7,4 +7,5 @@ import org.springframework.data.domain.Pageable
 interface HotDealQueryPort {
     fun findActive(pageable: Pageable): Page<HotDealModel>
     fun search(query: String, pageable: Pageable): Page<HotDealModel>
+    fun findAll(pageable: Pageable): Page<HotDealModel>
 }
