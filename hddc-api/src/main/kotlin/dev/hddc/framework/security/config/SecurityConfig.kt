@@ -59,7 +59,7 @@ class SecurityConfig(
             "/api/profiles/curated",
             "/api/click",
             "/api/view",
-            "/r/**",
+            "/r/{linkId}",
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/swagger-ui.html",

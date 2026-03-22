@@ -39,3 +39,8 @@ interface HotDealExpiredVoteRepository : JpaRepository<HotDealExpiredVoteEntity,
 interface HotDealReportRepository : JpaRepository<HotDealReportEntity, Long>
 
 interface HotDealCommentReportRepository : JpaRepository<HotDealCommentReportEntity, Long>
+
+interface HotDealClickRepository : JpaRepository<HotDealClickEntity, Long> {
+    fun existsByDealIdAndUserIdAndCreatedAtAfter(dealId: Long, userId: Long, after: java.time.Instant): Boolean
+    fun existsByDealIdAndIpAndUserIdIsNullAndCreatedAtAfter(dealId: Long, ip: String, after: java.time.Instant): Boolean
+}

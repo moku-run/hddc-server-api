@@ -47,6 +47,9 @@ class HotDealEntity(
     @Column(name = "expired_vote_count", nullable = false)
     var expiredVoteCount: Int = 0,
 
+    @Column(name = "click_count", nullable = false)
+    var clickCount: Int = 0,
+
     @Column(name = "is_expired", nullable = false)
     var isExpired: Boolean = false,
 ) : BaseAuditEntity()

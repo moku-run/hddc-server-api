@@ -17,6 +17,7 @@ data class HotDealModel(
     val likeCount: Int = 0,
     val commentCount: Int = 0,
     val expiredVoteCount: Int = 0,
+    val clickCount: Int = 0,
     val isExpired: Boolean = false,
     val isDeleted: Boolean = false,
     val createdAt: Instant = Instant.now(),

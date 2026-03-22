@@ -18,6 +18,7 @@ fun HotDealEntity.toDomain(): HotDealModel = HotDealModel(
     likeCount = likeCount,
     commentCount = commentCount,
     expiredVoteCount = expiredVoteCount,
+    clickCount = clickCount,
     isExpired = isExpired,
     isDeleted = isDeleted,
     createdAt = createdAt,

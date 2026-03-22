@@ -45,6 +45,7 @@ class HotDealPersistenceAdapter(
                     likeCount = model.likeCount
                     commentCount = model.commentCount
                     expiredVoteCount = model.expiredVoteCount
+                    clickCount = model.clickCount
                     isExpired = model.isExpired
                     isDeleted = model.isDeleted
                     if (model.isDeleted && deletedAt == null) deletedAt = Instant.now()
@@ -82,6 +83,7 @@ class HotDealPersistenceAdapter(
         likeCount = model.likeCount,
         commentCount = model.commentCount,
         expiredVoteCount = model.expiredVoteCount,
+        clickCount = model.clickCount,
         isExpired = model.isExpired,
     )
 }
