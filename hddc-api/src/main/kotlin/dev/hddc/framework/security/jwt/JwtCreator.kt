@@ -11,9 +11,15 @@ import java.util.Date
 class JwtCreator(
     private val jwtProperties: JwtProperties,
 ) {
-    fun create(username: String, role: String): String {
+    fun create(username: String, role: String): String =
+        buildToken(username, role, JwtSpec.TOKEN_TYPE_ACCESS, jwtProperties.expiredMs)
+
+    fun createRefresh(username: String, role: String): String =
+        buildToken(username, role, JwtSpec.TOKEN_TYPE_REFRESH, jwtProperties.refreshExpiredMs)
+
+    private fun buildToken(username: String, role: String, type: String, expiredMs: Long): String {
         val now = Date()
-        val expiration = Date(now.time + jwtProperties.expiredMs)
+        val expiration = Date(now.time + expiredMs)
         val key = Keys.hmacShaKeyFor(jwtProperties.secretKey.toByteArray())
 
         return Jwts.builder()
@@ -22,6 +28,7 @@ class JwtCreator(
             .expiration(expiration)
             .claim(JwtSpec.CLAIM_USERNAME, username)
             .claim(JwtSpec.CLAIM_ROLE, role)
+            .claim(JwtSpec.CLAIM_TOKEN_TYPE, type)
             .signWith(key)
             .compact()
     }

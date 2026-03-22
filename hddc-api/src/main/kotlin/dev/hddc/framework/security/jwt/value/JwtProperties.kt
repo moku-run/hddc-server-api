@@ -7,4 +7,6 @@ data class JwtProperties(
     val issuer: String,
     val secretKey: String,
     val expiredMs: Long,
+    val refreshExpiredMs: Long = 604800000,
+    val cookieSecure: Boolean = false,
 )

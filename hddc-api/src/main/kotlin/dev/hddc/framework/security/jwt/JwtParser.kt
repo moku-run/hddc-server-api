@@ -24,4 +24,7 @@ class JwtParser(
 
     fun getRole(token: String): String =
         getClaims(token).get("role", String::class.java)
+
+    fun getTokenType(token: String): String =
+        getClaims(token).get("type", String::class.java) ?: "access"
 }

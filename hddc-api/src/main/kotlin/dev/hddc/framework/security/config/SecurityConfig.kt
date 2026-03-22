@@ -34,6 +34,7 @@ class SecurityConfig(
             "/api/auth/login",
             "/api/auth/check-nickname",
             "/api/auth/logout",
+            "/api/auth/refresh",
             "/api/auth/password-reset/**",
             "/api/admin/auth/login",
             "/api/profiles/{slug}",
