@@ -35,6 +35,7 @@ class SecurityConfig(
             "/api/auth/check-nickname",
             "/api/auth/logout",
             "/api/auth/password-reset/**",
+            "/api/admin/auth/login",
             "/api/profiles/{slug}",
             "/api/hot-deals",
             "/api/hot-deals/search",
@@ -53,6 +54,7 @@ class SecurityConfig(
 
         val SKIP_JWT_URLS = arrayOf(
             "/api/auth/**",
+            "/api/admin/auth/**",
             "/api/profiles/curated",
             "/api/click",
             "/api/view",
@@ -77,6 +79,7 @@ class SecurityConfig(
                 it
                     .requestMatchers(*PERMIT_ALL_URLS).permitAll()
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                    .requestMatchers("/api/admin/**").hasAnyRole("SUPER_ADMIN", "ADMIN", "MODERATOR")
                     .anyRequest().authenticated()
             }
             .exceptionHandling {
