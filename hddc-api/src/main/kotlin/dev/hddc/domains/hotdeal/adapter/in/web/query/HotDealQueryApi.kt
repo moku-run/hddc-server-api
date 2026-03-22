@@ -64,8 +64,9 @@ class HotDealQueryApi(
         val nicknames = userQueryPort.findNicknamesByIds(userIds)
 
         return HotDealPageResponse(
-            content = content.map {
-                HotDealResponse.from(it.deal, nicknames[it.deal.userId] ?: "알 수 없음", it.isLiked, it.isVotedExpired)
+            content = content.mapIndexed { index, it ->
+                val dealNumber = totalElements - (page.toLong() * size) - index
+                HotDealResponse.from(it.deal, nicknames[it.deal.userId] ?: "알 수 없음", dealNumber, it.isLiked, it.isVotedExpired)
             },
             page = page,
             size = size,

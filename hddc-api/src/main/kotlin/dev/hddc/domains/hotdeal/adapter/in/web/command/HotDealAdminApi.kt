@@ -73,7 +73,10 @@ class HotDealAdminApi(
         val nicknames = userQueryPort.findNicknamesByIds(userIds)
 
         val response = HotDealPageResponse(
-            content = result.content.map { HotDealResponse.from(it, nicknames[it.userId] ?: "알 수 없음") },
+            content = result.content.mapIndexed { index, it ->
+                val dealNumber = result.totalElements - (result.number.toLong() * result.size) - index
+                HotDealResponse.from(it, nicknames[it.userId] ?: "알 수 없음", dealNumber)
+            },
             page = result.number,
             size = result.size,
             totalElements = result.totalElements,
