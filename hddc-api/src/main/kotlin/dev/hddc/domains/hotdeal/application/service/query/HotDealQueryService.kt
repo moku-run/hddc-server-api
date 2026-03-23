@@ -48,19 +48,20 @@ class HotDealQueryService(
         val rootIds = pagedRoots.mapNotNull { it.id }
         val replies = hotDealCommentPort.findRepliesByParentIds(rootIds)
 
-        // 대댓글이 존재하는 부모 ID 집합
-        val parentIdsWithReplies = replies
+        // 전체 댓글(루트+대댓글) 중 답글이 존재하는 부모 ID 집합
+        val allComments = pagedRoots + replies
+        val parentIdsWithReplies = allComments
             .filter { it.parentId != null }
             .map { it.parentId!! }
             .toSet()
 
-        // 삭제된 루트 댓글 중 대댓글 없으면 제외
+        // 삭제된 댓글 필터: 답글 있으면 유지("[삭제된 메시지입니다.]"), 없으면 제외
         val filteredRoots = pagedRoots.filter { root ->
             !root.isDeleted || root.id in parentIdsWithReplies
         }
-
-        // 삭제된 대댓글 제외
-        val filteredReplies = replies.filter { !it.isDeleted }
+        val filteredReplies = replies.filter { reply ->
+            !reply.isDeleted || reply.id in parentIdsWithReplies
+        }
 
         // 루트 + 대댓글을 flat list로 합산 (루트 순서 유지, 각 루트 아래 대댓글 배치)
         val comments = filteredRoots.flatMap { root ->
