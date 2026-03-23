@@ -24,6 +24,7 @@ data class UpdateProfileRequest(
     val avatarUrl: String? = null,
     val backgroundUrl: String? = null,
     val backgroundColor: String? = null,
+    val backgroundTexture: String? = null,
     val linkLayout: String = "list",
     val linkStyle: String = "fill",
     val fontFamily: String = "pretendard",
@@ -34,10 +35,19 @@ data class UpdateProfileRequest(
     val customSecondaryColor: String? = null,
     val fontColor: String? = null,
     val linkRound: String = "sm",
+    val decorator1Type: String? = null,
+    val decorator1Text: String? = null,
+    val decorator2Type: String? = null,
+    val decorator2Text: String? = null,
+    val linkGradientFrom: String? = null,
+    val linkGradientTo: String? = null,
+    val linkBorderColor: String? = null,
+    val linkBorderThick: String = "thin",
+    val pageLayout: String = "list",
     val darkMode: Boolean = false,
 
     @field:Valid
-    @field:Size(max = 20, message = "링크는 최대 20개까지 가능합니다.")
+    @field:Size(max = 30, message = "링크는 최대 30개까지 가능합니다.")
     val links: List<ProfileLinkRequest> = emptyList(),
 
     @field:Valid
@@ -51,6 +61,7 @@ data class UpdateProfileRequest(
         avatarUrl = avatarUrl,
         backgroundUrl = backgroundUrl,
         backgroundColor = backgroundColor,
+        backgroundTexture = backgroundTexture,
         linkLayout = linkLayout,
         linkStyle = linkStyle,
         fontFamily = fontFamily,
@@ -61,6 +72,15 @@ data class UpdateProfileRequest(
         customSecondaryColor = customSecondaryColor,
         fontColor = fontColor,
         linkRound = linkRound,
+        decorator1Type = decorator1Type,
+        decorator1Text = decorator1Text,
+        decorator2Type = decorator2Type,
+        decorator2Text = decorator2Text,
+        linkGradientFrom = linkGradientFrom,
+        linkGradientTo = linkGradientTo,
+        linkBorderColor = linkBorderColor,
+        linkBorderThick = linkBorderThick,
+        pageLayout = pageLayout,
         darkMode = darkMode,
         links = links.map { it.toCommand() },
         socials = socials.map { it.toCommand() },
@@ -85,6 +105,15 @@ data class ProfileLinkRequest(
 
     val order: Int = 0,
     val enabled: Boolean = true,
+    val price: Long? = null,
+    val originalPrice: Long? = null,
+    val discountRate: Int? = null,
+
+    @field:Size(max = 50, message = "스토어명은 50자 이하여야 합니다.")
+    val store: String? = null,
+
+    @field:Size(max = 50, message = "카테고리는 50자 이하여야 합니다.")
+    val category: String? = null,
 ) {
     fun toCommand(): ProfileLinkCommand = ProfileLinkCommand(
         id = id,
@@ -94,6 +123,11 @@ data class ProfileLinkRequest(
         description = description,
         order = order,
         enabled = enabled,
+        price = price,
+        originalPrice = originalPrice,
+        discountRate = discountRate,
+        store = store,
+        category = category,
     )
 }
 

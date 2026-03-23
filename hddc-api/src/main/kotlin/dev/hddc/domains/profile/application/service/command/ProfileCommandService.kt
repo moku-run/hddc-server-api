@@ -41,6 +41,7 @@ class ProfileCommandService(
             avatarUrl = command.avatarUrl,
             backgroundUrl = command.backgroundUrl,
             backgroundColor = command.backgroundColor,
+            backgroundTexture = command.backgroundTexture,
             linkLayout = command.linkLayout,
             linkStyle = command.linkStyle,
             fontFamily = command.fontFamily,
@@ -51,6 +52,15 @@ class ProfileCommandService(
             customSecondaryColor = command.customSecondaryColor,
             fontColor = command.fontColor,
             linkRound = command.linkRound,
+            decorator1Type = command.decorator1Type,
+            decorator1Text = command.decorator1Text,
+            decorator2Type = command.decorator2Type,
+            decorator2Text = command.decorator2Text,
+            linkGradientFrom = command.linkGradientFrom,
+            linkGradientTo = command.linkGradientTo,
+            linkBorderColor = command.linkBorderColor,
+            linkBorderThick = command.linkBorderThick,
+            pageLayout = command.pageLayout,
             darkMode = command.darkMode,
             updatedAt = Instant.now(),
             links = command.links.map { linkCmd ->
@@ -63,6 +73,11 @@ class ProfileCommandService(
                     description = linkCmd.description,
                     sortOrder = linkCmd.order,
                     enabled = linkCmd.enabled,
+                    price = linkCmd.price,
+                    originalPrice = linkCmd.originalPrice,
+                    discountRate = linkCmd.discountRate,
+                    store = linkCmd.store,
+                    category = linkCmd.category,
                 )
             },
             socials = command.socials.map { socialCmd ->
@@ -87,6 +102,9 @@ class ProfileCommandService(
             headerLayout = command.headerLayout,
             linkAnimation = command.linkAnimation,
             linkRound = command.linkRound,
+            pageLayout = command.pageLayout,
+            linkBorderThick = command.linkBorderThick,
+            backgroundTexture = command.backgroundTexture,
         )?.let {
             throw IllegalArgumentException(ApiResponseCode.PROFILE_INVALID_FIELD.code)
         }

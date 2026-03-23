@@ -36,6 +36,7 @@ class ProfilePersistenceAdapter(
                     avatarUrl = model.avatarUrl
                     backgroundUrl = model.backgroundUrl
                     backgroundColor = model.backgroundColor
+                    backgroundTexture = model.backgroundTexture
                     linkLayout = model.linkLayout
                     linkStyle = model.linkStyle
                     fontFamily = model.fontFamily
@@ -46,6 +47,15 @@ class ProfilePersistenceAdapter(
                     customSecondaryColor = model.customSecondaryColor
                     fontColor = model.fontColor
                     linkRound = model.linkRound
+                    decorator1Type = model.decorator1Type
+                    decorator1Text = model.decorator1Text
+                    decorator2Type = model.decorator2Type
+                    decorator2Text = model.decorator2Text
+                    linkGradientFrom = model.linkGradientFrom
+                    linkGradientTo = model.linkGradientTo
+                    linkBorderColor = model.linkBorderColor
+                    linkBorderThick = model.linkBorderThick
+                    pageLayout = model.pageLayout
                     darkMode = model.darkMode
                 }
 
@@ -78,6 +88,11 @@ class ProfilePersistenceAdapter(
                 entity.description = linkModel.description
                 entity.sortOrder = linkModel.sortOrder
                 entity.enabled = linkModel.enabled
+                entity.price = linkModel.price
+                entity.originalPrice = linkModel.originalPrice
+                entity.discountRate = linkModel.discountRate
+                entity.store = linkModel.store
+                entity.category = linkModel.category
                 entity.isDeleted = linkModel.isDeleted
             } else {
                 existing.links.add(linkModel.toEntity(existing))

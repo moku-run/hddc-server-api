@@ -32,6 +32,27 @@ class ProfileLinkEntity(
 
     @Column(nullable = false)
     var enabled: Boolean = true,
+
+    @Column
+    var price: Long? = null,
+
+    @Column(name = "original_price")
+    var originalPrice: Long? = null,
+
+    @Column(name = "discount_rate")
+    var discountRate: Int? = null,
+
+    @Column(length = 50)
+    var store: String? = null,
+
+    @Column(length = 50)
+    var category: String? = null,
+
+    @Column(nullable = false)
+    var clicks: Long = 0,
+
+    @Column(nullable = false)
+    var likes: Long = 0,
 ) : BaseAuditEntity() {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

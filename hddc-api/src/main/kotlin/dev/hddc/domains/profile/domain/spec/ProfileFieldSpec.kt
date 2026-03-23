@@ -6,6 +6,7 @@ import dev.hddc.domains.profile.domain.model.HeaderLayout
 import dev.hddc.domains.profile.domain.model.LinkAnimation
 import dev.hddc.domains.profile.domain.model.LinkLayout
 import dev.hddc.domains.profile.domain.model.LinkStyle
+import dev.hddc.domains.profile.domain.model.PageLayout
 import dev.hddc.domains.profile.domain.model.SocialPlatform
 
 object ProfileFieldSpec {
@@ -18,6 +19,9 @@ object ProfileFieldSpec {
     private val LINK_ANIMATIONS = LinkAnimation.entries.map { it.value }.toSet()
     private val SOCIAL_PLATFORMS = SocialPlatform.entries.map { it.value }.toSet()
     private val LINK_ROUNDS = setOf("none", "sm", "md", "lg")
+    private val PAGE_LAYOUTS = PageLayout.entries.map { it.value }.toSet()
+    private val LINK_BORDER_THICKS = setOf("none", "thin", "medium", "thick")
+    private val BACKGROUND_TEXTURES = setOf("paper", "linen", "concrete", "fabric", "noise")
 
     fun validateColorTheme(value: String): Boolean = value in COLOR_THEMES
     fun validateFontFamily(value: String): Boolean = value in FONT_FAMILIES
@@ -27,6 +31,9 @@ object ProfileFieldSpec {
     fun validateLinkAnimation(value: String): Boolean = value in LINK_ANIMATIONS
     fun validateSocialPlatform(value: String): Boolean = value in SOCIAL_PLATFORMS
     fun validateLinkRound(value: String): Boolean = value in LINK_ROUNDS
+    fun validatePageLayout(value: String): Boolean = value in PAGE_LAYOUTS
+    fun validateLinkBorderThick(value: String): Boolean = value in LINK_BORDER_THICKS
+    fun validateBackgroundTexture(value: String?): Boolean = value == null || value in BACKGROUND_TEXTURES
 
     fun validateProfileFields(
         colorTheme: String,
@@ -36,6 +43,9 @@ object ProfileFieldSpec {
         headerLayout: String,
         linkAnimation: String,
         linkRound: String,
+        pageLayout: String,
+        linkBorderThick: String,
+        backgroundTexture: String?,
     ): String? {
         if (!validateColorTheme(colorTheme)) return "colorTheme: $colorTheme"
         if (!validateFontFamily(fontFamily)) return "fontFamily: $fontFamily"
@@ -44,6 +54,9 @@ object ProfileFieldSpec {
         if (!validateHeaderLayout(headerLayout)) return "headerLayout: $headerLayout"
         if (!validateLinkAnimation(linkAnimation)) return "linkAnimation: $linkAnimation"
         if (!validateLinkRound(linkRound)) return "linkRound: $linkRound"
+        if (!validatePageLayout(pageLayout)) return "pageLayout: $pageLayout"
+        if (!validateLinkBorderThick(linkBorderThick)) return "linkBorderThick: $linkBorderThick"
+        if (!validateBackgroundTexture(backgroundTexture)) return "backgroundTexture: $backgroundTexture"
         return null
     }
 }

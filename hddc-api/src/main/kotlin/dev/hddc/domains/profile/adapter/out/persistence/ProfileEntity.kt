@@ -33,6 +33,9 @@ class ProfileEntity(
     @Column(name = "background_color", length = 20)
     var backgroundColor: String? = null,
 
+    @Column(name = "background_texture", length = 20)
+    var backgroundTexture: String? = null,
+
     @Column(name = "link_layout", nullable = false, length = 20)
     var linkLayout: String = "list",
 
@@ -62,6 +65,33 @@ class ProfileEntity(
 
     @Column(name = "link_round", nullable = false, length = 10)
     var linkRound: String = "sm",
+
+    @Column(name = "decorator1_type", length = 20)
+    var decorator1Type: String? = null,
+
+    @Column(name = "decorator1_text", length = 80)
+    var decorator1Text: String? = null,
+
+    @Column(name = "decorator2_type", length = 20)
+    var decorator2Type: String? = null,
+
+    @Column(name = "decorator2_text", length = 80)
+    var decorator2Text: String? = null,
+
+    @Column(name = "link_gradient_from", length = 20)
+    var linkGradientFrom: String? = null,
+
+    @Column(name = "link_gradient_to", length = 20)
+    var linkGradientTo: String? = null,
+
+    @Column(name = "link_border_color", length = 20)
+    var linkBorderColor: String? = null,
+
+    @Column(name = "link_border_thick", nullable = false, length = 20)
+    var linkBorderThick: String = "thin",
+
+    @Column(name = "page_layout", nullable = false, length = 20)
+    var pageLayout: String = "list",
 
     @Column(name = "dark_mode", nullable = false)
     var darkMode: Boolean = false,

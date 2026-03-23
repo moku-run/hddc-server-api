@@ -37,11 +37,6 @@ class SecurityConfig(
             "/api/auth/refresh",
             "/api/auth/password-reset/**",
             "/api/admin/auth/login",
-            "/api/profiles/{slug}",
-            "/api/hot-deals",
-            "/api/hot-deals/search",
-            "/api/hot-deals/*/comments",
-            "/api/profiles/curated",
             "/api/click",
             "/api/view",
             "/r/**",
@@ -78,6 +73,11 @@ class SecurityConfig(
             .cors { it.configurationSource(corsConfigurationSource()) }
             .authorizeHttpRequests {
                 it
+                    .requestMatchers(HttpMethod.GET, "/api/profiles/{slug}").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/hot-deals").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/hot-deals/search").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/hot-deals/*/comments").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/profiles/curated").permitAll()
                     .requestMatchers(*PERMIT_ALL_URLS).permitAll()
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .requestMatchers("/api/admin/**").hasAnyRole("SUPER_ADMIN", "ADMIN", "MODERATOR")
