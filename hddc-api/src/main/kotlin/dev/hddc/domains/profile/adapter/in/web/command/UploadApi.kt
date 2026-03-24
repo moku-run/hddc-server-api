@@ -34,7 +34,6 @@ class UploadApi(
     @Operation(summary = "이미지 조회용 pre-signed URL 발급")
     @GetMapping("/api/upload/presigned-url")
     fun getPresignedGetUrl(
-        @AuthenticationPrincipal user: UserAuthenticationDTO,
         @RequestParam key: String,
     ): ResponseEntity<ApiResponse<Map<String, String>>> =
         ApiResponse.of(ApiResponseCode.OK, mapOf("url" to fileUploadPort.generatePresignedGetUrl(key)))

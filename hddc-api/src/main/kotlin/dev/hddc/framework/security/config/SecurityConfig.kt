@@ -78,6 +78,7 @@ class SecurityConfig(
                     .requestMatchers(HttpMethod.GET, "/api/hot-deals/search").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/hot-deals/*/comments").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/profiles/curated").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/upload/presigned-url").permitAll()
                     .requestMatchers(*PERMIT_ALL_URLS).permitAll()
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .requestMatchers("/api/admin/**").hasAnyRole("SUPER_ADMIN", "ADMIN", "MODERATOR")
