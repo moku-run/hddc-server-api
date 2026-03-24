@@ -5,6 +5,7 @@ import dev.hddc.domains.profile.application.ports.input.command.SocialLinkComman
 import dev.hddc.domains.profile.application.ports.input.command.UpdateProfileCommand
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 
@@ -105,6 +106,8 @@ data class ProfileLinkRequest(
 
     val order: Int = 0,
     val enabled: Boolean = true,
+
+    @field:NotNull(message = "핫딜가는 필수입니다.")
     val price: Long? = null,
     val originalPrice: Long? = null,
     val discountRate: Int? = null,
