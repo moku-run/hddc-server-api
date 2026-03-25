@@ -54,6 +54,7 @@ class SecurityConfig(
             "/api/profiles/curated",
             "/api/click",
             "/api/view",
+            "/api/events/stream",
             "/r/{linkId}",
             "/v3/api-docs/**",
             "/swagger-ui/**",
@@ -79,6 +80,7 @@ class SecurityConfig(
                     .requestMatchers(HttpMethod.GET, "/api/hot-deals/*/comments").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/profiles/curated").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/upload/presigned-url").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/events/stream").permitAll()
                     .requestMatchers(*PERMIT_ALL_URLS).permitAll()
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .requestMatchers("/api/admin/**").hasAnyRole("SUPER_ADMIN", "ADMIN", "MODERATOR")

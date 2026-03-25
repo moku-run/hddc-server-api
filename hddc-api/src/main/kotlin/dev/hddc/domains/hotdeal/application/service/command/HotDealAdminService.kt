@@ -5,8 +5,11 @@ import dev.hddc.domains.hotdeal.application.ports.input.command.HotDealAdminUsec
 import dev.hddc.domains.hotdeal.application.ports.input.command.UpdateHotDealCommand
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommandPort
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealQueryPort
+import dev.hddc.domains.hotdeal.domain.event.DealSseEvent
 import dev.hddc.domains.hotdeal.domain.model.HotDealModel
+import dev.hddc.domains.user.application.ports.output.query.UserQueryPort
 import dev.hddc.framework.api.response.ApiResponseCode
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -16,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional
 class HotDealAdminService(
     private val hotDealCommandPort: HotDealCommandPort,
     private val hotDealQueryPort: HotDealQueryPort,
+    private val userQueryPort: UserQueryPort,
+    private val eventPublisher: ApplicationEventPublisher,
 ) : HotDealAdminUsecase {
 
     @Transactional(readOnly = true)
@@ -36,7 +41,23 @@ class HotDealAdminService(
             category = command.category,
             store = command.store,
         )
-        return hotDealCommandPort.save(model)
+        val saved = hotDealCommandPort.save(model)
+        val nicknames = userQueryPort.findNicknamesByIds(listOf(saved.userId))
+        eventPublisher.publishEvent(DealSseEvent.NewDeal(
+            id = saved.id!!,
+            title = saved.title,
+            dealPrice = saved.dealPrice,
+            originalPrice = saved.originalPrice,
+            discountRate = saved.discountRate,
+            imageUrl = saved.imageUrl,
+            nickname = nicknames[saved.userId] ?: "알 수 없음",
+            store = saved.store,
+            likeCount = saved.likeCount,
+            commentCount = saved.commentCount,
+            clickCount = saved.clickCount,
+            createdAt = saved.createdAt,
+        ))
+        return saved
     }
 
     @Transactional
@@ -65,5 +86,6 @@ class HotDealAdminService(
             ?: throw IllegalArgumentException(ApiResponseCode.HOT_DEAL_NOT_FOUND.code)
 
         hotDealCommandPort.save(existing.copy(isDeleted = true))
+        eventPublisher.publishEvent(DealSseEvent.DealDeleted(id = dealId))
     }
 }

@@ -2,7 +2,9 @@ package dev.hddc.domains.hotdeal.adapter.`in`.web.query
 
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealClickPort
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommandPort
+import dev.hddc.domains.hotdeal.domain.event.DealSseEvent
 import dev.hddc.framework.security.authentication.UserAuthenticationDTO
+import org.springframework.context.ApplicationEventPublisher
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.servlet.http.HttpServletRequest
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController
 class DealRedirectApi(
     private val hotDealCommandPort: HotDealCommandPort,
     private val hotDealClickPort: HotDealClickPort,
+    private val eventPublisher: ApplicationEventPublisher,
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -43,7 +46,9 @@ class DealRedirectApi(
 
         if (!hotDealClickPort.isDuplicate(dealId, userId, ip)) {
             hotDealClickPort.save(dealId, userId, ip)
-            hotDealCommandPort.save(deal.copy(clickCount = deal.clickCount + 1))
+            val newCount = deal.clickCount + 1
+            hotDealCommandPort.save(deal.copy(clickCount = newCount))
+            eventPublisher.publishEvent(DealSseEvent.DealUpdated(id = dealId, clickCount = newCount))
         }
 
         log.info("[DEAL_CLICK] dealId={} → {} | userId={} | ip={}",
