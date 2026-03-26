@@ -28,21 +28,17 @@ class LoginService(
         require(!user.isLocked) { ApiResponseCode.ACCOUNT_LOCKED.code }
 
         if (!passwordEncoder.matches(command.password, user.password)) {
-            val updated = user.copy(
-                loginAttemptCount = user.loginAttemptCount + 1,
-                isLocked = user.loginAttemptCount + 1 >= MAX_LOGIN_ATTEMPTS,
-            )
-            userCommandPort.save(updated)
+            val newCount = user.loginAttemptCount + 1
+            userCommandPort.updateLoginFailed(user.id!!, newCount, newCount >= MAX_LOGIN_ATTEMPTS)
             throw IllegalArgumentException(ApiResponseCode.INVALID_CREDENTIALS.code)
         }
 
-        val updated = user.copy(loginAttemptCount = 0)
-        userCommandPort.save(updated)
+        userCommandPort.updateLoginSuccess(user.id!!)
 
         val token = jwtService.create(user.email, user.role)
 
         return LoginResult(
-            userId = user.id!!,
+            userId = user.id,
             email = user.email,
             nickname = user.nickname,
             role = user.role,

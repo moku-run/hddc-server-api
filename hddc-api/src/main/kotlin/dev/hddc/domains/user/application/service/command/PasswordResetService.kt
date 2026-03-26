@@ -78,12 +78,7 @@ class PasswordResetService(
         val user = userQueryPort.findByEmail(command.email)
             ?: throw IllegalArgumentException(ApiResponseCode.USER_NOT_FOUND.code)
 
-        val updated = user.copy(
-            password = passwordEncoder.encode(command.password),
-            loginAttemptCount = 0,
-            isLocked = false,
-        )
-        userCommandPort.save(updated)
+        userCommandPort.updatePassword(user.id!!, passwordEncoder.encode(command.password))
 
         verificationCachePort.delete(cacheKey)
     }

@@ -39,7 +39,7 @@ class SignUpService(
             role = UserRole.USER.name,
         )
 
-        val userId = userCommandPort.save(model).id!!
+        val userId = userCommandPort.create(model).id!!
         verificationCachePort.delete(VerificationSpec.signUpKey(command.email))
         return userId
     }
