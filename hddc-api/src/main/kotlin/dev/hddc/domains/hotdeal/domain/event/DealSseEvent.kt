@@ -1,8 +1,13 @@
 package dev.hddc.domains.hotdeal.domain.event
 
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonInclude
 import java.time.Instant
 
-sealed class DealSseEvent(val eventType: String) {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+sealed class DealSseEvent(
+    @JsonIgnore val eventType: String,
+) {
 
     data class NewDeal(
         val id: Long,

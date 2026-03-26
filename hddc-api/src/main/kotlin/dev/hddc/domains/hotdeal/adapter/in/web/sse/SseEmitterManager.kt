@@ -20,7 +20,7 @@ class SseEmitterManager(
         emitter.onCompletion { emitters.remove(emitter) }
         emitter.onTimeout { emitters.remove(emitter) }
         emitter.onError { emitters.remove(emitter) }
-        log.debug("[SSE] 클라이언트 연결 (현재 {}명)", emitters.size)
+        log.info("[SSE] 클라이언트 연결 (현재 {}명)", emitters.size)
         return emitter
     }
 

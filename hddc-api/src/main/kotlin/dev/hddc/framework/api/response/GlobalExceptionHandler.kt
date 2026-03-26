@@ -5,10 +5,16 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
     private val log = LoggerFactory.getLogger(javaClass)
+
+    @ExceptionHandler(AsyncRequestNotUsableException::class)
+    fun handleAsyncDisconnect(e: AsyncRequestNotUsableException) {
+        // SSE 클라이언트 연결 끊김 — 정상 동작, 무시
+    }
 
     @ExceptionHandler(IllegalArgumentException::class)
     fun handleIllegalArgument(e: IllegalArgumentException): ResponseEntity<ApiResponse<Nothing>> {
