@@ -8,10 +8,10 @@ import dev.hddc.domains.profile.application.ports.input.query.ValidateSlugResult
 import dev.hddc.domains.profile.application.ports.input.query.ValidateSlugUsecase
 import dev.hddc.framework.api.response.ApiResponse
 import dev.hddc.framework.api.response.ApiResponseCode
+import dev.hddc.framework.api.response.ApiResult
 import dev.hddc.framework.security.authentication.UserAuthenticationDTO
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -30,14 +30,14 @@ class ProfileQueryApi(
     @GetMapping("/api/profiles/me")
     fun getMyProfile(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
-    ): ResponseEntity<ApiResponse<ProfileResponse>> =
+    ): ApiResult<ProfileResponse> =
         ApiResponse.of(ApiResponseCode.OK, ProfileResponse.from(getMyProfileUsecase.execute(user.userId)))
 
     @Operation(summary = "공개 프로필 조회 (slug)")
     @GetMapping("/api/profiles/{slug}")
     fun getPublicProfile(
         @PathVariable slug: String,
-    ): ResponseEntity<ApiResponse<ProfileResponse>> =
+    ): ApiResult<ProfileResponse> =
         ApiResponse.of(ApiResponseCode.OK, ProfileResponse.from(getPublicProfileUsecase.execute(slug)))
 
     @Operation(summary = "슬러그 중복 확인")
@@ -45,12 +45,12 @@ class ProfileQueryApi(
     fun checkSlug(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @RequestParam slug: String,
-    ): ResponseEntity<ApiResponse<ValidateSlugResult>> =
+    ): ApiResult<ValidateSlugResult> =
         ApiResponse.of(ApiResponseCode.OK, validateSlugUsecase.execute(user.userId, slug))
 
     @Operation(summary = "피드에 노출할 추천 프로필")
     @GetMapping("/api/profiles/curated")
-    fun getCuratedProfiles(): ResponseEntity<ApiResponse<List<CuratedProfileResponse>>> {
+    fun getCuratedProfiles(): ApiResult<List<CuratedProfileResponse>> {
         val profiles = getCuratedProfilesUsecase.execute(6)
         val result = profiles.map {
             CuratedProfileResponse(

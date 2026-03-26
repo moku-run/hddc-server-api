@@ -9,10 +9,12 @@ import dev.hddc.domains.hotdeal.application.ports.input.query.HotDealQueryUsecas
 import dev.hddc.domains.user.application.ports.output.query.UserQueryPort
 import dev.hddc.framework.api.response.ApiResponse
 import dev.hddc.framework.api.response.ApiResponseCode
+import dev.hddc.framework.api.response.ApiResult
 import dev.hddc.framework.security.authentication.UserAuthenticationDTO
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import org.springframework.http.ResponseEntity
+import org.springframework.data.domain.Pageable
+import org.springframework.data.web.PageableDefault
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -30,20 +32,18 @@ class HotDealQueryApi(
     fun getDeals(
         @AuthenticationPrincipal user: UserAuthenticationDTO?,
         @RequestParam(defaultValue = "latest") sort: String,
-        @RequestParam(defaultValue = "0") page: Int,
-        @RequestParam(defaultValue = "20") limit: Int,
-    ): ResponseEntity<ApiResponse<HotDealPageResponse>> =
-        ApiResponse.of(ApiResponseCode.OK, hotDealQueryUsecase.getDeals(user?.userId, sort, page, limit).toResponse())
+        @PageableDefault(size = 20) pageable: Pageable,
+    ): ApiResult<HotDealPageResponse> =
+        ApiResponse.of(ApiResponseCode.OK, hotDealQueryUsecase.getDeals(user?.userId, sort, pageable.pageNumber, pageable.pageSize).toResponse())
 
     @Operation(summary = "딜 검색")
     @GetMapping("/api/hot-deals/search")
     fun search(
         @AuthenticationPrincipal user: UserAuthenticationDTO?,
         @RequestParam q: String,
-        @RequestParam(defaultValue = "0") page: Int,
-        @RequestParam(defaultValue = "20") limit: Int,
-    ): ResponseEntity<ApiResponse<HotDealPageResponse>> =
-        ApiResponse.of(ApiResponseCode.OK, hotDealQueryUsecase.search(user?.userId, q, page, limit).toResponse())
+        @PageableDefault(size = 20) pageable: Pageable,
+    ): ApiResult<HotDealPageResponse> =
+        ApiResponse.of(ApiResponseCode.OK, hotDealQueryUsecase.search(user?.userId, q, pageable.pageNumber, pageable.pageSize).toResponse())
 
     @Operation(summary = "댓글 목록 조회 (커서 기반)")
     @GetMapping("/api/hot-deals/{dealId}/comments")
@@ -52,7 +52,7 @@ class HotDealQueryApi(
         @PathVariable dealId: Long,
         @RequestParam(required = false) after: Long?,
         @RequestParam(defaultValue = "20") size: Int,
-    ): ResponseEntity<ApiResponse<CommentCursorResponse>> {
+    ): ApiResult<CommentCursorResponse> {
         val result = hotDealQueryUsecase.getCommentsEnriched(dealId, user?.userId, after, size)
         val response = CommentCursorResponse(
             comments = result.comments.map {
@@ -71,7 +71,13 @@ class HotDealQueryApi(
         return HotDealPageResponse(
             content = content.mapIndexed { index, it ->
                 val dealNumber = totalElements - (page.toLong() * size) - index
-                HotDealResponse.from(it.deal, nicknames[it.deal.userId] ?: "알 수 없음", dealNumber, it.isLiked, it.isVotedExpired)
+                HotDealResponse.from(
+                    it.deal,
+                    nicknames[it.deal.userId] ?: "알 수 없음",
+                    dealNumber,
+                    it.isLiked,
+                    it.isVotedExpired
+                )
             },
             page = page,
             size = size,

@@ -6,10 +6,10 @@ import dev.hddc.domains.analytics.application.ports.input.query.GetAnalyticsUsec
 import dev.hddc.domains.analytics.application.ports.input.query.TopLink
 import dev.hddc.framework.api.response.ApiResponse
 import dev.hddc.framework.api.response.ApiResponseCode
+import dev.hddc.framework.api.response.ApiResult
 import dev.hddc.framework.security.authentication.UserAuthenticationDTO
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -25,7 +25,7 @@ class AnalyticsQueryApi(
     fun getSummary(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @RequestParam(defaultValue = "7d") period: String,
-    ): ResponseEntity<ApiResponse<AnalyticsSummary>> =
+    ): ApiResult<AnalyticsSummary> =
         ApiResponse.of(ApiResponseCode.OK, getAnalyticsUsecase.getSummary(user.userId, period))
 
     @Operation(summary = "일별 추이 데이터")
@@ -33,7 +33,7 @@ class AnalyticsQueryApi(
     fun getDaily(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @RequestParam(defaultValue = "7d") period: String,
-    ): ResponseEntity<ApiResponse<List<DailyAnalytics>>> =
+    ): ApiResult<List<DailyAnalytics>> =
         ApiResponse.of(ApiResponseCode.OK, getAnalyticsUsecase.getDaily(user.userId, period))
 
     @Operation(summary = "상위 클릭 링크")
@@ -41,6 +41,6 @@ class AnalyticsQueryApi(
     fun getTopLinks(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @RequestParam(defaultValue = "5") limit: Int,
-    ): ResponseEntity<ApiResponse<List<TopLink>>> =
+    ): ApiResult<List<TopLink>> =
         ApiResponse.of(ApiResponseCode.OK, getAnalyticsUsecase.getTopLinks(user.userId, limit))
 }

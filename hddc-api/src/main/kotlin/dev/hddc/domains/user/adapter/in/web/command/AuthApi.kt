@@ -16,6 +16,7 @@ import dev.hddc.domains.user.application.ports.input.query.CheckNicknameResult
 import dev.hddc.domains.user.application.ports.input.query.CheckNicknameUsecase
 import dev.hddc.framework.api.response.ApiResponse
 import dev.hddc.framework.api.response.ApiResponseCode
+import dev.hddc.framework.api.response.ApiResult
 import dev.hddc.framework.security.jwt.JwtService
 import dev.hddc.framework.security.jwt.spec.JwtSpec
 import dev.hddc.framework.security.jwt.value.JwtProperties
@@ -49,7 +50,7 @@ class AuthApi(
     @PostMapping("/api/auth/email-verifications")
     fun sendVerification(
         @Valid @RequestBody request: EmailVerificationSendRequest,
-    ): ResponseEntity<ApiResponse<Nothing>> {
+    ): ApiResult<Nothing> {
         emailVerificationUsecase.send(request.email)
         return ApiResponse.of(ApiResponseCode.VERIFICATION_CODE_SENT)
     }
@@ -58,7 +59,7 @@ class AuthApi(
     @PostMapping("/api/auth/email-verifications/verify")
     fun verify(
         @Valid @RequestBody request: EmailVerificationVerifyRequest,
-    ): ResponseEntity<ApiResponse<Nothing>> {
+    ): ApiResult<Nothing> {
         emailVerificationUsecase.verify(request.email, request.code)
         return ApiResponse.of(ApiResponseCode.VERIFICATION_COMPLETED)
     }
@@ -67,7 +68,7 @@ class AuthApi(
     @PostMapping("/api/auth/sign-up")
     fun signUp(
         @Valid @RequestBody request: SignUpRequest,
-    ): ResponseEntity<ApiResponse<Long>> =
+    ): ApiResult<Long> =
         ApiResponse.of(ApiResponseCode.CREATED, signUpUsecase.execute(request.toCommand()))
 
     @Operation(summary = "로그인")
@@ -75,7 +76,7 @@ class AuthApi(
     fun login(
         @Valid @RequestBody request: LoginRequest,
         response: HttpServletResponse,
-    ): ResponseEntity<ApiResponse<LoginResult>> {
+    ): ApiResult<LoginResult> {
         val result = loginUsecase.execute(request.toCommand())
 
         val refreshToken = jwtService.createRefresh(result.email, result.role)
@@ -99,7 +100,7 @@ class AuthApi(
     fun refresh(
         request: HttpServletRequest,
         response: HttpServletResponse,
-    ): ResponseEntity<ApiResponse<Map<String, String>>> {
+    ): ApiResult<Map<String, String>> {
         val refreshToken = request.cookies
             ?.find { it.name == JwtSpec.REFRESH_COOKIE_NAME }?.value
             ?: throw IllegalArgumentException(ApiResponseCode.TOKEN_INVALID.code)
@@ -132,7 +133,7 @@ class AuthApi(
     @PostMapping("/api/auth/password-reset/email-verifications")
     fun sendPasswordResetCode(
         @Valid @RequestBody request: PasswordResetSendRequest,
-    ): ResponseEntity<ApiResponse<Nothing>> {
+    ): ApiResult<Nothing> {
         passwordResetUsecase.sendCode(request.email)
         return ApiResponse.of(ApiResponseCode.VERIFICATION_CODE_SENT)
     }
@@ -141,7 +142,7 @@ class AuthApi(
     @PostMapping("/api/auth/password-reset/email-verifications/verify")
     fun verifyPasswordResetCode(
         @Valid @RequestBody request: PasswordResetVerifyRequest,
-    ): ResponseEntity<ApiResponse<Nothing>> {
+    ): ApiResult<Nothing> {
         passwordResetUsecase.verifyCode(request.email, request.code)
         return ApiResponse.of(ApiResponseCode.VERIFICATION_COMPLETED)
     }
@@ -150,7 +151,7 @@ class AuthApi(
     @PutMapping("/api/auth/password-reset")
     fun resetPassword(
         @Valid @RequestBody request: PasswordResetRequest,
-    ): ResponseEntity<ApiResponse<Nothing>> {
+    ): ApiResult<Nothing> {
         passwordResetUsecase.reset(request.toCommand())
         return ApiResponse.of(ApiResponseCode.UPDATED)
     }
@@ -159,7 +160,7 @@ class AuthApi(
     @GetMapping("/api/auth/check-nickname")
     fun checkNickname(
         @RequestParam nickname: String,
-    ): ResponseEntity<ApiResponse<CheckNicknameResult>> =
+    ): ApiResult<CheckNicknameResult> =
         ApiResponse.of(ApiResponseCode.OK, checkNicknameUsecase.execute(nickname))
 
     @Operation(summary = "로그아웃")
@@ -167,7 +168,7 @@ class AuthApi(
     fun logout(
         request: HttpServletRequest,
         response: HttpServletResponse,
-    ): ResponseEntity<ApiResponse<Nothing>> {
+    ): ApiResult<Nothing> {
         val token = request.getHeader(JwtSpec.TOKEN_HEADER)
             ?.removePrefix(JwtSpec.TOKEN_PREFIX)
         if (token != null) {

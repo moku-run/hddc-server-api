@@ -8,11 +8,11 @@ import dev.hddc.domains.profile.application.ports.input.command.LinkCommandUseca
 import dev.hddc.domains.profile.application.ports.input.command.ToggleLinkResult
 import dev.hddc.framework.api.response.ApiResponse
 import dev.hddc.framework.api.response.ApiResponseCode
+import dev.hddc.framework.api.response.ApiResult
 import dev.hddc.framework.security.authentication.UserAuthenticationDTO
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
-import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.PatchMapping
@@ -32,7 +32,7 @@ class LinkCommandApi(
     fun addLink(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @Valid @RequestBody request: AddLinkRequest,
-    ): ResponseEntity<ApiResponse<ProfileLinkResponse>> =
+    ): ApiResult<ProfileLinkResponse> =
         ApiResponse.of(ApiResponseCode.CREATED, ProfileLinkResponse.from(linkCommandUsecase.addLink(user.userId, request.toCommand())))
 
     @Operation(summary = "링크 수정")
@@ -41,7 +41,7 @@ class LinkCommandApi(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @PathVariable linkId: Long,
         @Valid @RequestBody request: UpdateLinkRequest,
-    ): ResponseEntity<ApiResponse<ProfileLinkResponse>> =
+    ): ApiResult<ProfileLinkResponse> =
         ApiResponse.of(ApiResponseCode.UPDATED, ProfileLinkResponse.from(linkCommandUsecase.updateLink(user.userId, linkId, request.toCommand())))
 
     @Operation(summary = "링크 삭제")
@@ -49,7 +49,7 @@ class LinkCommandApi(
     fun deleteLink(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @PathVariable linkId: Long,
-    ): ResponseEntity<ApiResponse<Nothing>> {
+    ): ApiResult<Nothing> {
         linkCommandUsecase.deleteLink(user.userId, linkId)
         return ApiResponse.of(ApiResponseCode.DELETED)
     }
@@ -59,7 +59,7 @@ class LinkCommandApi(
     fun toggleLink(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @PathVariable linkId: Long,
-    ): ResponseEntity<ApiResponse<ToggleLinkResult>> =
+    ): ApiResult<ToggleLinkResult> =
         ApiResponse.of(ApiResponseCode.UPDATED, linkCommandUsecase.toggleLink(user.userId, linkId))
 
     @Operation(summary = "링크 순서 변경")
@@ -67,6 +67,6 @@ class LinkCommandApi(
     fun reorderLinks(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @Valid @RequestBody request: ReorderRequest,
-    ): ResponseEntity<ApiResponse<List<ProfileLinkResponse>>> =
+    ): ApiResult<List<ProfileLinkResponse>> =
         ApiResponse.of(ApiResponseCode.UPDATED, linkCommandUsecase.reorderLinks(user.userId, request.orderedIds).map { ProfileLinkResponse.from(it) })
 }

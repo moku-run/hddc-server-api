@@ -2,6 +2,8 @@ package dev.hddc.framework.api.response
 
 import org.springframework.http.ResponseEntity
 
+typealias ApiResult<T> = ResponseEntity<ApiResponse<T>>
+
 data class ApiResponse<T>(
     val success: Boolean,
     val code: String,

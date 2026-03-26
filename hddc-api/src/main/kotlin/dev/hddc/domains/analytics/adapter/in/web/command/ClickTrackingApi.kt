@@ -5,11 +5,11 @@ import dev.hddc.domains.analytics.adapter.`in`.web.command.request.TrackViewRequ
 import dev.hddc.domains.analytics.application.ports.input.command.TrackClickUsecase
 import dev.hddc.framework.api.response.ApiResponse
 import dev.hddc.framework.api.response.ApiResponseCode
+import dev.hddc.framework.api.response.ApiResult
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
@@ -24,7 +24,7 @@ class ClickTrackingApi(
     fun trackClick(
         @Valid @RequestBody request: TrackClickRequest,
         httpRequest: HttpServletRequest,
-    ): ResponseEntity<ApiResponse<Nothing>> {
+    ): ApiResult<Nothing> {
         trackClickUsecase.trackClick(
             slug = request.slug,
             linkId = request.linkId,
@@ -40,7 +40,7 @@ class ClickTrackingApi(
     fun trackView(
         @Valid @RequestBody request: TrackViewRequest,
         httpRequest: HttpServletRequest,
-    ): ResponseEntity<ApiResponse<Nothing>> {
+    ): ApiResult<Nothing> {
         trackClickUsecase.trackPageView(
             slug = request.slug,
             ip = httpRequest.remoteAddr,

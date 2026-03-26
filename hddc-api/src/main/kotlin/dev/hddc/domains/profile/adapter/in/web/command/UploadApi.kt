@@ -6,10 +6,10 @@ import dev.hddc.domains.profile.application.ports.input.command.PresignedUploadU
 import dev.hddc.domains.profile.application.ports.output.FileUploadPort
 import dev.hddc.framework.api.response.ApiResponse
 import dev.hddc.framework.api.response.ApiResponseCode
+import dev.hddc.framework.api.response.ApiResult
 import dev.hddc.framework.security.authentication.UserAuthenticationDTO
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -28,13 +28,13 @@ class UploadApi(
     fun getPresignedPutUrl(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @RequestBody request: PresignedUploadRequest,
-    ): ResponseEntity<ApiResponse<PresignedUploadResult>> =
+    ): ApiResult<PresignedUploadResult> =
         ApiResponse.of(ApiResponseCode.OK, presignedUploadUsecase.generateUploadUrl(user.userId, request))
 
     @Operation(summary = "이미지 조회용 pre-signed URL 발급")
     @GetMapping("/api/upload/presigned-url")
     fun getPresignedGetUrl(
         @RequestParam key: String,
-    ): ResponseEntity<ApiResponse<Map<String, String>>> =
+    ): ApiResult<Map<String, String>> =
         ApiResponse.of(ApiResponseCode.OK, mapOf("url" to fileUploadPort.generatePresignedGetUrl(key)))
 }

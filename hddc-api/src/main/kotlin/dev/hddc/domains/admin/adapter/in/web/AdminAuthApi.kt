@@ -5,6 +5,7 @@ import dev.hddc.domains.admin.application.ports.input.command.AdminLoginResult
 import dev.hddc.domains.admin.application.ports.input.command.AdminLoginUsecase
 import dev.hddc.framework.api.response.ApiResponse
 import dev.hddc.framework.api.response.ApiResponseCode
+import dev.hddc.framework.api.response.ApiResult
 import dev.hddc.framework.security.jwt.spec.JwtSpec
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -32,7 +33,7 @@ class AdminAuthApi(
     @PostMapping("/api/admin/auth/login")
     fun login(
         @Valid @RequestBody request: AdminLoginRequest,
-    ): ResponseEntity<ApiResponse<AdminLoginResult>> {
+    ): ApiResult<AdminLoginResult> {
         val result = adminLoginUsecase.execute(AdminLoginCommand(request.email, request.password))
         return ResponseEntity
             .status(ApiResponseCode.OK.status)

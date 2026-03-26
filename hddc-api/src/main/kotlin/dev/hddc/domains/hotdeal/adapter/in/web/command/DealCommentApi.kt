@@ -5,11 +5,11 @@ import dev.hddc.domains.hotdeal.adapter.`in`.web.response.CommentResponse
 import dev.hddc.domains.hotdeal.application.ports.input.command.DealCommentUsecase
 import dev.hddc.framework.api.response.ApiResponse
 import dev.hddc.framework.api.response.ApiResponseCode
+import dev.hddc.framework.api.response.ApiResult
 import dev.hddc.framework.security.authentication.UserAuthenticationDTO
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
-import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -28,7 +28,7 @@ class DealCommentApi(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @PathVariable dealId: Long,
         @Valid @RequestBody request: AddCommentRequest,
-    ): ResponseEntity<ApiResponse<CommentResponse>> {
+    ): ApiResult<CommentResponse> {
         val comment = dealCommentUsecase.addComment(user.userId, dealId, request.content, request.parentId)
         return ApiResponse.of(ApiResponseCode.CREATED, CommentResponse.from(comment, user.nickname))
     }
@@ -39,7 +39,7 @@ class DealCommentApi(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @PathVariable dealId: Long,
         @PathVariable commentId: Long,
-    ): ResponseEntity<ApiResponse<Nothing>> {
+    ): ApiResult<Nothing> {
         dealCommentUsecase.deleteComment(user.userId, dealId, commentId)
         return ApiResponse.of(ApiResponseCode.DELETED)
     }

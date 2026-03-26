@@ -5,20 +5,16 @@ import dev.hddc.domains.hotdeal.application.ports.input.command.CrawlDealAdminUs
 import dev.hddc.domains.hotdeal.domain.model.CrawlHotDealModel
 import dev.hddc.framework.api.response.ApiResponse
 import dev.hddc.framework.api.response.ApiResponseCode
+import dev.hddc.framework.api.response.ApiResult
 import dev.hddc.framework.security.authentication.UserAuthenticationDTO
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
-import org.springframework.http.ResponseEntity
+import org.springframework.data.web.PageableDefault
 import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 data class CrawlDealResponse(
     val id: Long,
@@ -80,10 +76,8 @@ class CrawlDealAdminApi(
     fun getCrawlDeals(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @RequestParam(defaultValue = "PENDING") status: String,
-        @RequestParam(defaultValue = "0") page: Int,
-        @RequestParam(defaultValue = "20") size: Int,
-    ): ResponseEntity<ApiResponse<CrawlDealPageResponse>> {
-        val pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "crawledAt"))
+        @PageableDefault(size = 20, sort = ["crawledAt"], direction = Sort.Direction.DESC) pageable: Pageable,
+    ): ApiResult<CrawlDealPageResponse> {
         val result = crawlDealAdminUsecase.getCrawlDeals(status, pageable)
         return ApiResponse.of(ApiResponseCode.OK, result.toResponse())
     }
@@ -93,7 +87,7 @@ class CrawlDealAdminApi(
     fun approve(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @PathVariable id: Long,
-    ): ResponseEntity<ApiResponse<Map<String, Long>>> =
+    ): ApiResult<Map<String, Long>> =
         ApiResponse.of(ApiResponseCode.CREATED, mapOf("hotDealId" to crawlDealAdminUsecase.approve(id)))
 
     @Operation(summary = "크롤링 딜 거부")
@@ -101,7 +95,7 @@ class CrawlDealAdminApi(
     fun reject(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @PathVariable id: Long,
-    ): ResponseEntity<ApiResponse<Nothing>> {
+    ): ApiResult<Nothing> {
         crawlDealAdminUsecase.reject(id)
         return ApiResponse.of(ApiResponseCode.OK)
     }
@@ -111,7 +105,7 @@ class CrawlDealAdminApi(
     fun bulkApprove(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @RequestBody request: BulkApproveRequest,
-    ): ResponseEntity<ApiResponse<ApproveResult>> =
+    ): ApiResult<ApproveResult> =
         ApiResponse.of(ApiResponseCode.CREATED, crawlDealAdminUsecase.bulkApprove(request.ids))
 
     private fun Page<CrawlHotDealModel>.toResponse() = CrawlDealPageResponse(

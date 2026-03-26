@@ -3,10 +3,10 @@ package dev.hddc.domains.hotdeal.adapter.`in`.web.command
 import dev.hddc.domains.hotdeal.application.ports.input.command.DealLikeUsecase
 import dev.hddc.framework.api.response.ApiResponse
 import dev.hddc.framework.api.response.ApiResponseCode
+import dev.hddc.framework.api.response.ApiResult
 import dev.hddc.framework.security.authentication.UserAuthenticationDTO
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -23,7 +23,7 @@ class DealLikeApi(
     fun like(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @PathVariable dealId: Long,
-    ): ResponseEntity<ApiResponse<Nothing>> {
+    ): ApiResult<Nothing> {
         dealLikeUsecase.like(user.userId, dealId)
         return ApiResponse.of(ApiResponseCode.OK)
     }
@@ -33,7 +33,7 @@ class DealLikeApi(
     fun unlike(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @PathVariable dealId: Long,
-    ): ResponseEntity<ApiResponse<Nothing>> {
+    ): ApiResult<Nothing> {
         dealLikeUsecase.unlike(user.userId, dealId)
         return ApiResponse.of(ApiResponseCode.OK)
     }

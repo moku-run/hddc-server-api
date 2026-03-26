@@ -8,24 +8,18 @@ import dev.hddc.domains.hotdeal.application.ports.input.command.UpdateHotDealCom
 import dev.hddc.domains.user.application.ports.output.query.UserQueryPort
 import dev.hddc.framework.api.response.ApiResponse
 import dev.hddc.framework.api.response.ApiResponseCode
+import dev.hddc.framework.api.response.ApiResult
 import dev.hddc.framework.security.authentication.UserAuthenticationDTO
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
-import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
-import org.springframework.http.ResponseEntity
+import org.springframework.data.web.PageableDefault
 import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PatchMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 data class CreateHotDealRequest(
     @field:NotBlank(message = "제목은 필수입니다.")
@@ -64,10 +58,8 @@ class HotDealAdminApi(
     @GetMapping("/api/admin/hot-deals")
     fun getAll(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
-        @RequestParam(defaultValue = "0") page: Int,
-        @RequestParam(defaultValue = "20") size: Int,
-    ): ResponseEntity<ApiResponse<HotDealPageResponse>> {
-        val pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"))
+        @PageableDefault(size = 20, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable,
+    ): ApiResult<HotDealPageResponse> {
         val result = hotDealAdminUsecase.getAll(pageable)
         val userIds = result.content.map { it.userId }.distinct()
         val nicknames = userQueryPort.findNicknamesByIds(userIds)
@@ -90,7 +82,7 @@ class HotDealAdminApi(
     fun create(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @Valid @RequestBody request: CreateHotDealRequest,
-    ): ResponseEntity<ApiResponse<HotDealResponse>> {
+    ): ApiResult<HotDealResponse> {
         val deal = hotDealAdminUsecase.create(
             adminUserId = user.userId,
             command = CreateHotDealCommand(
@@ -114,7 +106,7 @@ class HotDealAdminApi(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @PathVariable dealId: Long,
         @RequestBody request: UpdateHotDealRequest,
-    ): ResponseEntity<ApiResponse<HotDealResponse>> {
+    ): ApiResult<HotDealResponse> {
         val deal = hotDealAdminUsecase.update(
             dealId = dealId,
             command = UpdateHotDealCommand(
@@ -138,7 +130,7 @@ class HotDealAdminApi(
     fun delete(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @PathVariable dealId: Long,
-    ): ResponseEntity<ApiResponse<Nothing>> {
+    ): ApiResult<Nothing> {
         hotDealAdminUsecase.delete(dealId)
         return ApiResponse.of(ApiResponseCode.DELETED)
     }

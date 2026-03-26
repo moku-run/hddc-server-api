@@ -7,11 +7,11 @@ import dev.hddc.domains.profile.adapter.`in`.web.response.SocialLinkResponse
 import dev.hddc.domains.profile.application.ports.input.command.SocialCommandUsecase
 import dev.hddc.framework.api.response.ApiResponse
 import dev.hddc.framework.api.response.ApiResponseCode
+import dev.hddc.framework.api.response.ApiResult
 import dev.hddc.framework.security.authentication.UserAuthenticationDTO
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
-import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.PatchMapping
@@ -31,7 +31,7 @@ class SocialCommandApi(
     fun addSocial(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @Valid @RequestBody request: AddSocialRequest,
-    ): ResponseEntity<ApiResponse<SocialLinkResponse>> =
+    ): ApiResult<SocialLinkResponse> =
         ApiResponse.of(ApiResponseCode.CREATED, SocialLinkResponse.from(socialCommandUsecase.addSocial(user.userId, request.toCommand())))
 
     @Operation(summary = "소셜 링크 수정")
@@ -40,7 +40,7 @@ class SocialCommandApi(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @PathVariable socialId: Long,
         @Valid @RequestBody request: UpdateSocialRequest,
-    ): ResponseEntity<ApiResponse<SocialLinkResponse>> =
+    ): ApiResult<SocialLinkResponse> =
         ApiResponse.of(ApiResponseCode.UPDATED, SocialLinkResponse.from(socialCommandUsecase.updateSocial(user.userId, socialId, request.toCommand())))
 
     @Operation(summary = "소셜 링크 삭제")
@@ -48,7 +48,7 @@ class SocialCommandApi(
     fun deleteSocial(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @PathVariable socialId: Long,
-    ): ResponseEntity<ApiResponse<Nothing>> {
+    ): ApiResult<Nothing> {
         socialCommandUsecase.deleteSocial(user.userId, socialId)
         return ApiResponse.of(ApiResponseCode.DELETED)
     }
@@ -58,6 +58,6 @@ class SocialCommandApi(
     fun reorderSocials(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @Valid @RequestBody request: ReorderRequest,
-    ): ResponseEntity<ApiResponse<List<SocialLinkResponse>>> =
+    ): ApiResult<List<SocialLinkResponse>> =
         ApiResponse.of(ApiResponseCode.UPDATED, socialCommandUsecase.reorderSocials(user.userId, request.orderedIds).map { SocialLinkResponse.from(it) })
 }

@@ -3,13 +3,13 @@ package dev.hddc.domains.profile.adapter.`in`.web.command
 import dev.hddc.domains.profile.application.ports.input.command.ProfileReportUsecase
 import dev.hddc.framework.api.response.ApiResponse
 import dev.hddc.framework.api.response.ApiResponseCode
+import dev.hddc.framework.api.response.ApiResult
 import dev.hddc.framework.security.authentication.UserAuthenticationDTO
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
-import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -33,7 +33,7 @@ class ProfileReportApi(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @PathVariable slug: String,
         @Valid @RequestBody request: ReportRequest,
-    ): ResponseEntity<ApiResponse<Nothing>> {
+    ): ApiResult<Nothing> {
         profileReportUsecase.reportProfile(user.userId, slug, request.reason)
         return ApiResponse.of(ApiResponseCode.CREATED)
     }
@@ -45,7 +45,7 @@ class ProfileReportApi(
         @PathVariable slug: String,
         @PathVariable linkId: Long,
         @Valid @RequestBody request: ReportRequest,
-    ): ResponseEntity<ApiResponse<Nothing>> {
+    ): ApiResult<Nothing> {
         profileReportUsecase.reportLink(user.userId, slug, linkId, request.reason)
         return ApiResponse.of(ApiResponseCode.CREATED)
     }

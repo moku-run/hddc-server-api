@@ -6,11 +6,11 @@ import dev.hddc.domains.profile.application.ports.input.command.ResetProfileUsec
 import dev.hddc.domains.profile.application.ports.input.command.UpdateMyProfileUsecase
 import dev.hddc.framework.api.response.ApiResponse
 import dev.hddc.framework.api.response.ApiResponseCode
+import dev.hddc.framework.api.response.ApiResult
 import dev.hddc.framework.security.authentication.UserAuthenticationDTO
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
-import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -28,13 +28,13 @@ class ProfileCommandApi(
     fun updateMyProfile(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @Valid @RequestBody request: UpdateProfileRequest,
-    ): ResponseEntity<ApiResponse<ProfileResponse>> =
+    ): ApiResult<ProfileResponse> =
         ApiResponse.of(ApiResponseCode.UPDATED, ProfileResponse.from(updateMyProfileUsecase.execute(user.userId, request.toCommand())))
 
     @Operation(summary = "프로필 초기화")
     @PostMapping("/api/profiles/me/reset")
     fun resetProfile(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
-    ): ResponseEntity<ApiResponse<ProfileResponse>> =
+    ): ApiResult<ProfileResponse> =
         ApiResponse.of(ApiResponseCode.OK, ProfileResponse.from(resetProfileUsecase.execute(user.userId)))
 }
