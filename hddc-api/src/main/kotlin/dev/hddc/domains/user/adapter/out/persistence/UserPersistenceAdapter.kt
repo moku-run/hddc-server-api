@@ -4,7 +4,6 @@ import dev.hddc.domains.user.application.ports.output.command.UserCommandPort
 import dev.hddc.domains.user.application.ports.output.query.UserQueryPort
 import dev.hddc.domains.user.domain.model.UserModel
 import org.springframework.stereotype.Repository
-import java.time.Instant
 
 @Repository
 class UserPersistenceAdapter(
@@ -34,8 +33,6 @@ class UserPersistenceAdapter(
                     isDeleted = model.isDeleted
                     isLocked = model.isLocked
                     loginAttemptCount = model.loginAttemptCount
-                    lastLoginAt = model.lastLoginAt
-                    updatedAt = Instant.now()
                 }
                 existing
             } else {

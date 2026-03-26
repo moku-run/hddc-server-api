@@ -10,7 +10,6 @@ import dev.hddc.framework.security.jwt.JwtService
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.Instant
 
 @Service
 class LoginService(
@@ -37,10 +36,7 @@ class LoginService(
             throw IllegalArgumentException(ApiResponseCode.INVALID_CREDENTIALS.code)
         }
 
-        val updated = user.copy(
-            loginAttemptCount = 0,
-            lastLoginAt = Instant.now(),
-        )
+        val updated = user.copy(loginAttemptCount = 0)
         userCommandPort.save(updated)
 
         val token = jwtService.create(user.email, user.role)

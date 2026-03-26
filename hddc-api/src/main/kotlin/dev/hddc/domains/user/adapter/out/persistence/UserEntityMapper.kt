@@ -11,9 +11,6 @@ fun UserEntity.toDomain(): UserModel = UserModel(
     isDeleted = isDeleted,
     isLocked = isLocked,
     loginAttemptCount = loginAttemptCount,
-    lastLoginAt = lastLoginAt,
-    createdAt = createdAt,
-    updatedAt = updatedAt,
 )
 
 fun UserModel.toNewEntity(): UserEntity = UserEntity(
@@ -23,5 +20,4 @@ fun UserModel.toNewEntity(): UserEntity = UserEntity(
     role = role,
     isLocked = isLocked,
     loginAttemptCount = loginAttemptCount,
-    lastLoginAt = lastLoginAt,
 )
