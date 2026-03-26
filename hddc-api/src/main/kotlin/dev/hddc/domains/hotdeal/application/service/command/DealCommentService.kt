@@ -7,7 +7,7 @@ import dev.hddc.domains.hotdeal.domain.event.DealSseEvent
 import dev.hddc.domains.hotdeal.domain.model.HotDealCommentModel
 import dev.hddc.domains.user.application.ports.output.query.UserQueryPort
 import dev.hddc.framework.api.response.ApiResponseCode
-import org.springframework.context.ApplicationEventPublisher
+import dev.hddc.domains.hotdeal.application.ports.output.event.DomainEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -16,7 +16,7 @@ class DealCommentService(
     private val hotDealCommandPort: HotDealCommandPort,
     private val hotDealCommentPort: HotDealCommentPort,
     private val userQueryPort: UserQueryPort,
-    private val eventPublisher: ApplicationEventPublisher,
+    private val eventPublisher: DomainEventPublisher,
 ) : DealCommentUsecase {
 
     @Transactional
@@ -43,7 +43,7 @@ class DealCommentService(
         hotDealCommandPort.save(deal.copy(commentCount = newCount))
 
         val nicknames = userQueryPort.findNicknamesByIds(listOf(userId))
-        eventPublisher.publishEvent(DealSseEvent.NewComment(
+        eventPublisher.publish(DealSseEvent.NewComment(
             dealId = dealId,
             id = saved.id!!,
             nickname = nicknames[userId] ?: "알 수 없음",
@@ -51,7 +51,7 @@ class DealCommentService(
             parentId = parentId,
             createdAt = saved.createdAt,
         ))
-        eventPublisher.publishEvent(DealSseEvent.DealUpdated(id = dealId, commentCount = newCount))
+        eventPublisher.publish(DealSseEvent.DealUpdated(id = dealId, commentCount = newCount))
 
         return saved
     }
@@ -69,7 +69,7 @@ class DealCommentService(
         hotDealCommentPort.save(comment.copy(isDeleted = true))
         val newCount = maxOf(0, deal.commentCount - 1)
         hotDealCommandPort.save(deal.copy(commentCount = newCount))
-        eventPublisher.publishEvent(DealSseEvent.CommentDeleted(dealId = dealId, id = commentId))
-        eventPublisher.publishEvent(DealSseEvent.DealUpdated(id = dealId, commentCount = newCount))
+        eventPublisher.publish(DealSseEvent.CommentDeleted(dealId = dealId, id = commentId))
+        eventPublisher.publish(DealSseEvent.DealUpdated(id = dealId, commentCount = newCount))
     }
 }

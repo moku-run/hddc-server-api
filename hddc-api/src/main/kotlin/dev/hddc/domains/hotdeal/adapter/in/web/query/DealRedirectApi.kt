@@ -1,10 +1,7 @@
 package dev.hddc.domains.hotdeal.adapter.`in`.web.query
 
-import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealClickPort
-import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommandPort
-import dev.hddc.domains.hotdeal.domain.event.DealSseEvent
+import dev.hddc.domains.hotdeal.application.ports.input.command.DealClickUsecase
 import dev.hddc.framework.security.authentication.UserAuthenticationDTO
-import org.springframework.context.ApplicationEventPublisher
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.servlet.http.HttpServletRequest
@@ -20,9 +17,7 @@ import org.springframework.web.bind.annotation.RestController
 @Tag(name = "Deal Redirect", description = "핫딜 리다이렉트")
 @RestController
 class DealRedirectApi(
-    private val hotDealCommandPort: HotDealCommandPort,
-    private val hotDealClickPort: HotDealClickPort,
-    private val eventPublisher: ApplicationEventPublisher,
+    private val dealClickUsecase: DealClickUsecase,
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -33,29 +28,18 @@ class DealRedirectApi(
         @AuthenticationPrincipal user: UserAuthenticationDTO?,
         request: HttpServletRequest,
     ): ResponseEntity<Void> {
-        val deal = hotDealCommandPort.findById(dealId)
-            ?: return ResponseEntity.notFound().build()
-
-        if (deal.isDeleted || deal.isExpired) {
-            return ResponseEntity.notFound().build()
-        }
-
         val ip = request.getHeader("X-Forwarded-For")?.split(",")?.first()?.trim()
             ?: request.remoteAddr
         val userId = user?.userId
 
-        if (!hotDealClickPort.isDuplicate(dealId, userId, ip)) {
-            hotDealClickPort.save(dealId, userId, ip)
-            val newCount = deal.clickCount + 1
-            hotDealCommandPort.save(deal.copy(clickCount = newCount))
-            eventPublisher.publishEvent(DealSseEvent.DealUpdated(id = dealId, clickCount = newCount))
-        }
+        val result = dealClickUsecase.click(dealId, userId, ip)
+            ?: return ResponseEntity.notFound().build()
 
         log.info("[DEAL_CLICK] dealId={} → {} | userId={} | ip={}",
-            dealId, deal.url, userId ?: "anonymous", ip)
+            dealId, result.url, userId ?: "anonymous", ip)
 
         return ResponseEntity.status(HttpStatus.FOUND)
-            .header(HttpHeaders.LOCATION, deal.url)
+            .header(HttpHeaders.LOCATION, result.url)
             .header(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate")
             .header(HttpHeaders.PRAGMA, "no-cache")
             .header(HttpHeaders.EXPIRES, "0")

@@ -22,3 +22,15 @@ data class CommentCursorResult(
     val nextCursor: Long?,
     val hasNext: Boolean,
 )
+
+data class CommentWithNickname(
+    val comment: HotDealCommentModel,
+    val nickname: String,
+    val isLiked: Boolean,
+)
+
+data class EnrichedCommentCursorResult(
+    val comments: List<CommentWithNickname>,
+    val nextCursor: Long?,
+    val hasNext: Boolean,
+)

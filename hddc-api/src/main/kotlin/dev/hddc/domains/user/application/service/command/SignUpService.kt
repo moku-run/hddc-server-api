@@ -21,35 +21,37 @@ class SignUpService(
     private val passwordEncoder: PasswordEncoder,
 ) : SignUpUsecase {
 
-    @Transactional
     override fun execute(command: SignUpCommand): Long {
+        // Redis 조회 + bcrypt 인코딩 — 트랜잭션 밖에서 수행
         requireEmailVerified(command.email)
+        val encodedPassword = passwordEncoder.encode(command.password)
+        return saveUser(command, encodedPassword)
+    }
 
+    @Transactional
+    fun saveUser(command: SignUpCommand, encodedPassword: String): Long {
         require(!userQueryPort.existsByEmail(command.email)) {
             ApiResponseCode.USER_DUPLICATE_EMAIL.code
         }
-
         require(!userQueryPort.existsByNickname(command.nickname)) {
             ApiResponseCode.USER_DUPLICATE_NICKNAME.code
         }
 
         val model = UserModel(
             email = command.email,
-            password = passwordEncoder.encode(command.password),
+            password = encodedPassword,
             nickname = command.nickname,
             role = UserRole.USER.name,
         )
 
         val userId = userCommandPort.save(model).id!!
         verificationCachePort.delete(VerificationSpec.signUpKey(command.email))
-
         return userId
     }
 
     private fun requireEmailVerified(email: String) {
         val cacheKey = VerificationSpec.signUpKey(email)
         val value = verificationCachePort.getValue(cacheKey)
-
         require(value == VerificationSpec.COMPLETED) {
             ApiResponseCode.VERIFICATION_REQUIRED.code
         }

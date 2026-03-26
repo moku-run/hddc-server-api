@@ -19,10 +19,13 @@ class ProfileCommandService(
     private val profileCommandPort: ProfileCommandPort,
 ) : UpdateMyProfileUsecase {
 
-    @Transactional
     override fun execute(userId: Long, command: UpdateProfileCommand): ProfileModel {
-        validateFields(command)
+        validateFields(command) // CPU 전용 — 트랜잭션 밖에서 수행
+        return saveProfile(userId, command)
+    }
 
+    @Transactional
+    fun saveProfile(userId: Long, command: UpdateProfileCommand): ProfileModel {
         val existing = profileQueryPort.findByUserIdWithDetails(userId)
 
         if (existing != null && existing.slug != command.slug && profileQueryPort.existsBySlug(command.slug)) {

@@ -6,7 +6,7 @@ import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealExpiredV
 import dev.hddc.domains.hotdeal.domain.event.DealSseEvent
 import dev.hddc.domains.hotdeal.domain.model.HotDealExpiredVoteModel
 import dev.hddc.framework.api.response.ApiResponseCode
-import org.springframework.context.ApplicationEventPublisher
+import dev.hddc.domains.hotdeal.application.ports.output.event.DomainEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional
 class DealExpiredVoteService(
     private val hotDealCommandPort: HotDealCommandPort,
     private val hotDealExpiredVotePort: HotDealExpiredVotePort,
-    private val eventPublisher: ApplicationEventPublisher,
+    private val eventPublisher: DomainEventPublisher,
 ) : DealExpiredVoteUsecase {
 
     companion object {
@@ -31,9 +31,9 @@ class DealExpiredVoteService(
         val newCount = deal.expiredVoteCount + 1
         val expired = newCount >= EXPIRED_THRESHOLD
         hotDealCommandPort.save(deal.copy(expiredVoteCount = newCount, isExpired = expired))
-        eventPublisher.publishEvent(DealSseEvent.DealUpdated(id = dealId, expiredVoteCount = newCount))
+        eventPublisher.publish(DealSseEvent.DealUpdated(id = dealId, expiredVoteCount = newCount))
         if (expired && !deal.isExpired) {
-            eventPublisher.publishEvent(DealSseEvent.DealExpired(id = dealId))
+            eventPublisher.publish(DealSseEvent.DealExpired(id = dealId))
         }
     }
 
@@ -46,6 +46,6 @@ class DealExpiredVoteService(
         hotDealExpiredVotePort.delete(vote)
         val newCount = maxOf(0, deal.expiredVoteCount - 1)
         hotDealCommandPort.save(deal.copy(expiredVoteCount = newCount, isExpired = false))
-        eventPublisher.publishEvent(DealSseEvent.DealUpdated(id = dealId, expiredVoteCount = newCount))
+        eventPublisher.publish(DealSseEvent.DealUpdated(id = dealId, expiredVoteCount = newCount))
     }
 }

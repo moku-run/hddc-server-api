@@ -9,7 +9,7 @@ import dev.hddc.domains.hotdeal.domain.event.DealSseEvent
 import dev.hddc.domains.hotdeal.domain.model.HotDealModel
 import dev.hddc.domains.user.application.ports.output.query.UserQueryPort
 import dev.hddc.framework.api.response.ApiResponseCode
-import org.springframework.context.ApplicationEventPublisher
+import dev.hddc.domains.hotdeal.application.ports.output.event.DomainEventPublisher
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -20,7 +20,7 @@ class HotDealAdminService(
     private val hotDealCommandPort: HotDealCommandPort,
     private val hotDealQueryPort: HotDealQueryPort,
     private val userQueryPort: UserQueryPort,
-    private val eventPublisher: ApplicationEventPublisher,
+    private val eventPublisher: DomainEventPublisher,
 ) : HotDealAdminUsecase {
 
     @Transactional(readOnly = true)
@@ -43,7 +43,7 @@ class HotDealAdminService(
         )
         val saved = hotDealCommandPort.save(model)
         val nicknames = userQueryPort.findNicknamesByIds(listOf(saved.userId))
-        eventPublisher.publishEvent(DealSseEvent.NewDeal(
+        eventPublisher.publish(DealSseEvent.NewDeal(
             id = saved.id!!,
             title = saved.title,
             dealPrice = saved.dealPrice,
@@ -86,6 +86,6 @@ class HotDealAdminService(
             ?: throw IllegalArgumentException(ApiResponseCode.HOT_DEAL_NOT_FOUND.code)
 
         hotDealCommandPort.save(existing.copy(isDeleted = true))
-        eventPublisher.publishEvent(DealSseEvent.DealDeleted(id = dealId))
+        eventPublisher.publish(DealSseEvent.DealDeleted(id = dealId))
     }
 }

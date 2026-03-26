@@ -1,14 +1,18 @@
 package dev.hddc.domains.hotdeal.application.service.query
 
 import dev.hddc.domains.hotdeal.application.ports.input.query.CommentCursorResult
+import dev.hddc.domains.hotdeal.application.ports.input.query.CommentWithNickname
+import dev.hddc.domains.hotdeal.application.ports.input.query.EnrichedCommentCursorResult
 import dev.hddc.domains.hotdeal.application.ports.input.query.HotDealPageResult
 import dev.hddc.domains.hotdeal.application.ports.input.query.HotDealQueryUsecase
 import dev.hddc.domains.hotdeal.application.ports.input.query.HotDealWithUserState
+import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommentLikePort
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommentPort
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealExpiredVotePort
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealLikePort
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealQueryPort
 import dev.hddc.domains.hotdeal.domain.model.HotDealModel
+import dev.hddc.domains.user.application.ports.output.query.UserQueryPort
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
@@ -21,6 +25,8 @@ class HotDealQueryService(
     private val hotDealLikePort: HotDealLikePort,
     private val hotDealExpiredVotePort: HotDealExpiredVotePort,
     private val hotDealCommentPort: HotDealCommentPort,
+    private val hotDealCommentLikePort: HotDealCommentLikePort,
+    private val userQueryPort: UserQueryPort,
 ) : HotDealQueryUsecase {
 
     @Transactional(readOnly = true)
@@ -75,6 +81,37 @@ class HotDealQueryService(
             comments = comments,
             nextCursor = nextCursor,
             hasNext = hasNext,
+        )
+    }
+
+    @Transactional(readOnly = true)
+    override fun getCommentsEnriched(dealId: Long, userId: Long?, afterId: Long?, size: Int): EnrichedCommentCursorResult {
+        val result = getComments(dealId, afterId, size)
+        val comments = result.comments
+
+        val userIds = comments.map { it.userId }.distinct()
+        val nicknames = userQueryPort.findNicknamesByIds(userIds)
+
+        val likedCommentIds = if (userId != null) {
+            val commentIds = comments.filter { !it.isDeleted }.mapNotNull { it.id }
+            if (commentIds.isNotEmpty()) {
+                hotDealCommentLikePort.findAllByUserIdAndCommentIds(userId, commentIds)
+                    .map { it.commentId }.toSet()
+            } else emptySet()
+        } else {
+            emptySet()
+        }
+
+        return EnrichedCommentCursorResult(
+            comments = comments.map { comment ->
+                CommentWithNickname(
+                    comment = comment,
+                    nickname = nicknames[comment.userId] ?: "알 수 없음",
+                    isLiked = comment.id in likedCommentIds,
+                )
+            },
+            nextCursor = result.nextCursor,
+            hasNext = result.hasNext,
         )
     }
 

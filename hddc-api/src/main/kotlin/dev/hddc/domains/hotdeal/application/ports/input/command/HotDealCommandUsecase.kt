@@ -22,6 +22,16 @@ interface DealCommentLikeUsecase {
     fun unlike(userId: Long, commentId: Long)
 }
 
+data class DealClickResult(
+    val url: String,
+    val dealId: Long,
+    val clickCount: Int,
+)
+
+interface DealClickUsecase {
+    fun click(dealId: Long, userId: Long?, ip: String): DealClickResult?
+}
+
 interface DealReportUsecase {
     fun reportDeal(userId: Long, dealId: Long, reason: String)
     fun reportComment(userId: Long, dealId: Long, commentId: Long, reason: String)
