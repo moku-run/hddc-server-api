@@ -9,8 +9,7 @@ import dev.hddc.domains.user.application.ports.output.security.PasswordEncodePor
 import dev.hddc.domains.user.application.ports.output.validation.EmailVerificationValidationPort
 import dev.hddc.domains.user.application.ports.output.validation.PasswordValidator
 import dev.hddc.domains.user.application.ports.output.validation.UserValidationPort
-import dev.hddc.domains.user.domain.model.UserModel
-import dev.hddc.domains.user.domain.model.UserRole
+import dev.hddc.domains.user.domain.model.CreateUserModel
 import dev.hddc.domains.user.domain.spec.VerificationSpec
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -27,23 +26,20 @@ class SignUpService(
 
     @Transactional
     override fun execute(command: SignUpCommand): SignUpResult {
-        // 1. validate (트랜잭션 밖이어도 되지만, 프록시 entry point에 @Transactional 필요)
         emailVerificationValidationPort.requireEmailVerified(command.email)
         passwordValidator.validatePasswordPattern(command.password)
         userValidationPort.requireEmailNotExists(command.email)
         userValidationPort.requireNicknameNotExists(command.nickname)
 
-        // 2. save
         val encodedPassword = passwordEncodePort.encode(command.password)
-        val model = UserModel(
-            email = command.email,
-            password = encodedPassword,
-            nickname = command.nickname,
-            role = UserRole.USER.name,
+        val userId = userCommandPort.create(
+            CreateUserModel(
+                email = command.email,
+                password = encodedPassword,
+                nickname = command.nickname,
+            )
         )
-        val userId = userCommandPort.create(model).id!!
 
-        // 3. cleanup
         verificationCachePort.delete(VerificationSpec.signUpKey(command.email))
 
         return SignUpResult(userId = userId)

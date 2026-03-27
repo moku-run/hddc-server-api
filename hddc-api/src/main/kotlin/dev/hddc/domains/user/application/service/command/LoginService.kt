@@ -28,11 +28,11 @@ class LoginService(
             loginValidator.requirePasswordMatch(command.password, user.password)
         } catch (e: Exception) {
             val newCount = user.loginAttemptCount + 1
-            userCommandPort.updateLoginFailed(user.id!!, newCount, LoginSpec.isLockRequired(newCount))
+            userCommandPort.updateLoginFailed(user.id, newCount, LoginSpec.isLockRequired(newCount))
             throw e
         }
 
-        userCommandPort.updateLoginSuccess(user.id!!)
+        userCommandPort.updateLoginSuccess(user.id)
         val tokenPair = tokenPort.createTokenPair(user.email, user.role)
 
         return LoginResult(

@@ -64,7 +64,7 @@ class PasswordResetService(
 
         val encodedPassword = passwordEncodePort.encode(command.password)
         val user = userQueryPort.loadByEmail(command.email)
-        userCommandPort.updatePassword(user.id!!, encodedPassword)
+        userCommandPort.updatePassword(user.id, encodedPassword)
 
         verificationCachePort.delete(VerificationSpec.resetPasswordKey(command.email))
     }

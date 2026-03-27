@@ -1,7 +1,7 @@
 package dev.hddc.domains.user.adapter.out.persistence
 
 import dev.hddc.domains.user.application.ports.output.command.UserCommandPort
-import dev.hddc.domains.user.domain.model.UserModel
+import dev.hddc.domains.user.domain.model.CreateUserModel
 import org.springframework.stereotype.Component
 
 @Component
@@ -9,9 +9,9 @@ class UserCommandAdapter(
     private val userRepository: UserRepository,
 ) : UserCommandPort {
 
-    override fun create(model: UserModel): UserModel {
+    override fun create(model: CreateUserModel): Long {
         val entity = model.toNewEntity()
-        return userRepository.save(entity).toDomain()
+        return userRepository.save(entity).id!!
     }
 
     override fun updateLoginSuccess(userId: Long) {
