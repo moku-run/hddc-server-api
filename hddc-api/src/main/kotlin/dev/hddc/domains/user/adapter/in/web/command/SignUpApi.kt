@@ -4,6 +4,7 @@ import dev.hddc.domains.user.adapter.`in`.web.request.EmailVerificationSendReque
 import dev.hddc.domains.user.adapter.`in`.web.request.EmailVerificationVerifyRequest
 import dev.hddc.domains.user.adapter.`in`.web.request.SignUpRequest
 import dev.hddc.domains.user.application.ports.input.command.EmailVerificationUsecase
+import dev.hddc.domains.user.application.ports.input.command.SignUpResult
 import dev.hddc.domains.user.application.ports.input.command.SignUpUsecase
 import dev.hddc.domains.user.application.ports.input.query.CheckNicknameResult
 import dev.hddc.domains.user.application.ports.input.query.CheckNicknameUsecase
@@ -48,7 +49,7 @@ class SignUpApi(
     @PostMapping("/api/auth/sign-up")
     fun signUp(
         @Valid @RequestBody request: SignUpRequest,
-    ): ApiResult<Long> =
+    ): ApiResult<SignUpResult> =
         ApiResponse.of(ApiResponseCode.CREATED, signUpUsecase.execute(request.toCommand()))
 
     @Operation(summary = "닉네임 중복 확인")

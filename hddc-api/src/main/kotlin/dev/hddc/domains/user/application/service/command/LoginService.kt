@@ -5,9 +5,9 @@ import dev.hddc.domains.user.application.ports.input.command.LoginResult
 import dev.hddc.domains.user.application.ports.input.command.LoginUsecase
 import dev.hddc.domains.user.application.ports.output.command.UserCommandPort
 import dev.hddc.domains.user.application.ports.output.query.UserQueryPort
+import dev.hddc.domains.user.application.ports.output.security.PasswordEncodePort
 import dev.hddc.framework.api.response.ApiResponseCode
 import dev.hddc.framework.security.jwt.JwtService
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional
 class LoginService(
     private val userQueryPort: UserQueryPort,
     private val userCommandPort: UserCommandPort,
-    private val passwordEncoder: PasswordEncoder,
+    private val passwordEncodePort: PasswordEncodePort,
     private val jwtService: JwtService,
 ) : LoginUsecase {
 
@@ -27,7 +27,7 @@ class LoginService(
         require(!user.isDeleted) { ApiResponseCode.USER_DELETED.code }
         require(!user.isLocked) { ApiResponseCode.ACCOUNT_LOCKED.code }
 
-        if (!passwordEncoder.matches(command.password, user.password)) {
+        if (!passwordEncodePort.matches(command.password, user.password)) {
             val newCount = user.loginAttemptCount + 1
             userCommandPort.updateLoginFailed(user.id!!, newCount, newCount >= MAX_LOGIN_ATTEMPTS)
             throw IllegalArgumentException(ApiResponseCode.INVALID_CREDENTIALS.code)

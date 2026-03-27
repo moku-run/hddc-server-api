@@ -10,7 +10,7 @@ import dev.hddc.domains.user.domain.spec.PasswordSpec
 import dev.hddc.domains.user.domain.policy.VerificationCodeGenerator
 import dev.hddc.domains.user.domain.spec.VerificationSpec
 import dev.hddc.framework.api.response.ApiResponseCode
-import org.springframework.security.crypto.password.PasswordEncoder
+import dev.hddc.domains.user.application.ports.output.security.PasswordEncodePort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -20,7 +20,7 @@ class PasswordResetService(
     private val userCommandPort: UserCommandPort,
     private val verificationCachePort: VerificationCachePort,
     private val emailSendPort: EmailSendPort,
-    private val passwordEncoder: PasswordEncoder,
+    private val passwordEncodePort: PasswordEncodePort,
 ) : PasswordResetUsecase {
 
     override fun sendCode(email: String) {
@@ -78,7 +78,7 @@ class PasswordResetService(
         val user = userQueryPort.findByEmail(command.email)
             ?: throw IllegalArgumentException(ApiResponseCode.USER_NOT_FOUND.code)
 
-        userCommandPort.updatePassword(user.id!!, passwordEncoder.encode(command.password))
+        userCommandPort.updatePassword(user.id!!, passwordEncodePort.encode(command.password))
 
         verificationCachePort.delete(cacheKey)
     }

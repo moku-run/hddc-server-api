@@ -6,6 +6,10 @@ data class SignUpCommand(
     val nickname: String,
 )
 
+data class SignUpResult(
+    val userId: Long,
+)
+
 interface SignUpUsecase {
-    fun execute(command: SignUpCommand): Long
+    fun execute(command: SignUpCommand): SignUpResult
 }
