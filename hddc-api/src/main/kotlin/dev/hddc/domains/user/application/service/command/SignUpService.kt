@@ -9,7 +9,6 @@ import dev.hddc.domains.user.application.ports.output.security.PasswordEncodePor
 import dev.hddc.domains.user.application.ports.output.validation.EmailVerificationValidationPort
 import dev.hddc.domains.user.application.ports.output.validation.PasswordValidator
 import dev.hddc.domains.user.application.ports.output.validation.UserValidationPort
-import dev.hddc.domains.user.domain.model.CreateUserModel
 import dev.hddc.domains.user.domain.spec.VerificationSpec
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -32,13 +31,7 @@ class SignUpService(
         userValidationPort.requireNicknameNotExists(command.nickname)
 
         val encodedPassword = passwordEncodePort.encode(command.password)
-        val userId = userCommandPort.create(
-            CreateUserModel(
-                email = command.email,
-                password = encodedPassword,
-                nickname = command.nickname,
-            )
-        )
+        val userId = userCommandPort.create(command.toCreateModel(encodedPassword))
 
         verificationCachePort.delete(VerificationSpec.signUpKey(command.email))
 
