@@ -5,9 +5,9 @@ import dev.hddc.domains.user.application.ports.input.command.LoginResult
 import dev.hddc.domains.user.application.ports.input.command.LoginUsecase
 import dev.hddc.domains.user.application.ports.output.command.UserCommandPort
 import dev.hddc.domains.user.application.ports.output.query.UserQueryPort
-import dev.hddc.domains.user.application.ports.output.security.PasswordEncodePort
-import dev.hddc.framework.api.response.ApiResponseCode
-import dev.hddc.framework.security.jwt.JwtService
+import dev.hddc.domains.user.application.ports.output.security.TokenPort
+import dev.hddc.domains.user.application.ports.output.validation.LoginValidator
+import dev.hddc.domains.user.domain.spec.LoginSpec
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -15,27 +15,32 @@ import org.springframework.transaction.annotation.Transactional
 class LoginService(
     private val userQueryPort: UserQueryPort,
     private val userCommandPort: UserCommandPort,
-    private val passwordEncodePort: PasswordEncodePort,
-    private val jwtService: JwtService,
+    private val loginValidator: LoginValidator,
+    private val tokenPort: TokenPort,
 ) : LoginUsecase {
 
     @Transactional
     override fun execute(command: LoginCommand): LoginResult {
         val user = userQueryPort.findByEmail(command.email)
-            ?: throw IllegalArgumentException(ApiResponseCode.INVALID_CREDENTIALS.code)
+            ?: throw IllegalArgumentException("INVALID_CREDENTIALS")
 
-        require(!user.isDeleted) { ApiResponseCode.USER_DELETED.code }
-        require(!user.isLocked) { ApiResponseCode.ACCOUNT_LOCKED.code }
+        // 1. validate
+        loginValidator.requireActiveUser(user)
 
-        if (!passwordEncodePort.matches(command.password, user.password)) {
+        // 2. password check + login attempt 처리
+        try {
+            loginValidator.requirePasswordMatch(command.password, user.password)
+        } catch (e: Exception) {
             val newCount = user.loginAttemptCount + 1
-            userCommandPort.updateLoginFailed(user.id!!, newCount, newCount >= MAX_LOGIN_ATTEMPTS)
-            throw IllegalArgumentException(ApiResponseCode.INVALID_CREDENTIALS.code)
+            userCommandPort.updateLoginFailed(user.id!!, newCount, LoginSpec.isLockRequired(newCount))
+            throw e
         }
 
+        // 3. save (로그인 성공)
         userCommandPort.updateLoginSuccess(user.id!!)
 
-        val token = jwtService.create(user.email, user.role)
+        // 4. token 발급
+        val token = tokenPort.createAccessToken(user.email, user.role)
 
         return LoginResult(
             userId = user.id,
@@ -44,9 +49,5 @@ class LoginService(
             role = user.role,
             token = token,
         )
-    }
-
-    companion object {
-        private const val MAX_LOGIN_ATTEMPTS = 5
     }
 }

@@ -13,7 +13,9 @@ class UserQueryService(
 
     @Transactional(readOnly = true)
     override fun execute(nickname: String): CheckNicknameResult {
-        val exists = userQueryPort.existsByNickname(nickname)
-        return CheckNicknameResult(available = !exists, nickname = nickname)
+        return CheckNicknameResult(
+            available = userQueryPort.notExistsByNickname(nickname),
+            nickname = nickname,
+        )
     }
 }

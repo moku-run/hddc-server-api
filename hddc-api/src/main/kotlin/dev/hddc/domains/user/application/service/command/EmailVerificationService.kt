@@ -4,9 +4,9 @@ import dev.hddc.domains.user.application.ports.input.command.EmailVerificationUs
 import dev.hddc.domains.user.application.ports.output.command.EmailSendPort
 import dev.hddc.domains.user.application.ports.output.command.VerificationCachePort
 import dev.hddc.domains.user.application.ports.output.validation.UserValidationPort
+import dev.hddc.domains.user.application.ports.output.validation.VerificationCodeValidator
 import dev.hddc.domains.user.domain.policy.VerificationCodeGenerator
 import dev.hddc.domains.user.domain.spec.VerificationSpec
-import dev.hddc.framework.api.response.ApiResponseCode
 import org.springframework.stereotype.Service
 
 @Service
@@ -14,21 +14,24 @@ class EmailVerificationService(
     private val userValidationPort: UserValidationPort,
     private val verificationCachePort: VerificationCachePort,
     private val emailSendPort: EmailSendPort,
+    private val verificationCodeValidator: VerificationCodeValidator,
 ) : EmailVerificationUsecase {
 
     override fun send(email: String) {
+        // 1. validate
         userValidationPort.requireEmailNotExists(email)
 
+        // 2. 코드 생성 + 캐시 저장
         val code = VerificationCodeGenerator.generate()
         val cacheKey = VerificationSpec.signUpKey(email)
-
         verificationCachePort.save(cacheKey, code, VerificationSpec.codeTimeToLive())
 
+        // 3. 이메일 발송 (실패 시 캐시 정리)
         try {
             emailSendPort.sendVerificationCode(email, code)
         } catch (e: Exception) {
             verificationCachePort.delete(cacheKey)
-            throw IllegalStateException(ApiResponseCode.VERIFICATION_MAIL_SEND_FAILED.code)
+            throw IllegalStateException("VERIFICATION_MAIL_SEND_FAILED")
         }
     }
 
@@ -36,31 +39,14 @@ class EmailVerificationService(
         val cacheKey = VerificationSpec.signUpKey(email)
         val attemptsKey = VerificationSpec.signUpAttemptsKey(email)
 
-        checkAttemptsNotExceeded(attemptsKey)
+        // 1. validate (코드 검증 + 시도 횟수 체크)
+        verificationCodeValidator.validateCode(cacheKey, attemptsKey, code)
 
-        val storedCode = verificationCachePort.getValue(cacheKey)
-            ?: throw IllegalArgumentException(ApiResponseCode.VERIFICATION_EXPIRED.code)
-
-        if (storedCode != code) {
-            val attempts = verificationCachePort.increment(attemptsKey, VerificationSpec.codeTimeToLive())
-            if (attempts >= VerificationSpec.MAX_ATTEMPTS) {
-                throw IllegalArgumentException(ApiResponseCode.VERIFICATION_ATTEMPTS_EXCEEDED.code)
-            }
-            throw IllegalArgumentException(ApiResponseCode.VERIFICATION_INVALID_CODE.code)
-        }
-
-        verificationCachePort.delete(attemptsKey)
+        // 2. 인증 완료 상태 저장
         verificationCachePort.save(
             cacheKey,
             VerificationSpec.COMPLETED,
             VerificationSpec.verifiedSessionTimeToLive(),
         )
-    }
-
-    private fun checkAttemptsNotExceeded(attemptsKey: String) {
-        val attempts = verificationCachePort.getValue(attemptsKey)?.toLongOrNull() ?: 0L
-        require(attempts < VerificationSpec.MAX_ATTEMPTS) {
-            ApiResponseCode.VERIFICATION_ATTEMPTS_EXCEEDED.code
-        }
     }
 }
