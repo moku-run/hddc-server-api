@@ -18,20 +18,17 @@ class EmailVerificationService(
 ) : EmailVerificationUsecase {
 
     override fun send(email: String) {
-        // 1. validate
         userValidationPort.requireEmailNotExists(email)
 
-        // 2. 코드 생성 + 캐시 저장
         val code = VerificationCodeGenerator.generate()
         val cacheKey = VerificationSpec.signUpKey(email)
         verificationCachePort.save(cacheKey, code, VerificationSpec.codeTimeToLive())
 
-        // 3. 이메일 발송 (실패 시 캐시 정리)
         try {
             emailSendPort.sendVerificationCode(email, code)
         } catch (e: Exception) {
             verificationCachePort.delete(cacheKey)
-            throw IllegalStateException("VERIFICATION_MAIL_SEND_FAILED")
+            throw e
         }
     }
 
@@ -39,10 +36,8 @@ class EmailVerificationService(
         val cacheKey = VerificationSpec.signUpKey(email)
         val attemptsKey = VerificationSpec.signUpAttemptsKey(email)
 
-        // 1. validate (코드 검증 + 시도 횟수 체크)
         verificationCodeValidator.validateCode(cacheKey, attemptsKey, code)
 
-        // 2. 인증 완료 상태 저장
         verificationCachePort.save(
             cacheKey,
             VerificationSpec.COMPLETED,

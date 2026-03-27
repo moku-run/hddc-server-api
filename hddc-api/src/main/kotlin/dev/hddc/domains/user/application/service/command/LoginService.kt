@@ -21,8 +21,7 @@ class LoginService(
 
     @Transactional
     override fun execute(command: LoginCommand): LoginResult {
-        val user = userQueryPort.findByEmail(command.email)
-            ?: throw IllegalArgumentException("INVALID_CREDENTIALS")
+        val user = userQueryPort.loadByEmail(command.email)
 
         // 1. validate
         loginValidator.requireActiveUser(user)

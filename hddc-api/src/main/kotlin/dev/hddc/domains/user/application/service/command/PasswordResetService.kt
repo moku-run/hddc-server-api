@@ -10,6 +10,7 @@ import dev.hddc.domains.user.application.ports.output.security.PasswordEncodePor
 import dev.hddc.domains.user.application.ports.output.validation.PasswordResetVerificationValidator
 import dev.hddc.domains.user.application.ports.output.validation.PasswordValidator
 import dev.hddc.domains.user.application.ports.output.validation.UserValidationPort
+import dev.hddc.domains.user.application.ports.output.validation.VerificationCodeValidator
 import dev.hddc.domains.user.domain.policy.VerificationCodeGenerator
 import dev.hddc.domains.user.domain.spec.VerificationSpec
 import org.springframework.stereotype.Service
@@ -25,23 +26,25 @@ class PasswordResetService(
     private val passwordValidator: PasswordValidator,
     private val passwordResetVerificationValidator: PasswordResetVerificationValidator,
     private val userValidationPort: UserValidationPort,
+    private val verificationCodeValidator: VerificationCodeValidator,
 ) : PasswordResetUsecase {
 
     override fun sendCode(email: String) {
+        // 1. validate
         userValidationPort.requireUserExistsByEmail(email)
 
+        // 2. 코드 생성 + 캐시 저장
         val code = VerificationCodeGenerator.generate()
         val cacheKey = VerificationSpec.resetPasswordKey(email)
-        val attemptsKey = VerificationSpec.resetPasswordAttemptsKey(email)
-
         verificationCachePort.save(cacheKey, code, VerificationSpec.codeTimeToLive())
-        verificationCachePort.delete(attemptsKey)
+        verificationCachePort.delete(VerificationSpec.resetPasswordAttemptsKey(email))
 
+        // 3. 이메일 발송 (실패 시 캐시 정리)
         try {
             emailSendPort.sendVerificationCode(email, code)
         } catch (e: Exception) {
             verificationCachePort.delete(cacheKey)
-            throw IllegalStateException("VERIFICATION_MAIL_SEND_FAILED")
+            throw e
         }
     }
 
@@ -49,20 +52,10 @@ class PasswordResetService(
         val cacheKey = VerificationSpec.resetPasswordKey(email)
         val attemptsKey = VerificationSpec.resetPasswordAttemptsKey(email)
 
-        checkAttemptsNotExceeded(attemptsKey)
+        // 1. validate (코드 검증 + 시도 횟수 체크)
+        verificationCodeValidator.validateCode(cacheKey, attemptsKey, code)
 
-        val storedCode = verificationCachePort.getValue(cacheKey)
-            ?: throw IllegalArgumentException("VERIFICATION_EXPIRED")
-
-        if (storedCode != code) {
-            val attempts = verificationCachePort.increment(attemptsKey, VerificationSpec.codeTimeToLive())
-            if (attempts >= VerificationSpec.MAX_ATTEMPTS) {
-                throw IllegalArgumentException("VERIFICATION_ATTEMPTS_EXCEEDED")
-            }
-            throw IllegalArgumentException("VERIFICATION_INVALID_CODE")
-        }
-
-        verificationCachePort.delete(attemptsKey)
+        // 2. 인증 완료 상태 저장
         verificationCachePort.save(
             cacheKey,
             VerificationSpec.RESET_PASSWORD_COMPLETED,
@@ -86,15 +79,7 @@ class PasswordResetService(
 
     @Transactional
     fun savePassword(email: String, encodedPassword: String) {
-        val user = userQueryPort.findByEmail(email)
-            ?: throw IllegalArgumentException("USER_NOT_FOUND")
+        val user = userQueryPort.loadByEmail(email)
         userCommandPort.updatePassword(user.id!!, encodedPassword)
-    }
-
-    private fun checkAttemptsNotExceeded(attemptsKey: String) {
-        val attempts = verificationCachePort.getValue(attemptsKey)?.toLongOrNull() ?: 0L
-        require(attempts < VerificationSpec.MAX_ATTEMPTS) {
-            "VERIFICATION_ATTEMPTS_EXCEEDED"
-        }
     }
 }
