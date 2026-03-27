@@ -18,4 +18,13 @@ class EmailSendAdapter(
             content = mailContentProvider.loadVerificationCodeContent(code),
         )
     }
+
+    override fun sendVerificationCode(toEmail: String, code: String, onFailure: () -> Unit) {
+        try {
+            sendVerificationCode(toEmail, code)
+        } catch (e: Exception) {
+            onFailure()
+            throw e
+        }
+    }
 }

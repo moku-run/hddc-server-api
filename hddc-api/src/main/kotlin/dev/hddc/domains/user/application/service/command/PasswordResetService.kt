@@ -31,18 +31,11 @@ class PasswordResetService(
 
     override fun sendCode(email: String) {
         userValidationPort.requireUserExistsByEmail(email)
-
         val code = VerificationCodeGenerator.generate()
         val cacheKey = VerificationSpec.resetPasswordKey(email)
         verificationCachePort.save(cacheKey, code, VerificationSpec.codeTimeToLive())
         verificationCachePort.delete(VerificationSpec.resetPasswordAttemptsKey(email))
-
-        try {
-            emailSendPort.sendVerificationCode(email, code)
-        } catch (e: Exception) {
-            verificationCachePort.delete(cacheKey)
-            throw e
-        }
+        emailSendPort.sendVerificationCode(email, code) { verificationCachePort.delete(cacheKey) }
     }
 
     override fun verifyCode(email: String, code: String) {

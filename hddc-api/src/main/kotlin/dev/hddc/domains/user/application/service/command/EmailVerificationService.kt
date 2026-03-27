@@ -19,17 +19,10 @@ class EmailVerificationService(
 
     override fun send(email: String) {
         userValidationPort.requireEmailNotExists(email)
-
         val code = VerificationCodeGenerator.generate()
         val cacheKey = VerificationSpec.signUpKey(email)
         verificationCachePort.save(cacheKey, code, VerificationSpec.codeTimeToLive())
-
-        try {
-            emailSendPort.sendVerificationCode(email, code)
-        } catch (e: Exception) {
-            verificationCachePort.delete(cacheKey)
-            throw e
-        }
+        emailSendPort.sendVerificationCode(email, code) { verificationCachePort.delete(cacheKey) }
     }
 
     override fun verify(email: String, code: String) {
