@@ -52,7 +52,7 @@ class PasswordResetService(
         val cacheKey = VerificationSpec.resetPasswordKey(email)
         val attemptsKey = VerificationSpec.resetPasswordAttemptsKey(email)
 
-        // 1. validate (코드 검증 + 시도 횟수 체크)
+        // 1. validate
         verificationCodeValidator.validateCode(cacheKey, attemptsKey, code)
 
         // 2. 인증 완료 상태 저장
@@ -63,6 +63,7 @@ class PasswordResetService(
         )
     }
 
+    @Transactional
     override fun reset(command: PasswordResetCommand) {
         // 1. validate
         passwordResetVerificationValidator.requireVerified(command.email)
@@ -71,15 +72,10 @@ class PasswordResetService(
 
         // 2. save
         val encodedPassword = passwordEncodePort.encode(command.password)
-        savePassword(command.email, encodedPassword)
+        val user = userQueryPort.loadByEmail(command.email)
+        userCommandPort.updatePassword(user.id!!, encodedPassword)
 
         // 3. cleanup
         verificationCachePort.delete(VerificationSpec.resetPasswordKey(command.email))
-    }
-
-    @Transactional
-    fun savePassword(email: String, encodedPassword: String) {
-        val user = userQueryPort.loadByEmail(email)
-        userCommandPort.updatePassword(user.id!!, encodedPassword)
     }
 }

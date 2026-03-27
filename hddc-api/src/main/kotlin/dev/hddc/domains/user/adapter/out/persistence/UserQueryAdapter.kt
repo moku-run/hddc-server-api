@@ -2,10 +2,9 @@ package dev.hddc.domains.user.adapter.out.persistence
 
 import dev.hddc.domains.user.application.ports.output.query.UserQueryPort
 import dev.hddc.domains.user.domain.model.UserModel
-import dev.hddc.framework.api.response.ApiResponseCode
-import org.springframework.stereotype.Repository
+import org.springframework.stereotype.Component
 
-@Repository
+@Component
 class UserQueryAdapter(
     private val userRepository: UserRepository,
 ) : UserQueryPort {
@@ -14,8 +13,7 @@ class UserQueryAdapter(
         userRepository.findByEmailAndIsDeletedFalse(email)?.toDomain()
 
     override fun loadByEmail(email: String): UserModel =
-        userRepository.findByEmailAndIsDeletedFalse(email)?.toDomain()
-            ?: throw IllegalArgumentException(ApiResponseCode.USER_NOT_FOUND.code)
+        userRepository.loadByEmail(email).toDomain()
 
     override fun existsByEmail(email: String): Boolean =
         userRepository.existsByEmailAndIsDeletedFalse(email)

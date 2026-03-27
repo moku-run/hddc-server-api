@@ -39,14 +39,15 @@ class LoginService(
         userCommandPort.updateLoginSuccess(user.id!!)
 
         // 4. token 발급
-        val token = tokenPort.createAccessToken(user.email, user.role)
+        val tokenPair = tokenPort.createTokenPair(user.email, user.role)
 
         return LoginResult(
             userId = user.id,
             email = user.email,
             nickname = user.nickname,
             role = user.role,
-            token = token,
+            accessToken = tokenPair.accessToken,
+            refreshToken = tokenPair.refreshToken,
         )
     }
 }

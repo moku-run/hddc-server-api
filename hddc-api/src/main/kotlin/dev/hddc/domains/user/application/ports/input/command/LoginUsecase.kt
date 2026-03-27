@@ -10,7 +10,8 @@ data class LoginResult(
     val email: String,
     val nickname: String,
     val role: String,
-    val token: String,
+    val accessToken: String,
+    val refreshToken: String,
 )
 
 interface LoginUsecase {
