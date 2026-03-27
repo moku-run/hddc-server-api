@@ -6,11 +6,12 @@ import dev.hddc.domains.user.application.ports.output.command.EmailSendPort
 import dev.hddc.domains.user.application.ports.output.command.UserCommandPort
 import dev.hddc.domains.user.application.ports.output.command.VerificationCachePort
 import dev.hddc.domains.user.application.ports.output.query.UserQueryPort
-import dev.hddc.domains.user.domain.spec.PasswordSpec
+import dev.hddc.domains.user.application.ports.output.security.PasswordEncodePort
+import dev.hddc.domains.user.application.ports.output.validation.PasswordResetVerificationValidator
+import dev.hddc.domains.user.application.ports.output.validation.PasswordValidator
+import dev.hddc.domains.user.application.ports.output.validation.UserValidationPort
 import dev.hddc.domains.user.domain.policy.VerificationCodeGenerator
 import dev.hddc.domains.user.domain.spec.VerificationSpec
-import dev.hddc.framework.api.response.ApiResponseCode
-import dev.hddc.domains.user.application.ports.output.security.PasswordEncodePort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -21,12 +22,13 @@ class PasswordResetService(
     private val verificationCachePort: VerificationCachePort,
     private val emailSendPort: EmailSendPort,
     private val passwordEncodePort: PasswordEncodePort,
+    private val passwordValidator: PasswordValidator,
+    private val passwordResetVerificationValidator: PasswordResetVerificationValidator,
+    private val userValidationPort: UserValidationPort,
 ) : PasswordResetUsecase {
 
     override fun sendCode(email: String) {
-        requireNotNull(userQueryPort.findByEmail(email)) {
-            ApiResponseCode.USER_NOT_FOUND.code
-        }
+        userValidationPort.requireUserExistsByEmail(email)
 
         val code = VerificationCodeGenerator.generate()
         val cacheKey = VerificationSpec.resetPasswordKey(email)
@@ -39,7 +41,7 @@ class PasswordResetService(
             emailSendPort.sendVerificationCode(email, code)
         } catch (e: Exception) {
             verificationCachePort.delete(cacheKey)
-            throw IllegalStateException(ApiResponseCode.VERIFICATION_MAIL_SEND_FAILED.code)
+            throw IllegalStateException("VERIFICATION_MAIL_SEND_FAILED")
         }
     }
 
@@ -50,14 +52,14 @@ class PasswordResetService(
         checkAttemptsNotExceeded(attemptsKey)
 
         val storedCode = verificationCachePort.getValue(cacheKey)
-            ?: throw IllegalArgumentException(ApiResponseCode.VERIFICATION_EXPIRED.code)
+            ?: throw IllegalArgumentException("VERIFICATION_EXPIRED")
 
         if (storedCode != code) {
             val attempts = verificationCachePort.increment(attemptsKey, VerificationSpec.codeTimeToLive())
             if (attempts >= VerificationSpec.MAX_ATTEMPTS) {
-                throw IllegalArgumentException(ApiResponseCode.VERIFICATION_ATTEMPTS_EXCEEDED.code)
+                throw IllegalArgumentException("VERIFICATION_ATTEMPTS_EXCEEDED")
             }
-            throw IllegalArgumentException(ApiResponseCode.VERIFICATION_INVALID_CODE.code)
+            throw IllegalArgumentException("VERIFICATION_INVALID_CODE")
         }
 
         verificationCachePort.delete(attemptsKey)
@@ -68,41 +70,31 @@ class PasswordResetService(
         )
     }
 
-    @Transactional
     override fun reset(command: PasswordResetCommand) {
-        val cacheKey = VerificationSpec.resetPasswordKey(command.email)
+        // 1. validate
+        passwordResetVerificationValidator.requireVerified(command.email)
+        passwordValidator.validatePasswordPattern(command.password)
+        passwordValidator.validatePasswordMatch(command.password, command.passwordConfirm)
 
-        requireVerified(cacheKey)
-        validatePassword(command.password, command.passwordConfirm)
+        // 2. save
+        val encodedPassword = passwordEncodePort.encode(command.password)
+        savePassword(command.email, encodedPassword)
 
-        val user = userQueryPort.findByEmail(command.email)
-            ?: throw IllegalArgumentException(ApiResponseCode.USER_NOT_FOUND.code)
-
-        userCommandPort.updatePassword(user.id!!, passwordEncodePort.encode(command.password))
-
-        verificationCachePort.delete(cacheKey)
+        // 3. cleanup
+        verificationCachePort.delete(VerificationSpec.resetPasswordKey(command.email))
     }
 
-    private fun requireVerified(cacheKey: String) {
-        val value = verificationCachePort.getValue(cacheKey)
-        require(value == VerificationSpec.RESET_PASSWORD_COMPLETED) {
-            ApiResponseCode.VERIFICATION_REQUIRED.code
-        }
-    }
-
-    private fun validatePassword(password: String, passwordConfirm: String) {
-        require(PasswordSpec.validate(password)) {
-            ApiResponseCode.USER_PASSWORD_MISMATCH.code
-        }
-        require(password == passwordConfirm) {
-            ApiResponseCode.USER_PASSWORD_MISMATCH.code
-        }
+    @Transactional
+    fun savePassword(email: String, encodedPassword: String) {
+        val user = userQueryPort.findByEmail(email)
+            ?: throw IllegalArgumentException("USER_NOT_FOUND")
+        userCommandPort.updatePassword(user.id!!, encodedPassword)
     }
 
     private fun checkAttemptsNotExceeded(attemptsKey: String) {
         val attempts = verificationCachePort.getValue(attemptsKey)?.toLongOrNull() ?: 0L
         require(attempts < VerificationSpec.MAX_ATTEMPTS) {
-            ApiResponseCode.VERIFICATION_ATTEMPTS_EXCEEDED.code
+            "VERIFICATION_ATTEMPTS_EXCEEDED"
         }
     }
 }

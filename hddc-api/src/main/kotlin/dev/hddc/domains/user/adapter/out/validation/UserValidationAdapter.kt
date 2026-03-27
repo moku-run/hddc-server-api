@@ -11,14 +11,20 @@ class UserValidationAdapter(
 ) : UserValidationPort {
 
     override fun requireEmailNotExists(email: String) {
-        require(!userQueryPort.existsByEmail(email)) {
+        require(userQueryPort.notExistsByEmail(email)) {
             ApiResponseCode.USER_DUPLICATE_EMAIL.code
         }
     }
 
     override fun requireNicknameNotExists(nickname: String) {
-        require(!userQueryPort.existsByNickname(nickname)) {
+        require(userQueryPort.notExistsByNickname(nickname)) {
             ApiResponseCode.USER_DUPLICATE_NICKNAME.code
+        }
+    }
+
+    override fun requireUserExistsByEmail(email: String) {
+        require(userQueryPort.existsByEmail(email)) {
+            ApiResponseCode.USER_NOT_FOUND.code
         }
     }
 }

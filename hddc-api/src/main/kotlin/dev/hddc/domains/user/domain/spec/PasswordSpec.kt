@@ -7,5 +7,7 @@ object PasswordSpec {
     private const val PATTERN_STRING = "^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#\$%^&*()_=+.])(?!.*\\s).{8,20}\$"
     val PATTERN = Regex(PATTERN_STRING)
 
-    fun validate(password: String): Boolean = PATTERN.matches(password)
+    fun isValidPattern(password: String): Boolean = PATTERN.matches(password)
+
+    fun isMatched(password: String, confirm: String): Boolean = password == confirm
 }
