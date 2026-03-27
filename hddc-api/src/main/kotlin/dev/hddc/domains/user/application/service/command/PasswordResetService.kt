@@ -30,16 +30,13 @@ class PasswordResetService(
 ) : PasswordResetUsecase {
 
     override fun sendCode(email: String) {
-        // 1. validate
         userValidationPort.requireUserExistsByEmail(email)
 
-        // 2. 코드 생성 + 캐시 저장
         val code = VerificationCodeGenerator.generate()
         val cacheKey = VerificationSpec.resetPasswordKey(email)
         verificationCachePort.save(cacheKey, code, VerificationSpec.codeTimeToLive())
         verificationCachePort.delete(VerificationSpec.resetPasswordAttemptsKey(email))
 
-        // 3. 이메일 발송 (실패 시 캐시 정리)
         try {
             emailSendPort.sendVerificationCode(email, code)
         } catch (e: Exception) {
@@ -51,11 +48,7 @@ class PasswordResetService(
     override fun verifyCode(email: String, code: String) {
         val cacheKey = VerificationSpec.resetPasswordKey(email)
         val attemptsKey = VerificationSpec.resetPasswordAttemptsKey(email)
-
-        // 1. validate
         verificationCodeValidator.validateCode(cacheKey, attemptsKey, code)
-
-        // 2. 인증 완료 상태 저장
         verificationCachePort.save(
             cacheKey,
             VerificationSpec.RESET_PASSWORD_COMPLETED,
@@ -65,17 +58,14 @@ class PasswordResetService(
 
     @Transactional
     override fun reset(command: PasswordResetCommand) {
-        // 1. validate
         passwordResetVerificationValidator.requireVerified(command.email)
         passwordValidator.validatePasswordPattern(command.password)
         passwordValidator.validatePasswordMatch(command.password, command.passwordConfirm)
 
-        // 2. save
         val encodedPassword = passwordEncodePort.encode(command.password)
         val user = userQueryPort.loadByEmail(command.email)
         userCommandPort.updatePassword(user.id!!, encodedPassword)
 
-        // 3. cleanup
         verificationCachePort.delete(VerificationSpec.resetPasswordKey(command.email))
     }
 }

@@ -22,11 +22,8 @@ class LoginService(
     @Transactional
     override fun execute(command: LoginCommand): LoginResult {
         val user = userQueryPort.loadByEmail(command.email)
-
-        // 1. validate
         loginValidator.requireActiveUser(user)
 
-        // 2. password check + login attempt 처리
         try {
             loginValidator.requirePasswordMatch(command.password, user.password)
         } catch (e: Exception) {
@@ -35,10 +32,7 @@ class LoginService(
             throw e
         }
 
-        // 3. save (로그인 성공)
         userCommandPort.updateLoginSuccess(user.id!!)
-
-        // 4. token 발급
         val tokenPair = tokenPort.createTokenPair(user.email, user.role)
 
         return LoginResult(
