@@ -1,4 +1,4 @@
-package dev.hddc.domains.hotdeal.adapter.out.persistence
+package dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.entity
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity

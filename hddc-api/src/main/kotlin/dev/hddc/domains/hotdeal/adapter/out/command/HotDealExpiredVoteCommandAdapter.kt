@@ -1,12 +1,14 @@
-package dev.hddc.domains.hotdeal.adapter.out.persistence
+package dev.hddc.domains.hotdeal.adapter.out.command
 
+import dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.entity.HotDealExpiredVoteEntity
+import dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.repository.HotDealExpiredVoteRepository
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealExpiredVotePort
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealExpiredVoteQueryPort
 import dev.hddc.domains.hotdeal.domain.model.HotDealExpiredVoteModel
 import org.springframework.stereotype.Component
 
 @Component
-class HotDealExpiredVotePersistenceAdapter(
+class HotDealExpiredVoteCommandAdapter(
     private val hotDealExpiredVoteRepository: HotDealExpiredVoteRepository,
 ) : HotDealExpiredVotePort, HotDealExpiredVoteQueryPort {
 

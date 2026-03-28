@@ -1,5 +1,9 @@
-package dev.hddc.domains.hotdeal.adapter.out.persistence
+package dev.hddc.domains.hotdeal.adapter.out.query
 
+import dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.entity.HotDealEntity
+import dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.mapper.toDomain
+import dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.repository.HotDealRepository
+import dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.repository.loadById
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealPageData
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealQueryPort
 import dev.hddc.domains.hotdeal.domain.model.HotDealModel

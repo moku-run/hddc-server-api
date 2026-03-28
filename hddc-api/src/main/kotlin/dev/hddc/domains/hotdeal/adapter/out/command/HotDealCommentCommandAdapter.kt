@@ -1,15 +1,18 @@
-package dev.hddc.domains.hotdeal.adapter.out.persistence
+package dev.hddc.domains.hotdeal.adapter.out.command
 
+import dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.entity.HotDealCommentEntity
+import dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.mapper.toDomain
+import dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.repository.HotDealCommentRepository
+import dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.repository.loadById
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommentPort
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealCommentQueryPort
 import dev.hddc.domains.hotdeal.domain.model.CreateHotDealCommentModel
 import dev.hddc.domains.hotdeal.domain.model.HotDealCommentModel
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Component
-import java.time.Instant
 
 @Component
-class HotDealCommentPersistenceAdapter(
+class HotDealCommentCommandAdapter(
     private val hotDealCommentRepository: HotDealCommentRepository,
 ) : HotDealCommentPort, HotDealCommentQueryPort {
 

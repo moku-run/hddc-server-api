@@ -1,5 +1,8 @@
-package dev.hddc.domains.hotdeal.adapter.out.persistence
+package dev.hddc.domains.hotdeal.adapter.out.command
 
+import dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.entity.CandidateDealEntity
+import dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.repository.CandidateDealRepository
+import dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.repository.loadById
 import dev.hddc.domains.hotdeal.application.ports.output.command.CandidateDealPort
 import dev.hddc.domains.hotdeal.application.ports.output.query.CandidateDealPageData
 import dev.hddc.domains.hotdeal.application.ports.output.query.CandidateDealQueryPort
@@ -13,7 +16,7 @@ import org.springframework.stereotype.Component
 import java.time.Instant
 
 @Component
-class CandidateDealPersistenceAdapter(
+class CandidateDealCommandAdapter(
     private val candidateDealRepository: CandidateDealRepository,
 ) : CandidateDealPort, CandidateDealQueryPort {
 

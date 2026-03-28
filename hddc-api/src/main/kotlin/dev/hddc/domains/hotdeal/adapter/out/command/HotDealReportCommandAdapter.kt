@@ -1,12 +1,16 @@
-package dev.hddc.domains.hotdeal.adapter.out.persistence
+package dev.hddc.domains.hotdeal.adapter.out.command
 
+import dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.entity.HotDealCommentReportEntity
+import dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.entity.HotDealReportEntity
+import dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.repository.HotDealCommentReportRepository
+import dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.repository.HotDealReportRepository
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealReportPort
 import dev.hddc.domains.hotdeal.domain.model.HotDealCommentReportModel
 import dev.hddc.domains.hotdeal.domain.model.HotDealReportModel
 import org.springframework.stereotype.Component
 
 @Component
-class HotDealReportPersistenceAdapter(
+class HotDealReportCommandAdapter(
     private val hotDealReportRepository: HotDealReportRepository,
     private val hotDealCommentReportRepository: HotDealCommentReportRepository,
 ) : HotDealReportPort {

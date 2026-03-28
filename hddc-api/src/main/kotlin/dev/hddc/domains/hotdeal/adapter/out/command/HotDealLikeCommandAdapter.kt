@@ -1,12 +1,14 @@
-package dev.hddc.domains.hotdeal.adapter.out.persistence
+package dev.hddc.domains.hotdeal.adapter.out.command
 
+import dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.entity.HotDealLikeEntity
+import dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.repository.HotDealLikeRepository
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealLikePort
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealLikeQueryPort
 import dev.hddc.domains.hotdeal.domain.model.HotDealLikeModel
 import org.springframework.stereotype.Component
 
 @Component
-class HotDealLikePersistenceAdapter(
+class HotDealLikeCommandAdapter(
     private val hotDealLikeRepository: HotDealLikeRepository,
 ) : HotDealLikePort, HotDealLikeQueryPort {
 

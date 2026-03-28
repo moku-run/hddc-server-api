@@ -1,5 +1,7 @@
-package dev.hddc.domains.hotdeal.adapter.out.persistence
+package dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.mapper
 
+import dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.entity.HotDealCommentEntity
+import dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.entity.HotDealEntity
 import dev.hddc.domains.hotdeal.domain.model.HotDealCommentModel
 import dev.hddc.domains.hotdeal.domain.model.HotDealModel
 

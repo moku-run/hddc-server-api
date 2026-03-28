@@ -1,5 +1,6 @@
-package dev.hddc.domains.hotdeal.adapter.out.persistence
+package dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.repository
 
+import dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.entity.CandidateDealEntity
 import dev.hddc.framework.api.response.ApiResponseCode
 import dev.hddc.framework.api.response.BusinessException
 import org.springframework.data.domain.Page

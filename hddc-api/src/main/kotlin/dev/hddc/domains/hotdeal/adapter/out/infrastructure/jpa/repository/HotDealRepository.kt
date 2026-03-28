@@ -1,5 +1,13 @@
-package dev.hddc.domains.hotdeal.adapter.out.persistence
+package dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.repository
 
+import dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.entity.HotDealClickEntity
+import dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.entity.HotDealCommentEntity
+import dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.entity.HotDealCommentLikeEntity
+import dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.entity.HotDealCommentReportEntity
+import dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.entity.HotDealEntity
+import dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.entity.HotDealExpiredVoteEntity
+import dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.entity.HotDealLikeEntity
+import dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.entity.HotDealReportEntity
 import dev.hddc.framework.api.response.ApiResponseCode
 import dev.hddc.framework.api.response.BusinessException
 import org.springframework.data.domain.Page
