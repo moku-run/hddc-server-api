@@ -6,10 +6,10 @@ import dev.hddc.domains.hotdeal.application.ports.input.query.EnrichedCommentCur
 import dev.hddc.domains.hotdeal.application.ports.input.query.HotDealPageResult
 import dev.hddc.domains.hotdeal.application.ports.input.query.HotDealQueryUsecase
 import dev.hddc.domains.hotdeal.application.ports.input.query.HotDealWithUserState
-import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommentLikePort
-import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommentPort
-import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealExpiredVotePort
-import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealLikePort
+import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealCommentLikeQueryPort
+import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealCommentQueryPort
+import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealExpiredVoteQueryPort
+import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealLikeQueryPort
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealPageData
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealQueryPort
 import dev.hddc.domains.user.application.ports.output.query.UserQueryPort
@@ -19,10 +19,10 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class HotDealQueryService(
     private val hotDealQueryPort: HotDealQueryPort,
-    private val hotDealLikePort: HotDealLikePort,
-    private val hotDealExpiredVotePort: HotDealExpiredVotePort,
-    private val hotDealCommentPort: HotDealCommentPort,
-    private val hotDealCommentLikePort: HotDealCommentLikePort,
+    private val hotDealLikeQueryPort: HotDealLikeQueryPort,
+    private val hotDealExpiredVoteQueryPort: HotDealExpiredVoteQueryPort,
+    private val hotDealCommentQueryPort: HotDealCommentQueryPort,
+    private val hotDealCommentLikeQueryPort: HotDealCommentLikeQueryPort,
     private val userQueryPort: UserQueryPort,
 ) : HotDealQueryUsecase {
 
@@ -40,12 +40,12 @@ class HotDealQueryService(
 
     @Transactional(readOnly = true)
     override fun getComments(dealId: Long, afterId: Long?, size: Int): CommentCursorResult {
-        val rootComments = hotDealCommentPort.findRootComments(dealId, afterId, size + 1)
+        val rootComments = hotDealCommentQueryPort.findRootComments(dealId, afterId, size + 1)
         val hasNext = rootComments.size > size
         val pagedRoots = if (hasNext) rootComments.take(size) else rootComments
 
         val rootIds = pagedRoots.map { it.id }
-        val replies = hotDealCommentPort.findRepliesByParentIds(rootIds)
+        val replies = hotDealCommentQueryPort.findRepliesByParentIds(rootIds)
 
         val allComments = pagedRoots + replies
         val parentIdsWithReplies = allComments
@@ -81,7 +81,7 @@ class HotDealQueryService(
         val likedCommentIds = if (userId != null) {
             val commentIds = comments.filter { !it.isDeleted }.map { it.id }
             if (commentIds.isNotEmpty()) {
-                hotDealCommentLikePort.findAllByUserIdAndCommentIds(userId, commentIds)
+                hotDealCommentLikeQueryPort.findAllByUserIdAndCommentIds(userId, commentIds)
                     .map { it.commentId }.toSet()
             } else emptySet()
         } else {
@@ -107,17 +107,18 @@ class HotDealQueryService(
         val nicknames = userQueryPort.findNicknamesByIds(userIds)
 
         val likedIds = userId?.let { uid ->
-            hotDealLikePort.findAllByUserIdAndDealIds(uid, dealIds).map { it.dealId }.toSet()
+            hotDealLikeQueryPort.findAllByUserIdAndDealIds(uid, dealIds).map { it.dealId }.toSet()
         } ?: emptySet()
 
         val votedExpiredIds = userId?.let { uid ->
-            hotDealExpiredVotePort.findAllByUserIdAndDealIds(uid, dealIds).map { it.dealId }.toSet()
+            hotDealExpiredVoteQueryPort.findAllByUserIdAndDealIds(uid, dealIds).map { it.dealId }.toSet()
         } ?: emptySet()
 
-        val content = dealPage.content.map { deal ->
+        val content = dealPage.content.mapIndexed { index, deal ->
             HotDealWithUserState(
                 deal = deal,
                 nickname = nicknames[deal.userId] ?: "알 수 없음",
+                dealNumber = dealPage.totalElements - (dealPage.page.toLong() * dealPage.size) - index,
                 isLiked = deal.id in likedIds,
                 isVotedExpired = deal.id in votedExpiredIds,
             )

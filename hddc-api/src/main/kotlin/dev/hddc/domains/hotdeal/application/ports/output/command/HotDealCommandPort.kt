@@ -5,8 +5,6 @@ import dev.hddc.domains.hotdeal.domain.model.HotDealModel
 
 interface HotDealCommandPort {
     fun create(model: CreateHotDealModel): HotDealModel
-    fun findById(dealId: Long): HotDealModel?
-    fun loadById(dealId: Long): HotDealModel
     fun updateLikeCount(dealId: Long, count: Int)
     fun updateCommentCount(dealId: Long, count: Int)
     fun updateClickCount(dealId: Long, count: Int)

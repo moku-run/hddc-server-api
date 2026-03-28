@@ -3,6 +3,8 @@ package dev.hddc.domains.hotdeal.application.service.command
 import dev.hddc.domains.hotdeal.application.ports.input.command.DealCommentUsecase
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommandPort
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommentPort
+import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealCommentQueryPort
+import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealQueryPort
 import dev.hddc.domains.hotdeal.domain.event.DealSseEvent
 import dev.hddc.domains.hotdeal.domain.model.CreateHotDealCommentModel
 import dev.hddc.domains.hotdeal.domain.model.HotDealCommentModel
@@ -13,18 +15,20 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class DealCommentService(
+    private val hotDealQueryPort: HotDealQueryPort,
     private val hotDealCommandPort: HotDealCommandPort,
     private val hotDealCommentPort: HotDealCommentPort,
+    private val hotDealCommentQueryPort: HotDealCommentQueryPort,
     private val userQueryPort: UserQueryPort,
     private val eventPublisher: DomainEventPublisher,
 ) : DealCommentUsecase {
 
     @Transactional
     override fun addComment(userId: Long, dealId: Long, content: String, parentId: Long?): HotDealCommentModel {
-        val deal = hotDealCommandPort.loadById(dealId)
+        val deal = hotDealQueryPort.loadById(dealId)
 
         if (parentId != null) {
-            val parent = hotDealCommentPort.loadById(parentId)
+            val parent = hotDealCommentQueryPort.loadById(parentId)
             require(parent.belongsTo(dealId) && !parent.isDeleted) {
                 "Parent comment not found or deleted"
             }
@@ -57,8 +61,8 @@ class DealCommentService(
 
     @Transactional
     override fun deleteComment(userId: Long, dealId: Long, commentId: Long) {
-        val deal = hotDealCommandPort.loadById(dealId)
-        val comment = hotDealCommentPort.loadById(commentId)
+        val deal = hotDealQueryPort.loadById(dealId)
+        val comment = hotDealCommentQueryPort.loadById(commentId)
         require(comment.belongsTo(dealId) && comment.isOwnedBy(userId) && !comment.isDeleted) {
             "Comment not found or not authorized"
         }

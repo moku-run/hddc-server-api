@@ -6,6 +6,10 @@ import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommentP
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealExpiredVotePort
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealLikePort
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealReportPort
+import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealCommentLikeQueryPort
+import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealCommentQueryPort
+import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealExpiredVoteQueryPort
+import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealLikeQueryPort
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealPageData
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealQueryPort
 import org.springframework.data.domain.Sort
@@ -22,7 +26,6 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Component
-import org.springframework.stereotype.Repository
 import java.time.Instant
 
 @Component
@@ -45,12 +48,6 @@ class HotDealPersistenceAdapter(
         )
         return hotDealRepository.save(entity).toDomain()
     }
-
-    override fun findById(dealId: Long): HotDealModel? =
-        hotDealRepository.findById(dealId).orElse(null)?.toDomain()
-
-    override fun loadById(dealId: Long): HotDealModel =
-        hotDealRepository.loadById(dealId).toDomain()
 
     override fun updateLikeCount(dealId: Long, count: Int) {
         val entity = hotDealRepository.loadById(dealId)
@@ -108,6 +105,15 @@ class HotDealQueryAdapter(
     private val hotDealRepository: HotDealRepository,
 ) : HotDealQueryPort {
 
+    override fun findById(dealId: Long): HotDealModel? =
+        hotDealRepository.findById(dealId).orElse(null)?.toDomain()
+
+    override fun loadById(dealId: Long): HotDealModel =
+        hotDealRepository.loadById(dealId).toDomain()
+
+    override fun existsById(dealId: Long): Boolean =
+        hotDealRepository.existsById(dealId)
+
     override fun findActive(sort: String, page: Int, size: Int): HotDealPageData {
         val pageable = PageRequest.of(page, size, resolveSort(sort))
         return hotDealRepository.findByIsDeletedFalseAndIsExpiredFalse(pageable).toPageData()
@@ -141,7 +147,7 @@ class HotDealQueryAdapter(
 @Component
 class HotDealCommentPersistenceAdapter(
     private val hotDealCommentRepository: HotDealCommentRepository,
-) : HotDealCommentPort {
+) : HotDealCommentPort, HotDealCommentQueryPort {
 
     override fun create(model: CreateHotDealCommentModel): HotDealCommentModel {
         val entity = HotDealCommentEntity(
@@ -186,10 +192,10 @@ class HotDealCommentPersistenceAdapter(
     }
 }
 
-@Repository
+@Component
 class HotDealLikePersistenceAdapter(
     private val hotDealLikeRepository: HotDealLikeRepository,
-) : HotDealLikePort {
+) : HotDealLikePort, HotDealLikeQueryPort {
 
     override fun existsByDealIdAndUserId(dealId: Long, userId: Long): Boolean =
         hotDealLikeRepository.existsByDealIdAndUserId(dealId, userId)
@@ -215,10 +221,10 @@ class HotDealLikePersistenceAdapter(
         }
 }
 
-@Repository
+@Component
 class HotDealExpiredVotePersistenceAdapter(
     private val hotDealExpiredVoteRepository: HotDealExpiredVoteRepository,
-) : HotDealExpiredVotePort {
+) : HotDealExpiredVotePort, HotDealExpiredVoteQueryPort {
 
     override fun existsByDealIdAndUserId(dealId: Long, userId: Long): Boolean =
         hotDealExpiredVoteRepository.existsByDealIdAndUserId(dealId, userId)
@@ -244,7 +250,7 @@ class HotDealExpiredVotePersistenceAdapter(
     }
 }
 
-@Repository
+@Component
 class HotDealReportPersistenceAdapter(
     private val hotDealReportRepository: HotDealReportRepository,
     private val hotDealCommentReportRepository: HotDealCommentReportRepository,
@@ -263,10 +269,10 @@ class HotDealReportPersistenceAdapter(
     }
 }
 
-@Repository
+@Component
 class HotDealCommentLikePersistenceAdapter(
     private val hotDealCommentLikeRepository: HotDealCommentLikeRepository,
-) : HotDealCommentLikePort {
+) : HotDealCommentLikePort, HotDealCommentLikeQueryPort {
 
     override fun existsByCommentIdAndUserId(commentId: Long, userId: Long): Boolean =
         hotDealCommentLikeRepository.existsByCommentIdAndUserId(commentId, userId)

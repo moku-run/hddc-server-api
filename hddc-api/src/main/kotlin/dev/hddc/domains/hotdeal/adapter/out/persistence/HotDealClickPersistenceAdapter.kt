@@ -2,10 +2,10 @@ package dev.hddc.domains.hotdeal.adapter.out.persistence
 
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealClickPort
 import dev.hddc.domains.hotdeal.domain.spec.HotDealSpec
-import org.springframework.stereotype.Repository
+import org.springframework.stereotype.Component
 import java.time.Instant
 
-@Repository
+@Component
 class HotDealClickPersistenceAdapter(
     private val hotDealClickRepository: HotDealClickRepository,
 ) : HotDealClickPort {

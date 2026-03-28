@@ -6,6 +6,7 @@ import dev.hddc.domains.hotdeal.domain.model.HotDealModel
 data class HotDealWithUserState(
     val deal: HotDealModel,
     val nickname: String,
+    val dealNumber: Long,
     val isLiked: Boolean,
     val isVotedExpired: Boolean,
 )
@@ -21,6 +22,7 @@ data class HotDealPageResult(
 data class HotDealWithNickname(
     val deal: HotDealModel,
     val nickname: String,
+    val dealNumber: Long = 0,
 )
 
 data class AdminHotDealPageResult(

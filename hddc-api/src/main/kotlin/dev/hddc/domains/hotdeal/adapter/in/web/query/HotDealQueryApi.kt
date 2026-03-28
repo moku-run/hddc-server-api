@@ -64,9 +64,8 @@ class HotDealQueryApi(
 
     private fun HotDealPageResult.toResponse(): HotDealPageResponse =
         HotDealPageResponse(
-            content = content.mapIndexed { index, it ->
-                val dealNumber = totalElements - (page.toLong() * size) - index
-                HotDealResponse.from(it.deal, it.nickname, dealNumber, it.isLiked, it.isVotedExpired)
+            content = content.map { it ->
+                HotDealResponse.from(it.deal, it.nickname, it.dealNumber, it.isLiked, it.isVotedExpired)
             },
             page = page,
             size = size,

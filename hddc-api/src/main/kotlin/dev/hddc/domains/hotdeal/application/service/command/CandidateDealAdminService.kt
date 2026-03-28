@@ -6,6 +6,7 @@ import dev.hddc.domains.hotdeal.application.ports.output.command.CandidateDealPo
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommandPort
 import dev.hddc.domains.hotdeal.application.ports.output.command.CandidateDealPageData
 import dev.hddc.domains.hotdeal.domain.model.CandidateDealModel
+import dev.hddc.domains.hotdeal.domain.model.CandidateDealStatus
 import dev.hddc.domains.hotdeal.domain.model.CreateHotDealModel
 import dev.hddc.domains.hotdeal.domain.spec.HotDealSpec
 import org.springframework.stereotype.Service
@@ -27,13 +28,13 @@ class CandidateDealAdminService(
         val candidate = candidateDealPort.findById(candidateDealId)
             ?: throw IllegalArgumentException("CANDIDATE_DEAL_NOT_FOUND")
 
-        require(candidate.status == "PENDING") {
+        require(candidate.status == CandidateDealStatus.PENDING.value) {
             "INVALID_REQUEST"
         }
 
         val saved = hotDealCommandPort.create(transferToCreateModel(candidate))
 
-        candidateDealPort.updateStatus(candidateDealId, "APPROVED", Instant.now())
+        candidateDealPort.updateStatus(candidateDealId, CandidateDealStatus.APPROVED.value, Instant.now())
 
         return saved.id
     }
@@ -43,20 +44,20 @@ class CandidateDealAdminService(
         val candidate = candidateDealPort.findById(candidateDealId)
             ?: throw IllegalArgumentException("CANDIDATE_DEAL_NOT_FOUND")
 
-        require(candidate.status == "PENDING") {
+        require(candidate.status == CandidateDealStatus.PENDING.value) {
             "INVALID_REQUEST"
         }
 
-        candidateDealPort.updateStatus(candidateDealId, "REJECTED")
+        candidateDealPort.updateStatus(candidateDealId, CandidateDealStatus.REJECTED.value)
     }
 
     @Transactional
     override fun bulkApprove(candidateDealIds: List<Long>): ApproveResult {
-        val candidates = candidateDealPort.findAllByIdsAndStatus(candidateDealIds, "PENDING")
+        val candidates = candidateDealPort.findAllByIdsAndStatus(candidateDealIds, CandidateDealStatus.PENDING.value)
 
         candidates.forEach { candidate ->
             hotDealCommandPort.create(transferToCreateModel(candidate))
-            candidateDealPort.updateStatus(candidate.id!!, "APPROVED", Instant.now())
+            candidateDealPort.updateStatus(candidate.id!!, CandidateDealStatus.APPROVED.value, Instant.now())
         }
 
         return ApproveResult(approvedCount = candidates.size)

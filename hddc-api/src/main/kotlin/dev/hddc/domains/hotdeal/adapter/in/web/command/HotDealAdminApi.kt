@@ -5,7 +5,6 @@ import dev.hddc.domains.hotdeal.adapter.`in`.web.response.HotDealResponse
 import dev.hddc.domains.hotdeal.application.ports.input.command.CreateHotDealCommand
 import dev.hddc.domains.hotdeal.application.ports.input.command.HotDealAdminUsecase
 import dev.hddc.domains.hotdeal.application.ports.input.command.UpdateHotDealCommand
-import dev.hddc.domains.user.application.ports.output.query.UserQueryPort
 import dev.hddc.framework.api.response.ApiResponse
 import dev.hddc.framework.api.response.ApiResponseCode
 import dev.hddc.framework.api.response.ApiResult
@@ -52,7 +51,6 @@ data class UpdateHotDealRequest(
 @RestController
 class HotDealAdminApi(
     private val hotDealAdminUsecase: HotDealAdminUsecase,
-    private val userQueryPort: UserQueryPort,
 ) {
     @Operation(summary = "핫딜 전체 목록 (삭제 포함)")
     @GetMapping("/api/admin/hot-deals")
@@ -62,9 +60,8 @@ class HotDealAdminApi(
     ): ApiResult<HotDealPageResponse> {
         val result = hotDealAdminUsecase.getAll(pageable.pageNumber, pageable.pageSize)
         val response = HotDealPageResponse(
-            content = result.content.mapIndexed { index, it ->
-                val dealNumber = result.totalElements - (result.page.toLong() * result.size) - index
-                HotDealResponse.from(it.deal, it.nickname, dealNumber)
+            content = result.content.map { it ->
+                HotDealResponse.from(it.deal, it.nickname, it.dealNumber)
             },
             page = result.page,
             size = result.size,
@@ -104,7 +101,7 @@ class HotDealAdminApi(
         @PathVariable dealId: Long,
         @RequestBody request: UpdateHotDealRequest,
     ): ApiResult<HotDealResponse> {
-        val deal = hotDealAdminUsecase.update(
+        val result = hotDealAdminUsecase.update(
             dealId = dealId,
             command = UpdateHotDealCommand(
                 title = request.title,
@@ -118,8 +115,7 @@ class HotDealAdminApi(
                 store = request.store,
             ),
         )
-        val nicknames = userQueryPort.findNicknamesByIds(listOf(deal.userId))
-        return ApiResponse.of(ApiResponseCode.OK, HotDealResponse.from(deal, nicknames[deal.userId] ?: "알 수 없음"))
+        return ApiResponse.of(ApiResponseCode.OK, HotDealResponse.from(result.deal, result.nickname))
     }
 
     @Operation(summary = "핫딜 삭제 (soft delete)")

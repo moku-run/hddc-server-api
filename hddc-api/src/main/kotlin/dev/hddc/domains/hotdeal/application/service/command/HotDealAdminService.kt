@@ -17,8 +17,8 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class HotDealAdminService(
-    private val hotDealCommandPort: HotDealCommandPort,
     private val hotDealQueryPort: HotDealQueryPort,
+    private val hotDealCommandPort: HotDealCommandPort,
     private val userQueryPort: UserQueryPort,
     private val eventPublisher: DomainEventPublisher,
 ) : HotDealAdminUsecase {
@@ -29,8 +29,12 @@ class HotDealAdminService(
         val userIds = data.content.map { it.userId }.distinct()
         val nicknames = userQueryPort.findNicknamesByIds(userIds)
         return AdminHotDealPageResult(
-            content = data.content.map { deal ->
-                HotDealWithNickname(deal = deal, nickname = nicknames[deal.userId] ?: "알 수 없음")
+            content = data.content.mapIndexed { index, deal ->
+                HotDealWithNickname(
+                    deal = deal,
+                    nickname = nicknames[deal.userId] ?: "알 수 없음",
+                    dealNumber = data.totalElements - (data.page.toLong() * data.size) - index,
+                )
             },
             page = data.page,
             size = data.size,
@@ -74,8 +78,8 @@ class HotDealAdminService(
     }
 
     @Transactional
-    override fun update(dealId: Long, command: UpdateHotDealCommand): HotDealModel {
-        return hotDealCommandPort.update(dealId) { existing ->
+    override fun update(dealId: Long, command: UpdateHotDealCommand): HotDealWithNickname {
+        val updated = hotDealCommandPort.update(dealId) { existing ->
             existing.copy(
                 title = command.title ?: existing.title,
                 description = command.description ?: existing.description,
@@ -88,11 +92,16 @@ class HotDealAdminService(
                 store = command.store ?: existing.store,
             )
         }
+        val nicknames = userQueryPort.findNicknamesByIds(listOf(updated.userId))
+        return HotDealWithNickname(
+            deal = updated,
+            nickname = nicknames[updated.userId] ?: "알 수 없음",
+        )
     }
 
     @Transactional
     override fun delete(dealId: Long) {
-        hotDealCommandPort.loadById(dealId)
+        hotDealQueryPort.loadById(dealId)
         hotDealCommandPort.softDelete(dealId)
         eventPublisher.publish(DealSseEvent.DealDeleted(id = dealId))
     }
