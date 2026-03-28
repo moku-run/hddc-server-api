@@ -5,7 +5,6 @@ import dev.hddc.domains.hotdeal.application.ports.input.query.CommentWithNicknam
 import dev.hddc.domains.hotdeal.application.ports.input.query.EnrichedCommentCursorResult
 import dev.hddc.domains.hotdeal.application.ports.input.query.HotDealPageResult
 import dev.hddc.domains.hotdeal.application.ports.input.query.HotDealQueryUsecase
-import dev.hddc.domains.hotdeal.application.ports.input.query.HotDealWithUserState
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealCommentLikeQueryPort
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealCommentQueryPort
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealExpiredVoteQueryPort
@@ -116,32 +115,11 @@ class HotDealQueryService(
         )
     }
 
-    private fun toPageResult(dealPage: HotDealPageData, userId: Long?): HotDealPageResult {
-        val dealIds = dealPage.content.map { it.id }
-        val userIds = dealPage.content.map { it.userId }.distinct()
-        val nicknames = userQueryPort.findNicknamesByIds(userIds)
-
-        val likedIds = userId?.let { uid ->
-            hotDealLikeQueryPort.findAllByUserIdAndDealIds(uid, dealIds).map { it.dealId }.toSet()
-        } ?: emptySet()
-
-        val votedExpiredIds = userId?.let { uid ->
-            hotDealExpiredVoteQueryPort.findAllByUserIdAndDealIds(uid, dealIds).map { it.dealId }.toSet()
-        } ?: emptySet()
-
-        val content = dealPage.content.mapIndexed { index, deal ->
-            HotDealWithUserState(
-                deal = deal,
-                nickname = nicknames[deal.userId] ?: "알 수 없음",
-                dealNumber = dealPage.pagination.totalItems - ((dealPage.pagination.currentPage - 1).toLong() * dealPage.pagination.perPage) - index,
-                isLiked = deal.id in likedIds,
-                isVotedExpired = deal.id in votedExpiredIds,
-            )
-        }
-
-        return HotDealPageResult(
-            content = content,
-            pagination = dealPage.pagination,
-        )
+    private fun toPageResult(deals: HotDealPageData, userId: Long?): HotDealPageResult {
+        val nicknames = userQueryPort.findNicknamesByIds(deals.userIds())
+        val dealIds = deals.content.map { it.id }
+        val likedIds = userId?.let { hotDealLikeQueryPort.findAllByUserIdAndDealIds(it, dealIds).map { it.dealId }.toSet() } ?: emptySet()
+        val votedExpiredIds = userId?.let { hotDealExpiredVoteQueryPort.findAllByUserIdAndDealIds(it, dealIds).map { it.dealId }.toSet() } ?: emptySet()
+        return HotDealPageResult.of(deals, nicknames, likedIds, votedExpiredIds)
     }
 }

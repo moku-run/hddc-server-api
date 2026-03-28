@@ -3,7 +3,6 @@ package dev.hddc.domains.hotdeal.application.ports.input.query
 import dev.hddc.domains.hotdeal.domain.model.HotDealCommentModel
 import dev.hddc.domains.hotdeal.domain.model.HotDealModel
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealPageData
-import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealWithNicknamePageData
 import dev.hddc.framework.pagination.Pagination
 
 data class HotDealWithUserState(
@@ -17,7 +16,27 @@ data class HotDealWithUserState(
 data class HotDealPageResult(
     val content: List<HotDealWithUserState>,
     val pagination: Pagination,
-)
+) {
+    companion object {
+        fun of(
+            deals: HotDealPageData,
+            nicknames: Map<Long, String>,
+            likedIds: Set<Long>,
+            votedExpiredIds: Set<Long>,
+        ): HotDealPageResult = HotDealPageResult(
+            content = deals.content.mapIndexed { index, deal ->
+                HotDealWithUserState(
+                    deal = deal,
+                    nickname = nicknames[deal.userId] ?: "알 수 없음",
+                    dealNumber = deals.pagination.totalItems - ((deals.pagination.currentPage - 1).toLong() * deals.pagination.perPage) - index,
+                    isLiked = deal.id in likedIds,
+                    isVotedExpired = deal.id in votedExpiredIds,
+                )
+            },
+            pagination = deals.pagination,
+        )
+    }
+}
 
 data class HotDealWithNickname(
     val deal: HotDealModel,
@@ -40,18 +59,6 @@ data class AdminHotDealPageResult(
                     )
                 },
                 pagination = deals.pagination,
-            )
-
-        fun from(data: HotDealWithNicknamePageData): AdminHotDealPageResult =
-            AdminHotDealPageResult(
-                content = data.content.mapIndexed { index, item ->
-                    HotDealWithNickname(
-                        deal = item.deal,
-                        nickname = item.nickname,
-                        dealNumber = data.pagination.totalItems - ((data.pagination.currentPage - 1).toLong() * data.pagination.perPage) - index,
-                    )
-                },
-                pagination = data.pagination,
             )
     }
 }
