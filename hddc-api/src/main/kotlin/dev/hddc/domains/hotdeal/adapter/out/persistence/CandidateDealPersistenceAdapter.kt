@@ -1,22 +1,22 @@
 package dev.hddc.domains.hotdeal.adapter.out.persistence
 
-import dev.hddc.domains.hotdeal.application.ports.output.command.CrawlHotDealPageData
-import dev.hddc.domains.hotdeal.application.ports.output.command.CrawlHotDealPort
-import dev.hddc.domains.hotdeal.domain.model.CrawlHotDealModel
+import dev.hddc.domains.hotdeal.application.ports.output.command.CandidateDealPageData
+import dev.hddc.domains.hotdeal.application.ports.output.command.CandidateDealPort
+import dev.hddc.domains.hotdeal.domain.model.CandidateDealModel
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Component
 import java.time.Instant
 
 @Component
-class CrawlHotDealPersistenceAdapter(
-    private val crawlHotDealRepository: CrawlHotDealRepository,
-) : CrawlHotDealPort {
+class CandidateDealPersistenceAdapter(
+    private val candidateDealRepository: CandidateDealRepository,
+) : CandidateDealPort {
 
-    override fun findByStatus(status: String, page: Int, size: Int): CrawlHotDealPageData {
+    override fun findByStatus(status: String, page: Int, size: Int): CandidateDealPageData {
         val pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "crawledAt"))
-        val result = crawlHotDealRepository.findByStatus(status, pageable)
-        return CrawlHotDealPageData(
+        val result = candidateDealRepository.findByStatus(status, pageable)
+        return CandidateDealPageData(
             content = result.content.map { it.toDomain() },
             page = result.number,
             size = result.size,
@@ -25,20 +25,20 @@ class CrawlHotDealPersistenceAdapter(
         )
     }
 
-    override fun findById(id: Long): CrawlHotDealModel? =
-        crawlHotDealRepository.findById(id).orElse(null)?.toDomain()
+    override fun findById(id: Long): CandidateDealModel? =
+        candidateDealRepository.findById(id).orElse(null)?.toDomain()
 
-    override fun findAllByIdsAndStatus(ids: List<Long>, status: String): List<CrawlHotDealModel> =
-        crawlHotDealRepository.findAllByIdInAndStatus(ids, status).map { it.toDomain() }
+    override fun findAllByIdsAndStatus(ids: List<Long>, status: String): List<CandidateDealModel> =
+        candidateDealRepository.findAllByIdInAndStatus(ids, status).map { it.toDomain() }
 
     override fun updateStatus(id: Long, status: String, transferredAt: Instant?) {
-        val entity = crawlHotDealRepository.findById(id).orElse(null) ?: return
+        val entity = candidateDealRepository.findById(id).orElse(null) ?: return
         entity.status = status
         entity.transferredAt = transferredAt
-        crawlHotDealRepository.save(entity)
+        candidateDealRepository.save(entity)
     }
 
-    private fun CrawlHotDealEntity.toDomain() = CrawlHotDealModel(
+    private fun CandidateDealEntity.toDomain() = CandidateDealModel(
         id = id,
         sourceSite = sourceSite,
         sourceId = sourceId,

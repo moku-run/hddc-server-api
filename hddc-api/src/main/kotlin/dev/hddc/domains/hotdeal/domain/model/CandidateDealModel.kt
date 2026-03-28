@@ -2,7 +2,7 @@ package dev.hddc.domains.hotdeal.domain.model
 
 import java.time.Instant
 
-data class CrawlHotDealModel(
+data class CandidateDealModel(
     val id: Long? = null,
     val sourceSite: String,
     val sourceId: String? = null,

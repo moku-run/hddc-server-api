@@ -10,7 +10,7 @@ import java.time.Instant
 
 @Entity
 @Table(name = "crawl_hot_deal")
-class CrawlHotDealEntity(
+class CandidateDealEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
