@@ -13,6 +13,7 @@ import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealPageData
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealQueryPort
 import dev.hddc.domains.hotdeal.domain.model.HotDealCommentModel
 import dev.hddc.domains.user.application.ports.output.query.UserQueryPort
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -27,14 +28,14 @@ class HotDealQueryService(
 ) : HotDealQueryUsecase {
 
     @Transactional(readOnly = true)
-    override fun getDeals(userId: Long?, sort: String, page: Int, size: Int): HotDealPageResult {
-        val dealPage = hotDealQueryPort.findActive(sort, page, size)
+    override fun getDeals(userId: Long?, sort: String, pageable: Pageable): HotDealPageResult {
+        val dealPage = hotDealQueryPort.findActive(sort, pageable)
         return toPageResult(dealPage, userId)
     }
 
     @Transactional(readOnly = true)
-    override fun search(userId: Long?, query: String, page: Int, size: Int): HotDealPageResult {
-        val dealPage = hotDealQueryPort.search(query, page, size)
+    override fun search(userId: Long?, query: String, pageable: Pageable): HotDealPageResult {
+        val dealPage = hotDealQueryPort.search(query, pageable)
         return toPageResult(dealPage, userId)
     }
 

@@ -32,7 +32,7 @@ class HotDealQueryApi(
         @RequestParam(defaultValue = "latest") sort: String,
         @PageableDefault(size = 20) pageable: Pageable,
     ): ApiResult<HotDealPageResponse> =
-        ApiResponse.of(ApiResponseCode.OK, hotDealQueryUsecase.getDeals(user?.userId, sort, pageable.pageNumber, pageable.pageSize).toResponse())
+        ApiResponse.of(ApiResponseCode.OK, hotDealQueryUsecase.getDeals(user?.userId, sort, pageable).toResponse())
 
     @Operation(summary = "딜 검색")
     @GetMapping("/api/hot-deals/search")
@@ -41,7 +41,7 @@ class HotDealQueryApi(
         @RequestParam q: String,
         @PageableDefault(size = 20) pageable: Pageable,
     ): ApiResult<HotDealPageResponse> =
-        ApiResponse.of(ApiResponseCode.OK, hotDealQueryUsecase.search(user?.userId, q, pageable.pageNumber, pageable.pageSize).toResponse())
+        ApiResponse.of(ApiResponseCode.OK, hotDealQueryUsecase.search(user?.userId, q, pageable).toResponse())
 
     @Operation(summary = "댓글 목록 조회 (커서 기반)")
     @GetMapping("/api/hot-deals/{dealId}/comments")

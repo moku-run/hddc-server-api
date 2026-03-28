@@ -28,7 +28,7 @@ class CandidateDealAdminQueryApi(
         @RequestParam(defaultValue = "PENDING") status: String,
         @PageableDefault(size = 20, sort = ["crawledAt"], direction = Sort.Direction.DESC) pageable: Pageable,
     ): ApiResult<CandidateDealPageResponse> {
-        val result = candidateDealAdminQueryUsecase.getCandidateDeals(status, pageable.pageNumber, pageable.pageSize)
+        val result = candidateDealAdminQueryUsecase.getCandidateDeals(status, pageable)
         return ApiResponse.of(ApiResponseCode.OK, CandidateDealPageResponse.from(result))
     }
 }

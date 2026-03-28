@@ -4,6 +4,7 @@ import dev.hddc.domains.hotdeal.application.ports.input.query.AdminHotDealPageRe
 import dev.hddc.domains.hotdeal.application.ports.input.query.HotDealAdminQueryUsecase
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealQueryPort
 import dev.hddc.domains.user.application.ports.output.query.UserQueryPort
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -14,8 +15,8 @@ class HotDealAdminQueryService(
 ) : HotDealAdminQueryUsecase {
 
     @Transactional(readOnly = true)
-    override fun getAll(page: Int, size: Int): AdminHotDealPageResult {
-        val deals = hotDealQueryPort.findAll(page, size)
+    override fun getAll(pageable: Pageable): AdminHotDealPageResult {
+        val deals = hotDealQueryPort.findAll(pageable)
         val nicknames = userQueryPort.findNicknamesByIds(deals.userIds())
         return AdminHotDealPageResult.of(deals, nicknames)
     }

@@ -8,6 +8,7 @@ import dev.hddc.domains.hotdeal.domain.model.CandidateDealStatus
 import dev.hddc.framework.api.response.ApiResponseCode
 import dev.hddc.framework.api.response.BusinessException
 import dev.hddc.framework.pagination.Pagination
+import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Component
@@ -18,9 +19,9 @@ class CandidateDealPersistenceAdapter(
     private val candidateDealRepository: CandidateDealRepository,
 ) : CandidateDealPort, CandidateDealQueryPort {
 
-    override fun findByStatus(status: String, page: Int, size: Int): CandidateDealPageData {
-        val pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "crawledAt"))
-        val result = candidateDealRepository.findByStatus(status, pageable)
+    override fun findByStatus(status: String, pageable: Pageable): CandidateDealPageData {
+        val sorted = PageRequest.of(pageable.pageNumber, pageable.pageSize, Sort.by(Sort.Direction.DESC, "crawledAt"))
+        val result = candidateDealRepository.findByStatus(status, sorted)
         return CandidateDealPageData(
             content = result.content.map { it.toDomain() },
             pagination = Pagination.of(result),

@@ -5,6 +5,7 @@ import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealQueryPort
 import dev.hddc.domains.hotdeal.domain.model.HotDealModel
 import dev.hddc.framework.pagination.Pagination
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Component
@@ -20,20 +21,16 @@ class HotDealQueryAdapter(
     override fun loadById(dealId: Long): HotDealModel =
         hotDealRepository.loadById(dealId).toDomain()
 
-    override fun findActive(sort: String, page: Int, size: Int): HotDealPageData {
-        val pageable = PageRequest.of(page, size, resolveSort(sort))
-        return hotDealRepository.findByIsDeletedFalseAndIsExpiredFalse(pageable).toPageData()
+    override fun findActive(sort: String, pageable: Pageable): HotDealPageData {
+        val sorted = PageRequest.of(pageable.pageNumber, pageable.pageSize, resolveSort(sort))
+        return hotDealRepository.findByIsDeletedFalseAndIsExpiredFalse(sorted).toPageData()
     }
 
-    override fun search(query: String, page: Int, size: Int): HotDealPageData {
-        val pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"))
-        return hotDealRepository.search(query, pageable).toPageData()
-    }
+    override fun search(query: String, pageable: Pageable): HotDealPageData =
+        hotDealRepository.search(query, pageable).toPageData()
 
-    override fun findAll(page: Int, size: Int): HotDealPageData {
-        val pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"))
-        return hotDealRepository.findAll(pageable).toPageData()
-    }
+    override fun findAll(pageable: Pageable): HotDealPageData =
+        hotDealRepository.findAll(pageable).toPageData()
 
     private fun Page<HotDealEntity>.toPageData() = HotDealPageData(
         content = content.map { it.toDomain() },

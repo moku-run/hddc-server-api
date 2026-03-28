@@ -27,7 +27,7 @@ class HotDealAdminQueryApi(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @PageableDefault(size = 20, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable,
     ): ApiResult<HotDealPageResponse> {
-        val result = hotDealAdminQueryUsecase.getAll(pageable.pageNumber, pageable.pageSize)
+        val result = hotDealAdminQueryUsecase.getAll(pageable)
         val response = HotDealPageResponse(
             content = result.content.map { it ->
                 HotDealResponse.from(it.deal, it.nickname, it.dealNumber)
