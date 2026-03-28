@@ -30,9 +30,9 @@ class DealExpiredVoteService(
         val newCount = deal.incrementedExpiredVoteCount()
         val expired = HotDealSpec.isExpiredThresholdReached(newCount)
         hotDealCommandPort.updateExpiredVote(dealId, newCount, expired)
-        eventPublisher.publish(DealEvent.DealUpdated(id = dealId, expiredVoteCount = newCount))
+        eventPublisher.publish(DealEvent.ExpiredVoteCountChanged(dealId = dealId, count = newCount))
         if (expired && !deal.isExpired) {
-            eventPublisher.publish(DealEvent.DealExpired(id = dealId))
+            eventPublisher.publish(DealEvent.DealExpired(dealId = dealId))
         }
     }
 
@@ -43,6 +43,6 @@ class DealExpiredVoteService(
 
         val newCount = deal.decrementedExpiredVoteCount()
         hotDealCommandPort.updateExpiredVote(dealId, newCount, false)
-        eventPublisher.publish(DealEvent.DealUpdated(id = dealId, expiredVoteCount = newCount))
+        eventPublisher.publish(DealEvent.ExpiredVoteCountChanged(dealId = dealId, count = newCount))
     }
 }

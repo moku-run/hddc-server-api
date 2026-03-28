@@ -38,21 +38,7 @@ class HotDealAdminService(
                 store = command.store,
             )
         )
-        val nicknames = userQueryPort.findNicknamesByIds(listOf(saved.userId))
-        eventPublisher.publish(DealEvent.NewDeal(
-            id = saved.id,
-            title = saved.title,
-            dealPrice = saved.dealPrice,
-            originalPrice = saved.originalPrice,
-            discountRate = saved.discountRate,
-            imageUrl = saved.imageUrl,
-            nickname = nicknames[saved.userId] ?: "알 수 없음",
-            store = saved.store,
-            likeCount = saved.likeCount,
-            commentCount = saved.commentCount,
-            clickCount = saved.clickCount,
-            createdAt = saved.createdAt,
-        ))
+        eventPublisher.publish(DealEvent.DealCreated(dealId = saved.id))
         return saved
     }
 
@@ -82,6 +68,6 @@ class HotDealAdminService(
     override fun delete(dealId: Long) {
         hotDealQueryPort.loadById(dealId)
         hotDealCommandPort.softDelete(dealId)
-        eventPublisher.publish(DealEvent.DealDeleted(id = dealId))
+        eventPublisher.publish(DealEvent.DealDeleted(dealId = dealId))
     }
 }

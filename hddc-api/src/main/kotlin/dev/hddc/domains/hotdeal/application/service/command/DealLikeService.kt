@@ -28,7 +28,7 @@ class DealLikeService(
         hotDealLikePort.save(HotDealLikeModel(dealId = dealId, userId = userId))
         val newCount = deal.incrementedLikeCount()
         hotDealCommandPort.updateLikeCount(dealId, newCount)
-        eventPublisher.publish(DealEvent.DealUpdated(id = dealId, likeCount = newCount))
+        eventPublisher.publish(DealEvent.LikeCountChanged(dealId = dealId, count = newCount))
     }
 
     @Transactional
@@ -38,6 +38,6 @@ class DealLikeService(
 
         val newCount = deal.decrementedLikeCount()
         hotDealCommandPort.updateLikeCount(dealId, newCount)
-        eventPublisher.publish(DealEvent.DealUpdated(id = dealId, likeCount = newCount))
+        eventPublisher.publish(DealEvent.LikeCountChanged(dealId = dealId, count = newCount))
     }
 }
