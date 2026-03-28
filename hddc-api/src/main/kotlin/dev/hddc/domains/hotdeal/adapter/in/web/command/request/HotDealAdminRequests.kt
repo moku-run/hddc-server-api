@@ -1,5 +1,7 @@
 package dev.hddc.domains.hotdeal.adapter.`in`.web.command.request
 
+import dev.hddc.domains.hotdeal.application.ports.input.command.CreateHotDealCommand
+import dev.hddc.domains.hotdeal.application.ports.input.command.UpdateHotDealCommand
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 
@@ -16,7 +18,19 @@ data class CreateHotDealRequest(
     val discountRate: Int? = null,
     val category: String? = null,
     val store: String? = null,
-)
+) {
+    fun toCommand() = CreateHotDealCommand(
+        title = title,
+        description = description,
+        url = url,
+        imageUrl = imageUrl,
+        originalPrice = originalPrice,
+        dealPrice = dealPrice,
+        discountRate = discountRate,
+        category = category,
+        store = store,
+    )
+}
 
 data class UpdateHotDealRequest(
     val title: String? = null,
@@ -28,4 +42,16 @@ data class UpdateHotDealRequest(
     val discountRate: Int? = null,
     val category: String? = null,
     val store: String? = null,
-)
+) {
+    fun toCommand() = UpdateHotDealCommand(
+        title = title,
+        description = description,
+        url = url,
+        imageUrl = imageUrl,
+        originalPrice = originalPrice,
+        dealPrice = dealPrice,
+        discountRate = discountRate,
+        category = category,
+        store = store,
+    )
+}

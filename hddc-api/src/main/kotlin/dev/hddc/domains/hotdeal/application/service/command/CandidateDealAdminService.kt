@@ -2,15 +2,15 @@ package dev.hddc.domains.hotdeal.application.service.command
 
 import dev.hddc.domains.hotdeal.application.ports.input.command.ApproveResult
 import dev.hddc.domains.hotdeal.application.ports.input.command.CandidateDealAdminUsecase
-import dev.hddc.domains.hotdeal.application.ports.input.query.CandidateDealAdminQueryUsecase
 import dev.hddc.domains.hotdeal.application.ports.output.command.CandidateDealPort
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommandPort
-import dev.hddc.domains.hotdeal.application.ports.output.query.CandidateDealPageData
 import dev.hddc.domains.hotdeal.application.ports.output.query.CandidateDealQueryPort
 import dev.hddc.domains.hotdeal.domain.model.CandidateDealModel
 import dev.hddc.domains.hotdeal.domain.model.CandidateDealStatus
 import dev.hddc.domains.hotdeal.domain.model.CreateHotDealModel
 import dev.hddc.domains.hotdeal.domain.spec.HotDealSpec
+import dev.hddc.framework.api.response.ApiResponseCode
+import dev.hddc.framework.api.response.BusinessException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -20,18 +20,14 @@ class CandidateDealAdminService(
     private val candidateDealQueryPort: CandidateDealQueryPort,
     private val candidateDealPort: CandidateDealPort,
     private val hotDealCommandPort: HotDealCommandPort,
-) : CandidateDealAdminUsecase, CandidateDealAdminQueryUsecase {
-
-    @Transactional(readOnly = true)
-    override fun getCandidateDeals(status: String, page: Int, size: Int): CandidateDealPageData =
-        candidateDealQueryPort.findByStatus(status, page, size)
+) : CandidateDealAdminUsecase {
 
     @Transactional
     override fun approve(candidateDealId: Long): Long {
         val candidate = candidateDealQueryPort.loadById(candidateDealId)
 
-        require(candidate.status == CandidateDealStatus.PENDING) {
-            "INVALID_REQUEST"
+        if (candidate.status != CandidateDealStatus.PENDING) {
+            throw BusinessException(ApiResponseCode.INVALID_REQUEST)
         }
 
         val saved = hotDealCommandPort.create(transferToCreateModel(candidate))
@@ -45,8 +41,8 @@ class CandidateDealAdminService(
     override fun reject(candidateDealId: Long) {
         val candidate = candidateDealQueryPort.loadById(candidateDealId)
 
-        require(candidate.status == CandidateDealStatus.PENDING) {
-            "INVALID_REQUEST"
+        if (candidate.status != CandidateDealStatus.PENDING) {
+            throw BusinessException(ApiResponseCode.INVALID_REQUEST)
         }
 
         candidateDealPort.updateStatus(candidateDealId, CandidateDealStatus.REJECTED.value)

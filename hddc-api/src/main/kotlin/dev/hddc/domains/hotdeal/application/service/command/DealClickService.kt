@@ -2,7 +2,6 @@ package dev.hddc.domains.hotdeal.application.service.command
 
 import dev.hddc.domains.hotdeal.application.ports.input.command.DealClickResult
 import dev.hddc.domains.hotdeal.application.ports.input.command.DealClickUsecase
-import dev.hddc.domains.hotdeal.application.ports.output.checker.HotDealClickChecker
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealClickPort
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommandPort
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealQueryPort
@@ -16,7 +15,6 @@ class DealClickService(
     private val hotDealQueryPort: HotDealQueryPort,
     private val hotDealCommandPort: HotDealCommandPort,
     private val hotDealClickPort: HotDealClickPort,
-    private val hotDealClickChecker: HotDealClickChecker,
     private val eventPublisher: DomainEventPublisher,
 ) : DealClickUsecase {
 

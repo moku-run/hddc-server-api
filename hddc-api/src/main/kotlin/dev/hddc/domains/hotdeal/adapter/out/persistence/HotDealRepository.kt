@@ -1,15 +1,17 @@
 package dev.hddc.domains.hotdeal.adapter.out.persistence
 
+import dev.hddc.framework.api.response.ApiResponseCode
+import dev.hddc.framework.api.response.BusinessException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 
 fun HotDealRepository.loadById(id: Long): HotDealEntity =
-    findById(id).orElseThrow { IllegalArgumentException("HOT_DEAL_NOT_FOUND") }
+    findById(id).orElseThrow { BusinessException(ApiResponseCode.HOT_DEAL_NOT_FOUND) }
 
 fun HotDealCommentRepository.loadById(id: Long): HotDealCommentEntity =
-    findById(id).orElseThrow { IllegalArgumentException("HOT_DEAL_COMMENT_NOT_FOUND") }
+    findById(id).orElseThrow { BusinessException(ApiResponseCode.HOT_DEAL_COMMENT_NOT_FOUND) }
 
 interface HotDealRepository : JpaRepository<HotDealEntity, Long> {
     fun findByIsDeletedFalseAndIsExpiredFalse(pageable: Pageable): Page<HotDealEntity>

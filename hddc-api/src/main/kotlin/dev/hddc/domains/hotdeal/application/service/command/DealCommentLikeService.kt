@@ -6,6 +6,8 @@ import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommentP
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealCommentLikeQueryPort
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealCommentQueryPort
 import dev.hddc.domains.hotdeal.domain.model.HotDealCommentLikeModel
+import dev.hddc.framework.api.response.ApiResponseCode
+import dev.hddc.framework.api.response.BusinessException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -20,7 +22,7 @@ class DealCommentLikeService(
     @Transactional
     override fun like(userId: Long, commentId: Long) {
         val comment = hotDealCommentQueryPort.loadById(commentId)
-        require(!comment.isDeleted) { "HOT_DEAL_COMMENT_NOT_FOUND" }
+        if (comment.isDeleted) throw BusinessException(ApiResponseCode.HOT_DEAL_COMMENT_NOT_FOUND)
         if (hotDealCommentLikeQueryPort.existsByCommentIdAndUserId(commentId, userId)) return
 
         hotDealCommentLikePort.save(HotDealCommentLikeModel(commentId = commentId, userId = userId))

@@ -1,5 +1,7 @@
 package dev.hddc.domains.user.adapter.out.persistence
 
+import dev.hddc.framework.api.response.ApiResponseCode
+import dev.hddc.framework.api.response.BusinessException
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface UserRepository : JpaRepository<UserEntity, Long> {
@@ -12,9 +14,9 @@ interface UserRepository : JpaRepository<UserEntity, Long> {
 // 확장함수: not-found → 에러 변환 재사용
 fun UserRepository.loadById(id: Long): UserEntity =
     findById(id).orElseThrow {
-        IllegalArgumentException("USER_NOT_FOUND")
+        BusinessException(ApiResponseCode.USER_NOT_FOUND)
     }
 
 fun UserRepository.loadByEmail(email: String): UserEntity =
     findByEmailAndIsDeletedFalse(email)
-        ?: throw IllegalArgumentException("USER_NOT_FOUND")
+        ?: throw BusinessException(ApiResponseCode.USER_NOT_FOUND)

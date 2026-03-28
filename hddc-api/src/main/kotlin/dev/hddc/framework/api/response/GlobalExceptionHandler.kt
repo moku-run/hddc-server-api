@@ -16,6 +16,10 @@ class GlobalExceptionHandler {
         // SSE 클라이언트 연결 끊김 — 정상 동작, 무시
     }
 
+    @ExceptionHandler(BusinessException::class)
+    fun handleBusinessException(e: BusinessException): ResponseEntity<ApiResponse<Nothing>> =
+        ApiResponse.error(e.code)
+
     @ExceptionHandler(IllegalArgumentException::class)
     fun handleIllegalArgument(e: IllegalArgumentException): ResponseEntity<ApiResponse<Nothing>> {
         val code = ApiResponseCode.findByCode(e.message ?: "")

@@ -1,10 +1,12 @@
 package dev.hddc.domains.hotdeal.adapter.out.persistence
 
 import dev.hddc.domains.hotdeal.application.ports.output.command.CandidateDealPort
-import dev.hddc.domains.hotdeal.application.ports.output.query.CandidateDealPageData
+import dev.hddc.domains.hotdeal.application.ports.input.query.CandidateDealPageData
 import dev.hddc.domains.hotdeal.application.ports.output.query.CandidateDealQueryPort
 import dev.hddc.domains.hotdeal.domain.model.CandidateDealModel
 import dev.hddc.domains.hotdeal.domain.model.CandidateDealStatus
+import dev.hddc.framework.api.response.ApiResponseCode
+import dev.hddc.framework.api.response.BusinessException
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Component
@@ -32,7 +34,7 @@ class CandidateDealPersistenceAdapter(
 
     override fun loadById(id: Long): CandidateDealModel =
         candidateDealRepository.findById(id).orElseThrow {
-            IllegalArgumentException("CANDIDATE_DEAL_NOT_FOUND")
+            BusinessException(ApiResponseCode.CANDIDATE_DEAL_NOT_FOUND)
         }.toDomain()
 
     override fun findAllByIdsAndStatus(ids: List<Long>, status: String): List<CandidateDealModel> =

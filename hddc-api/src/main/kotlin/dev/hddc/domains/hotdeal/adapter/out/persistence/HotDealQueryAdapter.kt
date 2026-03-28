@@ -19,9 +19,6 @@ class HotDealQueryAdapter(
     override fun loadById(dealId: Long): HotDealModel =
         hotDealRepository.loadById(dealId).toDomain()
 
-    override fun existsById(dealId: Long): Boolean =
-        hotDealRepository.existsById(dealId)
-
     override fun findActive(sort: String, page: Int, size: Int): HotDealPageData {
         val pageable = PageRequest.of(page, size, resolveSort(sort))
         return hotDealRepository.findByIsDeletedFalseAndIsExpiredFalse(pageable).toPageData()

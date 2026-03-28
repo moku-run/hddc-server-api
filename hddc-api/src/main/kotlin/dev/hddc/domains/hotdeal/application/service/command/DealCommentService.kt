@@ -10,6 +10,8 @@ import dev.hddc.domains.hotdeal.domain.model.CreateHotDealCommentModel
 import dev.hddc.domains.hotdeal.domain.model.HotDealCommentModel
 import dev.hddc.domains.user.application.ports.output.query.UserQueryPort
 import dev.hddc.domains.hotdeal.application.ports.output.event.DomainEventPublisher
+import dev.hddc.framework.api.response.ApiResponseCode
+import dev.hddc.framework.api.response.BusinessException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -29,8 +31,8 @@ class DealCommentService(
 
         if (parentId != null) {
             val parent = hotDealCommentQueryPort.loadById(parentId)
-            require(parent.belongsTo(dealId) && !parent.isDeleted) {
-                "HOT_DEAL_COMMENT_NOT_FOUND"
+            if (!parent.belongsTo(dealId) || parent.isDeleted) {
+                throw BusinessException(ApiResponseCode.HOT_DEAL_COMMENT_NOT_FOUND)
             }
         }
 
@@ -63,8 +65,8 @@ class DealCommentService(
     override fun deleteComment(userId: Long, dealId: Long, commentId: Long) {
         val deal = hotDealQueryPort.loadById(dealId)
         val comment = hotDealCommentQueryPort.loadById(commentId)
-        require(comment.belongsTo(dealId) && comment.isOwnedBy(userId) && !comment.isDeleted) {
-            "HOT_DEAL_COMMENT_NOT_FOUND"
+        if (!comment.belongsTo(dealId) || !comment.isOwnedBy(userId) || comment.isDeleted) {
+            throw BusinessException(ApiResponseCode.HOT_DEAL_COMMENT_NOT_FOUND)
         }
 
         hotDealCommentPort.softDelete(commentId)

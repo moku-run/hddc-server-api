@@ -1,5 +1,6 @@
 package dev.hddc.domains.hotdeal.adapter.`in`.web.response
 
+import dev.hddc.domains.hotdeal.application.ports.input.query.CandidateDealPageData
 import dev.hddc.domains.hotdeal.domain.model.CandidateDealModel
 
 data class CandidateDealResponse(
@@ -48,4 +49,14 @@ data class CandidateDealPageResponse(
     val size: Int,
     val totalElements: Long,
     val totalPages: Int,
-)
+) {
+    companion object {
+        fun from(data: CandidateDealPageData) = CandidateDealPageResponse(
+            content = data.content.map { CandidateDealResponse.from(it) },
+            page = data.page,
+            size = data.size,
+            totalElements = data.totalElements,
+            totalPages = data.totalPages,
+        )
+    }
+}
