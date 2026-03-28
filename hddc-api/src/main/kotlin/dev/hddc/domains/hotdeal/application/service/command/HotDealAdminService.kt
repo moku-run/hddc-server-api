@@ -6,9 +6,9 @@ import dev.hddc.domains.hotdeal.application.ports.input.command.UpdateHotDealCom
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommandPort
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealQueryPort
 import dev.hddc.domains.hotdeal.domain.event.DealSseEvent
+import dev.hddc.domains.hotdeal.domain.model.CreateHotDealModel
 import dev.hddc.domains.hotdeal.domain.model.HotDealModel
 import dev.hddc.domains.user.application.ports.output.query.UserQueryPort
-import dev.hddc.framework.api.response.ApiResponseCode
 import dev.hddc.domains.hotdeal.application.ports.output.event.DomainEventPublisher
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -29,22 +29,23 @@ class HotDealAdminService(
 
     @Transactional
     override fun create(adminUserId: Long, command: CreateHotDealCommand): HotDealModel {
-        val model = HotDealModel(
-            userId = adminUserId,
-            title = command.title,
-            description = command.description,
-            url = command.url,
-            imageUrl = command.imageUrl,
-            originalPrice = command.originalPrice,
-            dealPrice = command.dealPrice,
-            discountRate = command.discountRate,
-            category = command.category,
-            store = command.store,
+        val saved = hotDealCommandPort.create(
+            CreateHotDealModel(
+                userId = adminUserId,
+                title = command.title,
+                description = command.description,
+                url = command.url,
+                imageUrl = command.imageUrl,
+                originalPrice = command.originalPrice,
+                dealPrice = command.dealPrice,
+                discountRate = command.discountRate,
+                category = command.category,
+                store = command.store,
+            )
         )
-        val saved = hotDealCommandPort.save(model)
         val nicknames = userQueryPort.findNicknamesByIds(listOf(saved.userId))
         eventPublisher.publish(DealSseEvent.NewDeal(
-            id = saved.id!!,
+            id = saved.id,
             title = saved.title,
             dealPrice = saved.dealPrice,
             originalPrice = saved.originalPrice,
@@ -62,30 +63,25 @@ class HotDealAdminService(
 
     @Transactional
     override fun update(dealId: Long, command: UpdateHotDealCommand): HotDealModel {
-        val existing = hotDealCommandPort.findById(dealId)
-            ?: throw IllegalArgumentException(ApiResponseCode.HOT_DEAL_NOT_FOUND.code)
-
-        val updated = existing.copy(
-            title = command.title ?: existing.title,
-            description = command.description ?: existing.description,
-            url = command.url ?: existing.url,
-            imageUrl = command.imageUrl ?: existing.imageUrl,
-            originalPrice = command.originalPrice ?: existing.originalPrice,
-            dealPrice = command.dealPrice ?: existing.dealPrice,
-            discountRate = command.discountRate ?: existing.discountRate,
-            category = command.category ?: existing.category,
-            store = command.store ?: existing.store,
-        )
-
-        return hotDealCommandPort.save(updated)
+        return hotDealCommandPort.update(dealId) { existing ->
+            existing.copy(
+                title = command.title ?: existing.title,
+                description = command.description ?: existing.description,
+                url = command.url ?: existing.url,
+                imageUrl = command.imageUrl ?: existing.imageUrl,
+                originalPrice = command.originalPrice ?: existing.originalPrice,
+                dealPrice = command.dealPrice ?: existing.dealPrice,
+                discountRate = command.discountRate ?: existing.discountRate,
+                category = command.category ?: existing.category,
+                store = command.store ?: existing.store,
+            )
+        }
     }
 
     @Transactional
     override fun delete(dealId: Long) {
-        val existing = hotDealCommandPort.findById(dealId)
-            ?: throw IllegalArgumentException(ApiResponseCode.HOT_DEAL_NOT_FOUND.code)
-
-        hotDealCommandPort.save(existing.copy(isDeleted = true))
+        hotDealCommandPort.loadById(dealId)
+        hotDealCommandPort.softDelete(dealId)
         eventPublisher.publish(DealSseEvent.DealDeleted(id = dealId))
     }
 }

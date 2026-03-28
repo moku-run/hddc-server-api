@@ -6,7 +6,6 @@ import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommentP
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealReportPort
 import dev.hddc.domains.hotdeal.domain.model.HotDealCommentReportModel
 import dev.hddc.domains.hotdeal.domain.model.HotDealReportModel
-import dev.hddc.framework.api.response.ApiResponseCode
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -19,14 +18,14 @@ class DealReportService(
 
     @Transactional
     override fun reportDeal(userId: Long, dealId: Long, reason: String) {
-        require(hotDealCommandPort.existsById(dealId)) { ApiResponseCode.HOT_DEAL_NOT_FOUND.code }
+        hotDealCommandPort.loadById(dealId)
         hotDealReportPort.saveDealReport(HotDealReportModel(dealId = dealId, userId = userId, reason = reason))
     }
 
     @Transactional
     override fun reportComment(userId: Long, dealId: Long, commentId: Long, reason: String) {
-        require(hotDealCommandPort.existsById(dealId)) { ApiResponseCode.HOT_DEAL_NOT_FOUND.code }
-        require(hotDealCommentPort.existsById(commentId)) { ApiResponseCode.HOT_DEAL_COMMENT_NOT_FOUND.code }
+        hotDealCommandPort.loadById(dealId)
+        hotDealCommentPort.loadById(commentId)
         hotDealReportPort.saveCommentReport(HotDealCommentReportModel(commentId = commentId, userId = userId, reason = reason))
     }
 }

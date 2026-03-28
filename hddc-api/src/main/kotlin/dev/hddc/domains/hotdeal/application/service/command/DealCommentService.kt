@@ -4,9 +4,9 @@ import dev.hddc.domains.hotdeal.application.ports.input.command.DealCommentUseca
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommandPort
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommentPort
 import dev.hddc.domains.hotdeal.domain.event.DealSseEvent
+import dev.hddc.domains.hotdeal.domain.model.CreateHotDealCommentModel
 import dev.hddc.domains.hotdeal.domain.model.HotDealCommentModel
 import dev.hddc.domains.user.application.ports.output.query.UserQueryPort
-import dev.hddc.framework.api.response.ApiResponseCode
 import dev.hddc.domains.hotdeal.application.ports.output.event.DomainEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -21,31 +21,30 @@ class DealCommentService(
 
     @Transactional
     override fun addComment(userId: Long, dealId: Long, content: String, parentId: Long?): HotDealCommentModel {
-        val deal = hotDealCommandPort.findById(dealId)
-            ?: throw IllegalArgumentException(ApiResponseCode.HOT_DEAL_NOT_FOUND.code)
+        val deal = hotDealCommandPort.loadById(dealId)
 
         if (parentId != null) {
-            val parent = hotDealCommentPort.findById(parentId)
-                ?: throw IllegalArgumentException(ApiResponseCode.HOT_DEAL_COMMENT_NOT_FOUND.code)
+            val parent = hotDealCommentPort.loadById(parentId)
             require(parent.dealId == dealId && !parent.isDeleted) {
-                ApiResponseCode.HOT_DEAL_COMMENT_NOT_FOUND.code
+                "Parent comment not found or deleted"
             }
         }
 
-        val model = HotDealCommentModel(
-            dealId = dealId,
-            userId = userId,
-            parentId = parentId,
-            content = content,
+        val saved = hotDealCommentPort.create(
+            CreateHotDealCommentModel(
+                dealId = dealId,
+                userId = userId,
+                parentId = parentId,
+                content = content,
+            )
         )
-        val saved = hotDealCommentPort.save(model)
         val newCount = deal.commentCount + 1
-        hotDealCommandPort.save(deal.copy(commentCount = newCount))
+        hotDealCommandPort.updateCommentCount(dealId, newCount)
 
         val nicknames = userQueryPort.findNicknamesByIds(listOf(userId))
         eventPublisher.publish(DealSseEvent.NewComment(
             dealId = dealId,
-            id = saved.id!!,
+            id = saved.id,
             nickname = nicknames[userId] ?: "알 수 없음",
             content = content,
             parentId = parentId,
@@ -58,17 +57,15 @@ class DealCommentService(
 
     @Transactional
     override fun deleteComment(userId: Long, dealId: Long, commentId: Long) {
-        val deal = hotDealCommandPort.findById(dealId)
-            ?: throw IllegalArgumentException(ApiResponseCode.HOT_DEAL_NOT_FOUND.code)
-        val comment = hotDealCommentPort.findById(commentId)
-            ?: throw IllegalArgumentException(ApiResponseCode.HOT_DEAL_COMMENT_NOT_FOUND.code)
+        val deal = hotDealCommandPort.loadById(dealId)
+        val comment = hotDealCommentPort.loadById(commentId)
         require(comment.dealId == dealId && comment.userId == userId && !comment.isDeleted) {
-            ApiResponseCode.HOT_DEAL_COMMENT_NOT_FOUND.code
+            "Comment not found or not authorized"
         }
 
-        hotDealCommentPort.save(comment.copy(isDeleted = true))
+        hotDealCommentPort.softDelete(commentId)
         val newCount = maxOf(0, deal.commentCount - 1)
-        hotDealCommandPort.save(deal.copy(commentCount = newCount))
+        hotDealCommandPort.updateCommentCount(dealId, newCount)
         eventPublisher.publish(DealSseEvent.CommentDeleted(dealId = dealId, id = commentId))
         eventPublisher.publish(DealSseEvent.DealUpdated(id = dealId, commentCount = newCount))
     }

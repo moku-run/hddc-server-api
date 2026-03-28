@@ -116,7 +116,7 @@ class HotDealQueryService(
     }
 
     private fun toPageResult(dealPage: Page<HotDealModel>, userId: Long?): HotDealPageResult {
-        val dealIds = dealPage.content.map { it.id!! }
+        val dealIds = dealPage.content.map { it.id }
 
         val likedIds = userId?.let { uid ->
             hotDealLikePort.findAllByUserIdAndDealIds(uid, dealIds).map { it.dealId }.toSet()
@@ -129,8 +129,8 @@ class HotDealQueryService(
         val content = dealPage.content.map { deal ->
             HotDealWithUserState(
                 deal = deal,
-                isLiked = deal.id!! in likedIds,
-                isVotedExpired = deal.id!! in votedExpiredIds,
+                isLiked = deal.id in likedIds,
+                isVotedExpired = deal.id in votedExpiredIds,
             )
         }
 

@@ -7,6 +7,8 @@ import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealExpiredV
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealLikePort
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealReportPort
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealQueryPort
+import dev.hddc.domains.hotdeal.domain.model.CreateHotDealCommentModel
+import dev.hddc.domains.hotdeal.domain.model.CreateHotDealModel
 import dev.hddc.domains.hotdeal.domain.model.HotDealCommentLikeModel
 import dev.hddc.domains.hotdeal.domain.model.HotDealCommentModel
 import dev.hddc.domains.hotdeal.domain.model.HotDealCommentReportModel
@@ -17,51 +19,92 @@ import dev.hddc.domains.hotdeal.domain.model.HotDealReportModel
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
+import org.springframework.stereotype.Component
 import org.springframework.stereotype.Repository
 import java.time.Instant
 
-@Repository
+@Component
 class HotDealPersistenceAdapter(
     private val hotDealRepository: HotDealRepository,
-) : HotDealCommandPort, HotDealQueryPort {
+) : HotDealCommandPort {
+
+    override fun create(model: CreateHotDealModel): HotDealModel {
+        val entity = HotDealEntity(
+            userId = model.userId,
+            title = model.title,
+            description = model.description,
+            url = model.url,
+            imageUrl = model.imageUrl,
+            originalPrice = model.originalPrice,
+            dealPrice = model.dealPrice,
+            discountRate = model.discountRate,
+            category = model.category,
+            store = model.store,
+        )
+        return hotDealRepository.save(entity).toDomain()
+    }
 
     override fun findById(dealId: Long): HotDealModel? =
         hotDealRepository.findById(dealId).orElse(null)?.toDomain()
 
-    override fun existsById(dealId: Long): Boolean =
-        hotDealRepository.existsById(dealId)
+    override fun loadById(dealId: Long): HotDealModel =
+        hotDealRepository.loadById(dealId).toDomain()
 
-    override fun save(model: HotDealModel): HotDealModel {
-        val entity = if (model.id != null) {
-            val existing = hotDealRepository.findById(model.id).orElse(null)
-            if (existing != null) {
-                existing.apply {
-                    title = model.title
-                    description = model.description
-                    url = model.url
-                    imageUrl = model.imageUrl
-                    originalPrice = model.originalPrice
-                    dealPrice = model.dealPrice
-                    discountRate = model.discountRate
-                    category = model.category
-                    store = model.store
-                    likeCount = model.likeCount
-                    commentCount = model.commentCount
-                    expiredVoteCount = model.expiredVoteCount
-                    clickCount = model.clickCount
-                    isExpired = model.isExpired
-                    isDeleted = model.isDeleted
-                    if (model.isDeleted && deletedAt == null) deletedAt = Instant.now()
-                }
-                existing
-            } else {
-                toNewEntity(model)
-            }
-        } else {
-            toNewEntity(model)
+    override fun updateLikeCount(dealId: Long, count: Int) {
+        val entity = hotDealRepository.loadById(dealId)
+        entity.likeCount = count
+        hotDealRepository.save(entity)
+    }
+
+    override fun updateCommentCount(dealId: Long, count: Int) {
+        val entity = hotDealRepository.loadById(dealId)
+        entity.commentCount = count
+        hotDealRepository.save(entity)
+    }
+
+    override fun updateClickCount(dealId: Long, count: Int) {
+        val entity = hotDealRepository.loadById(dealId)
+        entity.clickCount = count
+        hotDealRepository.save(entity)
+    }
+
+    override fun updateExpiredVote(dealId: Long, count: Int, expired: Boolean) {
+        val entity = hotDealRepository.loadById(dealId)
+        entity.expiredVoteCount = count
+        entity.isExpired = expired
+        hotDealRepository.save(entity)
+    }
+
+    override fun softDelete(dealId: Long) {
+        val entity = hotDealRepository.loadById(dealId)
+        entity.isDeleted = true
+        entity.deletedAt = Instant.now()
+        hotDealRepository.save(entity)
+    }
+
+    override fun update(dealId: Long, updater: (HotDealModel) -> HotDealModel): HotDealModel {
+        val entity = hotDealRepository.loadById(dealId)
+        val current = entity.toDomain()
+        val updated = updater(current)
+        entity.apply {
+            title = updated.title
+            description = updated.description
+            url = updated.url
+            imageUrl = updated.imageUrl
+            originalPrice = updated.originalPrice
+            dealPrice = updated.dealPrice
+            discountRate = updated.discountRate
+            category = updated.category
+            store = updated.store
         }
         return hotDealRepository.save(entity).toDomain()
     }
+}
+
+@Component
+class HotDealQueryAdapter(
+    private val hotDealRepository: HotDealRepository,
+) : HotDealQueryPort {
 
     override fun findActive(pageable: Pageable): Page<HotDealModel> =
         hotDealRepository.findByIsDeletedFalseAndIsExpiredFalse(pageable).map { it.toDomain() }
@@ -71,24 +114,54 @@ class HotDealPersistenceAdapter(
 
     override fun findAll(pageable: Pageable): Page<HotDealModel> =
         hotDealRepository.findAll(pageable).map { it.toDomain() }
+}
 
-    private fun toNewEntity(model: HotDealModel) = HotDealEntity(
-        userId = model.userId,
-        title = model.title,
-        description = model.description,
-        url = model.url,
-        imageUrl = model.imageUrl,
-        originalPrice = model.originalPrice,
-        dealPrice = model.dealPrice,
-        discountRate = model.discountRate,
-        category = model.category,
-        store = model.store,
-        likeCount = model.likeCount,
-        commentCount = model.commentCount,
-        expiredVoteCount = model.expiredVoteCount,
-        clickCount = model.clickCount,
-        isExpired = model.isExpired,
-    )
+@Component
+class HotDealCommentPersistenceAdapter(
+    private val hotDealCommentRepository: HotDealCommentRepository,
+) : HotDealCommentPort {
+
+    override fun create(model: CreateHotDealCommentModel): HotDealCommentModel {
+        val entity = HotDealCommentEntity(
+            dealId = model.dealId,
+            userId = model.userId,
+            parentId = model.parentId,
+            content = model.content,
+        )
+        return hotDealCommentRepository.save(entity).toDomain()
+    }
+
+    override fun loadById(commentId: Long): HotDealCommentModel =
+        hotDealCommentRepository.loadById(commentId).toDomain()
+
+    override fun softDelete(commentId: Long) {
+        val entity = hotDealCommentRepository.loadById(commentId)
+        entity.isDeleted = true
+        entity.deletedAt = Instant.now()
+        hotDealCommentRepository.save(entity)
+    }
+
+    override fun updateLikeCount(commentId: Long, count: Int) {
+        val entity = hotDealCommentRepository.loadById(commentId)
+        entity.likeCount = count
+        hotDealCommentRepository.save(entity)
+    }
+
+    override fun findRootComments(dealId: Long, afterId: Long?, size: Int): List<HotDealCommentModel> {
+        val pageable = PageRequest.of(0, size)
+        val entities = if (afterId != null) {
+            hotDealCommentRepository.findRootCommentsAfter(dealId, afterId, pageable)
+        } else {
+            hotDealCommentRepository.findRootComments(dealId, pageable)
+        }
+        return entities.map { it.toDomain() }
+    }
+
+    override fun findRepliesByParentIds(parentIds: List<Long>): List<HotDealCommentModel> {
+        if (parentIds.isEmpty()) return emptyList()
+        return hotDealCommentRepository.findAllByParentIdInOrderByCreatedAtAsc(parentIds)
+            .map { it.toDomain() }
+    }
 }
 
 @Repository
@@ -118,71 +191,6 @@ class HotDealLikePersistenceAdapter(
         hotDealLikeRepository.findAllByUserIdAndDealIdIn(userId, dealIds).map {
             HotDealLikeModel(id = it.id, dealId = it.dealId, userId = it.userId, createdAt = it.createdAt)
         }
-}
-
-@Repository
-class HotDealCommentPersistenceAdapter(
-    private val hotDealCommentRepository: HotDealCommentRepository,
-) : HotDealCommentPort {
-
-    override fun findById(commentId: Long): HotDealCommentModel? =
-        hotDealCommentRepository.findById(commentId).orElse(null)?.toDomain()
-
-    override fun existsById(commentId: Long): Boolean =
-        hotDealCommentRepository.existsById(commentId)
-
-    override fun save(model: HotDealCommentModel): HotDealCommentModel {
-        val entity = if (model.id != null) {
-            val existing = hotDealCommentRepository.findById(model.id).orElse(null)
-            if (existing != null) {
-                existing.apply {
-                    content = model.content
-                    likeCount = model.likeCount
-                    isDeleted = model.isDeleted
-                    if (model.isDeleted && deletedAt == null) deletedAt = Instant.now()
-                    updatedAt = Instant.now()
-                }
-                existing
-            } else {
-                HotDealCommentEntity(
-                    dealId = model.dealId, userId = model.userId,
-                    parentId = model.parentId, content = model.content,
-                    likeCount = model.likeCount,
-                )
-            }
-        } else {
-            HotDealCommentEntity(
-                dealId = model.dealId, userId = model.userId,
-                parentId = model.parentId, content = model.content,
-                likeCount = model.likeCount,
-            )
-        }
-        return hotDealCommentRepository.save(entity).toDomain()
-    }
-
-    override fun findAllByDealId(dealId: Long): List<HotDealCommentModel> =
-        hotDealCommentRepository.findAllByDealIdAndIsDeletedFalseOrderByCreatedAtAsc(dealId)
-            .map { it.toDomain() }
-
-    override fun findAllByDealIdIncludingDeleted(dealId: Long): List<HotDealCommentModel> =
-        hotDealCommentRepository.findAllByDealIdOrderByCreatedAtAsc(dealId)
-            .map { it.toDomain() }
-
-    override fun findRootComments(dealId: Long, afterId: Long?, size: Int): List<HotDealCommentModel> {
-        val pageable = PageRequest.of(0, size)
-        val entities = if (afterId != null) {
-            hotDealCommentRepository.findRootCommentsAfter(dealId, afterId, pageable)
-        } else {
-            hotDealCommentRepository.findRootComments(dealId, pageable)
-        }
-        return entities.map { it.toDomain() }
-    }
-
-    override fun findRepliesByParentIds(parentIds: List<Long>): List<HotDealCommentModel> {
-        if (parentIds.isEmpty()) return emptyList()
-        return hotDealCommentRepository.findAllByParentIdInOrderByCreatedAtAsc(parentIds)
-            .map { it.toDomain() }
-    }
 }
 
 @Repository

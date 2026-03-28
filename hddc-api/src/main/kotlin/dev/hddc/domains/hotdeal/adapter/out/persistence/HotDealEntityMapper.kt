@@ -4,7 +4,7 @@ import dev.hddc.domains.hotdeal.domain.model.HotDealCommentModel
 import dev.hddc.domains.hotdeal.domain.model.HotDealModel
 
 fun HotDealEntity.toDomain(): HotDealModel = HotDealModel(
-    id = id,
+    id = id!!,
     userId = userId,
     title = title,
     description = description,
@@ -26,7 +26,7 @@ fun HotDealEntity.toDomain(): HotDealModel = HotDealModel(
 )
 
 fun HotDealCommentEntity.toDomain(): HotDealCommentModel = HotDealCommentModel(
-    id = id,
+    id = id!!,
     dealId = dealId,
     userId = userId,
     parentId = parentId,

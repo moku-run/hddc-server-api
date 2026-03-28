@@ -29,7 +29,7 @@ data class HotDealResponse(
     companion object {
         fun from(model: HotDealModel, nickname: String, dealNumber: Long = 0, isLiked: Boolean = false, isVotedExpired: Boolean = false) = HotDealResponse(
             dealNumber = dealNumber,
-            id = model.id!!,
+            id = model.id,
             userId = model.userId,
             nickname = nickname,
             title = model.title,
@@ -84,7 +84,7 @@ data class CommentResponse(
         private const val DELETED_NICKNAME = ""
 
         fun from(model: HotDealCommentModel, nickname: String, isLiked: Boolean = false) = CommentResponse(
-            id = model.id!!,
+            id = model.id,
             dealId = model.dealId,
             userId = model.userId,
             nickname = if (model.isDeleted) DELETED_NICKNAME else nickname,

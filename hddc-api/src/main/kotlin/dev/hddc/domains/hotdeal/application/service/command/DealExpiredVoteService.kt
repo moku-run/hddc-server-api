@@ -5,7 +5,7 @@ import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommandP
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealExpiredVotePort
 import dev.hddc.domains.hotdeal.domain.event.DealSseEvent
 import dev.hddc.domains.hotdeal.domain.model.HotDealExpiredVoteModel
-import dev.hddc.framework.api.response.ApiResponseCode
+import dev.hddc.domains.hotdeal.domain.spec.HotDealSpec
 import dev.hddc.domains.hotdeal.application.ports.output.event.DomainEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -17,20 +17,15 @@ class DealExpiredVoteService(
     private val eventPublisher: DomainEventPublisher,
 ) : DealExpiredVoteUsecase {
 
-    companion object {
-        private const val EXPIRED_THRESHOLD = 10
-    }
-
     @Transactional
     override fun vote(userId: Long, dealId: Long) {
-        val deal = hotDealCommandPort.findById(dealId)
-            ?: throw IllegalArgumentException(ApiResponseCode.HOT_DEAL_NOT_FOUND.code)
+        val deal = hotDealCommandPort.loadById(dealId)
         if (hotDealExpiredVotePort.existsByDealIdAndUserId(dealId, userId)) return
 
         hotDealExpiredVotePort.save(HotDealExpiredVoteModel(dealId = dealId, userId = userId))
         val newCount = deal.expiredVoteCount + 1
-        val expired = newCount >= EXPIRED_THRESHOLD
-        hotDealCommandPort.save(deal.copy(expiredVoteCount = newCount, isExpired = expired))
+        val expired = HotDealSpec.isExpiredThresholdReached(newCount)
+        hotDealCommandPort.updateExpiredVote(dealId, newCount, expired)
         eventPublisher.publish(DealSseEvent.DealUpdated(id = dealId, expiredVoteCount = newCount))
         if (expired && !deal.isExpired) {
             eventPublisher.publish(DealSseEvent.DealExpired(id = dealId))
@@ -39,13 +34,12 @@ class DealExpiredVoteService(
 
     @Transactional
     override fun unvote(userId: Long, dealId: Long) {
-        val deal = hotDealCommandPort.findById(dealId)
-            ?: throw IllegalArgumentException(ApiResponseCode.HOT_DEAL_NOT_FOUND.code)
+        val deal = hotDealCommandPort.loadById(dealId)
         val vote = hotDealExpiredVotePort.findByDealIdAndUserId(dealId, userId) ?: return
 
         hotDealExpiredVotePort.delete(vote)
         val newCount = maxOf(0, deal.expiredVoteCount - 1)
-        hotDealCommandPort.save(deal.copy(expiredVoteCount = newCount, isExpired = false))
+        hotDealCommandPort.updateExpiredVote(dealId, newCount, false)
         eventPublisher.publish(DealSseEvent.DealUpdated(id = dealId, expiredVoteCount = newCount))
     }
 }

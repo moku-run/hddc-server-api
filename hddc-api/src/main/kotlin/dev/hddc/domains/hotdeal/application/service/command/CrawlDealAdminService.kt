@@ -5,8 +5,8 @@ import dev.hddc.domains.hotdeal.application.ports.input.command.CrawlDealAdminUs
 import dev.hddc.domains.hotdeal.application.ports.output.command.CrawlHotDealPort
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommandPort
 import dev.hddc.domains.hotdeal.domain.model.CrawlHotDealModel
-import dev.hddc.domains.hotdeal.domain.model.HotDealModel
-import dev.hddc.framework.api.response.ApiResponseCode
+import dev.hddc.domains.hotdeal.domain.model.CreateHotDealModel
+import dev.hddc.domains.hotdeal.domain.spec.HotDealSpec
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -19,10 +19,6 @@ class CrawlDealAdminService(
     private val hotDealCommandPort: HotDealCommandPort,
 ) : CrawlDealAdminUsecase {
 
-    companion object {
-        private const val SYSTEM_USER_ID = 1L
-    }
-
     @Transactional(readOnly = true)
     override fun getCrawlDeals(status: String, pageable: Pageable): Page<CrawlHotDealModel> =
         crawlHotDealPort.findByStatus(status, pageable)
@@ -30,27 +26,26 @@ class CrawlDealAdminService(
     @Transactional
     override fun approve(crawlDealId: Long): Long {
         val crawl = crawlHotDealPort.findById(crawlDealId)
-            ?: throw IllegalArgumentException(ApiResponseCode.HOT_DEAL_NOT_FOUND.code)
+            ?: throw IllegalArgumentException("CRAWL_DEAL_NOT_FOUND")
 
         require(crawl.status == "PENDING") {
-            ApiResponseCode.INVALID_REQUEST.code
+            "INVALID_REQUEST"
         }
 
-        val hotDeal = transferToHotDeal(crawl)
-        val saved = hotDealCommandPort.save(hotDeal)
+        val saved = hotDealCommandPort.create(transferToCreateModel(crawl))
 
         crawlHotDealPort.updateStatus(crawlDealId, "APPROVED", Instant.now())
 
-        return saved.id!!
+        return saved.id
     }
 
     @Transactional
     override fun reject(crawlDealId: Long) {
         val crawl = crawlHotDealPort.findById(crawlDealId)
-            ?: throw IllegalArgumentException(ApiResponseCode.HOT_DEAL_NOT_FOUND.code)
+            ?: throw IllegalArgumentException("CRAWL_DEAL_NOT_FOUND")
 
         require(crawl.status == "PENDING") {
-            ApiResponseCode.INVALID_REQUEST.code
+            "INVALID_REQUEST"
         }
 
         crawlHotDealPort.updateStatus(crawlDealId, "REJECTED")
@@ -61,16 +56,15 @@ class CrawlDealAdminService(
         val crawls = crawlHotDealPort.findAllByIdsAndStatus(crawlDealIds, "PENDING")
 
         crawls.forEach { crawl ->
-            val hotDeal = transferToHotDeal(crawl)
-            hotDealCommandPort.save(hotDeal)
+            hotDealCommandPort.create(transferToCreateModel(crawl))
             crawlHotDealPort.updateStatus(crawl.id!!, "APPROVED", Instant.now())
         }
 
         return ApproveResult(approvedCount = crawls.size)
     }
 
-    private fun transferToHotDeal(crawl: CrawlHotDealModel) = HotDealModel(
-        userId = SYSTEM_USER_ID,
+    private fun transferToCreateModel(crawl: CrawlHotDealModel) = CreateHotDealModel(
+        userId = HotDealSpec.SYSTEM_USER_ID,
         title = crawl.title ?: "제목 없음",
         description = crawl.description,
         url = crawl.dealLink ?: crawl.postUrl,

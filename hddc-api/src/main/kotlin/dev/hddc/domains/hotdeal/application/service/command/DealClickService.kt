@@ -28,7 +28,7 @@ class DealClickService(
 
         hotDealClickPort.save(dealId, userId, ip)
         val newCount = deal.clickCount + 1
-        hotDealCommandPort.save(deal.copy(clickCount = newCount))
+        hotDealCommandPort.updateClickCount(dealId, newCount)
         eventPublisher.publish(DealSseEvent.DealUpdated(id = dealId, clickCount = newCount))
 
         return DealClickResult(url = deal.url, dealId = dealId, clickCount = newCount)
