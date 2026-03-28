@@ -4,6 +4,7 @@ import dev.hddc.framework.jpa.BaseAuditEntity
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Table
+import java.time.Instant
 
 @Entity
 @Table(name = "mst_hot_deal_comment")
@@ -22,4 +23,9 @@ class HotDealCommentEntity(
 
     @Column(name = "like_count", nullable = false)
     var likeCount: Int = 0,
-) : BaseAuditEntity()
+) : BaseAuditEntity() {
+    fun softDelete() {
+        isDeleted = true
+        deletedAt = Instant.now()
+    }
+}

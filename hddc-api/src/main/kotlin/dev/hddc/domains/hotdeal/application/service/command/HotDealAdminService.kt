@@ -3,6 +3,7 @@ package dev.hddc.domains.hotdeal.application.service.command
 import dev.hddc.domains.hotdeal.application.ports.input.command.CreateHotDealCommand
 import dev.hddc.domains.hotdeal.application.ports.input.command.HotDealAdminUsecase
 import dev.hddc.domains.hotdeal.application.ports.input.command.UpdateHotDealCommand
+import dev.hddc.domains.hotdeal.application.ports.input.query.HotDealAdminQueryUsecase
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommandPort
 import dev.hddc.domains.hotdeal.application.ports.input.query.AdminHotDealPageResult
 import dev.hddc.domains.hotdeal.application.ports.input.query.HotDealWithNickname
@@ -21,7 +22,7 @@ class HotDealAdminService(
     private val hotDealCommandPort: HotDealCommandPort,
     private val userQueryPort: UserQueryPort,
     private val eventPublisher: DomainEventPublisher,
-) : HotDealAdminUsecase {
+) : HotDealAdminUsecase, HotDealAdminQueryUsecase {
 
     @Transactional(readOnly = true)
     override fun getAll(page: Int, size: Int): AdminHotDealPageResult {

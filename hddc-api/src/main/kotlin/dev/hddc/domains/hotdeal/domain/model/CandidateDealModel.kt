@@ -16,7 +16,7 @@ data class CandidateDealModel(
     val discountRate: Int? = null,
     val store: String? = null,
     val category: String? = null,
-    val status: String = CandidateDealStatus.PENDING.value,
+    val status: CandidateDealStatus = CandidateDealStatus.PENDING,
     val crawledAt: Instant = Instant.now(),
     val transferredAt: Instant? = null,
 )

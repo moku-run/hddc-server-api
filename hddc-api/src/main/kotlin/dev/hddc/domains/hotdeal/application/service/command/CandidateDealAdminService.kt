@@ -2,9 +2,11 @@ package dev.hddc.domains.hotdeal.application.service.command
 
 import dev.hddc.domains.hotdeal.application.ports.input.command.ApproveResult
 import dev.hddc.domains.hotdeal.application.ports.input.command.CandidateDealAdminUsecase
+import dev.hddc.domains.hotdeal.application.ports.input.query.CandidateDealAdminQueryUsecase
 import dev.hddc.domains.hotdeal.application.ports.output.command.CandidateDealPort
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommandPort
-import dev.hddc.domains.hotdeal.application.ports.output.command.CandidateDealPageData
+import dev.hddc.domains.hotdeal.application.ports.output.query.CandidateDealPageData
+import dev.hddc.domains.hotdeal.application.ports.output.query.CandidateDealQueryPort
 import dev.hddc.domains.hotdeal.domain.model.CandidateDealModel
 import dev.hddc.domains.hotdeal.domain.model.CandidateDealStatus
 import dev.hddc.domains.hotdeal.domain.model.CreateHotDealModel
@@ -15,20 +17,20 @@ import java.time.Instant
 
 @Service
 class CandidateDealAdminService(
+    private val candidateDealQueryPort: CandidateDealQueryPort,
     private val candidateDealPort: CandidateDealPort,
     private val hotDealCommandPort: HotDealCommandPort,
-) : CandidateDealAdminUsecase {
+) : CandidateDealAdminUsecase, CandidateDealAdminQueryUsecase {
 
     @Transactional(readOnly = true)
     override fun getCandidateDeals(status: String, page: Int, size: Int): CandidateDealPageData =
-        candidateDealPort.findByStatus(status, page, size)
+        candidateDealQueryPort.findByStatus(status, page, size)
 
     @Transactional
     override fun approve(candidateDealId: Long): Long {
-        val candidate = candidateDealPort.findById(candidateDealId)
-            ?: throw IllegalArgumentException("CANDIDATE_DEAL_NOT_FOUND")
+        val candidate = candidateDealQueryPort.loadById(candidateDealId)
 
-        require(candidate.status == CandidateDealStatus.PENDING.value) {
+        require(candidate.status == CandidateDealStatus.PENDING) {
             "INVALID_REQUEST"
         }
 
@@ -41,10 +43,9 @@ class CandidateDealAdminService(
 
     @Transactional
     override fun reject(candidateDealId: Long) {
-        val candidate = candidateDealPort.findById(candidateDealId)
-            ?: throw IllegalArgumentException("CANDIDATE_DEAL_NOT_FOUND")
+        val candidate = candidateDealQueryPort.loadById(candidateDealId)
 
-        require(candidate.status == CandidateDealStatus.PENDING.value) {
+        require(candidate.status == CandidateDealStatus.PENDING) {
             "INVALID_REQUEST"
         }
 
@@ -53,7 +54,7 @@ class CandidateDealAdminService(
 
     @Transactional
     override fun bulkApprove(candidateDealIds: List<Long>): ApproveResult {
-        val candidates = candidateDealPort.findAllByIdsAndStatus(candidateDealIds, CandidateDealStatus.PENDING.value)
+        val candidates = candidateDealQueryPort.findAllByIdsAndStatus(candidateDealIds, CandidateDealStatus.PENDING.value)
 
         candidates.forEach { candidate ->
             hotDealCommandPort.create(transferToCreateModel(candidate))

@@ -20,7 +20,7 @@ class DealCommentLikeService(
     @Transactional
     override fun like(userId: Long, commentId: Long) {
         val comment = hotDealCommentQueryPort.loadById(commentId)
-        if (comment.isDeleted) throw IllegalArgumentException("Comment is deleted")
+        require(!comment.isDeleted) { "HOT_DEAL_COMMENT_NOT_FOUND" }
         if (hotDealCommentLikeQueryPort.existsByCommentIdAndUserId(commentId, userId)) return
 
         hotDealCommentLikePort.save(HotDealCommentLikeModel(commentId = commentId, userId = userId))

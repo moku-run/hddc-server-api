@@ -30,7 +30,7 @@ class DealCommentService(
         if (parentId != null) {
             val parent = hotDealCommentQueryPort.loadById(parentId)
             require(parent.belongsTo(dealId) && !parent.isDeleted) {
-                "Parent comment not found or deleted"
+                "HOT_DEAL_COMMENT_NOT_FOUND"
             }
         }
 
@@ -64,7 +64,7 @@ class DealCommentService(
         val deal = hotDealQueryPort.loadById(dealId)
         val comment = hotDealCommentQueryPort.loadById(commentId)
         require(comment.belongsTo(dealId) && comment.isOwnedBy(userId) && !comment.isDeleted) {
-            "Comment not found or not authorized"
+            "HOT_DEAL_COMMENT_NOT_FOUND"
         }
 
         hotDealCommentPort.softDelete(commentId)

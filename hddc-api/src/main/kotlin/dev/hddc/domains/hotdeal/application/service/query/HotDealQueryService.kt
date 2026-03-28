@@ -12,6 +12,7 @@ import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealExpiredVot
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealLikeQueryPort
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealPageData
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealQueryPort
+import dev.hddc.domains.hotdeal.domain.model.HotDealCommentModel
 import dev.hddc.domains.user.application.ports.output.query.UserQueryPort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -40,6 +41,51 @@ class HotDealQueryService(
 
     @Transactional(readOnly = true)
     override fun getComments(dealId: Long, afterId: Long?, size: Int): CommentCursorResult {
+        val (comments, nextCursor, hasNext) = fetchComments(dealId, afterId, size)
+        return CommentCursorResult(
+            comments = comments,
+            nextCursor = nextCursor,
+            hasNext = hasNext,
+        )
+    }
+
+    @Transactional(readOnly = true)
+    override fun getCommentsEnriched(dealId: Long, userId: Long?, afterId: Long?, size: Int): EnrichedCommentCursorResult {
+        val (comments, nextCursor, hasNext) = fetchComments(dealId, afterId, size)
+
+        val userIds = comments.map { it.userId }.distinct()
+        val nicknames = userQueryPort.findNicknamesByIds(userIds)
+
+        val likedCommentIds = if (userId != null) {
+            val commentIds = comments.filter { !it.isDeleted }.map { it.id }
+            if (commentIds.isNotEmpty()) {
+                hotDealCommentLikeQueryPort.findAllByUserIdAndCommentIds(userId, commentIds)
+                    .map { it.commentId }.toSet()
+            } else emptySet()
+        } else {
+            emptySet()
+        }
+
+        return EnrichedCommentCursorResult(
+            comments = comments.map { comment ->
+                CommentWithNickname(
+                    comment = comment,
+                    nickname = nicknames[comment.userId] ?: "알 수 없음",
+                    isLiked = comment.id in likedCommentIds,
+                )
+            },
+            nextCursor = nextCursor,
+            hasNext = hasNext,
+        )
+    }
+
+    private data class FetchCommentsResult(
+        val comments: List<HotDealCommentModel>,
+        val nextCursor: Long?,
+        val hasNext: Boolean,
+    )
+
+    private fun fetchComments(dealId: Long, afterId: Long?, size: Int): FetchCommentsResult {
         val rootComments = hotDealCommentQueryPort.findRootComments(dealId, afterId, size + 1)
         val hasNext = rootComments.size > size
         val pagedRoots = if (hasNext) rootComments.take(size) else rootComments
@@ -63,41 +109,10 @@ class HotDealQueryService(
 
         val nextCursor = if (hasNext) pagedRoots.last().id else null
 
-        return CommentCursorResult(
+        return FetchCommentsResult(
             comments = comments,
             nextCursor = nextCursor,
             hasNext = hasNext,
-        )
-    }
-
-    @Transactional(readOnly = true)
-    override fun getCommentsEnriched(dealId: Long, userId: Long?, afterId: Long?, size: Int): EnrichedCommentCursorResult {
-        val result = getComments(dealId, afterId, size)
-        val comments = result.comments
-
-        val userIds = comments.map { it.userId }.distinct()
-        val nicknames = userQueryPort.findNicknamesByIds(userIds)
-
-        val likedCommentIds = if (userId != null) {
-            val commentIds = comments.filter { !it.isDeleted }.map { it.id }
-            if (commentIds.isNotEmpty()) {
-                hotDealCommentLikeQueryPort.findAllByUserIdAndCommentIds(userId, commentIds)
-                    .map { it.commentId }.toSet()
-            } else emptySet()
-        } else {
-            emptySet()
-        }
-
-        return EnrichedCommentCursorResult(
-            comments = comments.map { comment ->
-                CommentWithNickname(
-                    comment = comment,
-                    nickname = nicknames[comment.userId] ?: "알 수 없음",
-                    isLiked = comment.id in likedCommentIds,
-                )
-            },
-            nextCursor = result.nextCursor,
-            hasNext = result.hasNext,
         )
     }
 

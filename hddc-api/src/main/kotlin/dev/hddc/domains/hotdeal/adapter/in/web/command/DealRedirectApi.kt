@@ -1,4 +1,4 @@
-package dev.hddc.domains.hotdeal.adapter.`in`.web.query
+package dev.hddc.domains.hotdeal.adapter.`in`.web.command
 
 import dev.hddc.domains.hotdeal.application.ports.input.command.DealClickUsecase
 import dev.hddc.framework.security.authentication.UserAuthenticationDTO

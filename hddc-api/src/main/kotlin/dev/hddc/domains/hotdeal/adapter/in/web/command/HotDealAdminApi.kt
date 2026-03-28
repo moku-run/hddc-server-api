@@ -1,10 +1,13 @@
 package dev.hddc.domains.hotdeal.adapter.`in`.web.command
 
+import dev.hddc.domains.hotdeal.adapter.`in`.web.command.request.CreateHotDealRequest
+import dev.hddc.domains.hotdeal.adapter.`in`.web.command.request.UpdateHotDealRequest
 import dev.hddc.domains.hotdeal.adapter.`in`.web.response.HotDealPageResponse
 import dev.hddc.domains.hotdeal.adapter.`in`.web.response.HotDealResponse
 import dev.hddc.domains.hotdeal.application.ports.input.command.CreateHotDealCommand
 import dev.hddc.domains.hotdeal.application.ports.input.command.HotDealAdminUsecase
 import dev.hddc.domains.hotdeal.application.ports.input.command.UpdateHotDealCommand
+import dev.hddc.domains.hotdeal.application.ports.input.query.HotDealAdminQueryUsecase
 import dev.hddc.framework.api.response.ApiResponse
 import dev.hddc.framework.api.response.ApiResponseCode
 import dev.hddc.framework.api.response.ApiResult
@@ -12,44 +15,16 @@ import dev.hddc.framework.security.authentication.UserAuthenticationDTO
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
-import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.Size
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.web.PageableDefault
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 
-data class CreateHotDealRequest(
-    @field:NotBlank(message = "제목은 필수입니다.")
-    @field:Size(max = 200, message = "제목은 200자 이하여야 합니다.")
-    val title: String,
-    val description: String? = null,
-    @field:NotBlank(message = "URL은 필수입니다.")
-    val url: String,
-    val imageUrl: String? = null,
-    val originalPrice: Int? = null,
-    val dealPrice: Int? = null,
-    val discountRate: Int? = null,
-    val category: String? = null,
-    val store: String? = null,
-)
-
-data class UpdateHotDealRequest(
-    val title: String? = null,
-    val description: String? = null,
-    val url: String? = null,
-    val imageUrl: String? = null,
-    val originalPrice: Int? = null,
-    val dealPrice: Int? = null,
-    val discountRate: Int? = null,
-    val category: String? = null,
-    val store: String? = null,
-)
-
 @Tag(name = "Admin - Hot Deal", description = "관리자 핫딜 관리 API")
 @RestController
 class HotDealAdminApi(
+    private val hotDealAdminQueryUsecase: HotDealAdminQueryUsecase,
     private val hotDealAdminUsecase: HotDealAdminUsecase,
 ) {
     @Operation(summary = "핫딜 전체 목록 (삭제 포함)")
@@ -58,7 +33,7 @@ class HotDealAdminApi(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @PageableDefault(size = 20, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable,
     ): ApiResult<HotDealPageResponse> {
-        val result = hotDealAdminUsecase.getAll(pageable.pageNumber, pageable.pageSize)
+        val result = hotDealAdminQueryUsecase.getAll(pageable.pageNumber, pageable.pageSize)
         val response = HotDealPageResponse(
             content = result.content.map { it ->
                 HotDealResponse.from(it.deal, it.nickname, it.dealNumber)

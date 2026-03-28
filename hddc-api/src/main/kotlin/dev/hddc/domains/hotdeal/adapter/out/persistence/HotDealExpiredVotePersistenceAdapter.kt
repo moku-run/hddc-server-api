@@ -1,0 +1,35 @@
+package dev.hddc.domains.hotdeal.adapter.out.persistence
+
+import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealExpiredVotePort
+import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealExpiredVoteQueryPort
+import dev.hddc.domains.hotdeal.domain.model.HotDealExpiredVoteModel
+import org.springframework.stereotype.Component
+
+@Component
+class HotDealExpiredVotePersistenceAdapter(
+    private val hotDealExpiredVoteRepository: HotDealExpiredVoteRepository,
+) : HotDealExpiredVotePort, HotDealExpiredVoteQueryPort {
+
+    override fun existsByDealIdAndUserId(dealId: Long, userId: Long): Boolean =
+        hotDealExpiredVoteRepository.existsByDealIdAndUserId(dealId, userId)
+
+    override fun findByDealIdAndUserId(dealId: Long, userId: Long): HotDealExpiredVoteModel? =
+        hotDealExpiredVoteRepository.findByDealIdAndUserId(dealId, userId)?.let {
+            HotDealExpiredVoteModel(id = it.id, dealId = it.dealId, userId = it.userId, createdAt = it.createdAt)
+        }
+
+    override fun findAllByUserIdAndDealIds(userId: Long, dealIds: List<Long>): List<HotDealExpiredVoteModel> =
+        hotDealExpiredVoteRepository.findAllByUserIdAndDealIdIn(userId, dealIds).map {
+            HotDealExpiredVoteModel(id = it.id, dealId = it.dealId, userId = it.userId, createdAt = it.createdAt)
+        }
+
+    override fun save(model: HotDealExpiredVoteModel): HotDealExpiredVoteModel {
+        val entity = HotDealExpiredVoteEntity(dealId = model.dealId, userId = model.userId)
+        val saved = hotDealExpiredVoteRepository.save(entity)
+        return HotDealExpiredVoteModel(id = saved.id, dealId = saved.dealId, userId = saved.userId, createdAt = saved.createdAt)
+    }
+
+    override fun delete(model: HotDealExpiredVoteModel) {
+        model.id?.let { hotDealExpiredVoteRepository.deleteById(it) }
+    }
+}

@@ -4,6 +4,7 @@ import dev.hddc.framework.jpa.BaseAuditEntity
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Table
+import java.time.Instant
 
 @Entity
 @Table(name = "mst_hot_deal")
@@ -52,4 +53,9 @@ class HotDealEntity(
 
     @Column(name = "is_expired", nullable = false)
     var isExpired: Boolean = false,
-) : BaseAuditEntity()
+) : BaseAuditEntity() {
+    fun softDelete() {
+        isDeleted = true
+        deletedAt = Instant.now()
+    }
+}
