@@ -1,7 +1,7 @@
 package dev.hddc.domains.hotdeal.application.service.query
 
 import dev.hddc.domains.hotdeal.application.ports.input.query.CandidateDealAdminQueryUsecase
-import dev.hddc.domains.hotdeal.application.ports.input.query.CandidateDealPageData
+import dev.hddc.domains.hotdeal.application.ports.output.query.CandidateDealPageData
 import dev.hddc.domains.hotdeal.application.ports.output.query.CandidateDealQueryPort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

@@ -1,6 +1,6 @@
 package dev.hddc.domains.hotdeal.adapter.`in`.web.response
 
-import dev.hddc.domains.hotdeal.application.ports.input.query.CandidateDealPageData
+import dev.hddc.domains.hotdeal.application.ports.output.query.CandidateDealPageData
 import dev.hddc.domains.hotdeal.domain.model.CandidateDealModel
 
 data class CandidateDealResponse(

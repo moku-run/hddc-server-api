@@ -1,7 +1,7 @@
 package dev.hddc.domains.hotdeal.adapter.out.persistence
 
 import dev.hddc.domains.hotdeal.application.ports.output.command.CandidateDealPort
-import dev.hddc.domains.hotdeal.application.ports.input.query.CandidateDealPageData
+import dev.hddc.domains.hotdeal.application.ports.output.query.CandidateDealPageData
 import dev.hddc.domains.hotdeal.application.ports.output.query.CandidateDealQueryPort
 import dev.hddc.domains.hotdeal.domain.model.CandidateDealModel
 import dev.hddc.domains.hotdeal.domain.model.CandidateDealStatus
