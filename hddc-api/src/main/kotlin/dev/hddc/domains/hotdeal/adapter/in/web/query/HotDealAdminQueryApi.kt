@@ -32,10 +32,7 @@ class HotDealAdminQueryApi(
             content = result.content.map { it ->
                 HotDealResponse.from(it.deal, it.nickname, it.dealNumber)
             },
-            page = result.page,
-            size = result.size,
-            totalElements = result.totalElements,
-            totalPages = result.totalPages,
+            pagination = result.pagination,
         )
         return ApiResponse.of(ApiResponseCode.OK, response)
     }

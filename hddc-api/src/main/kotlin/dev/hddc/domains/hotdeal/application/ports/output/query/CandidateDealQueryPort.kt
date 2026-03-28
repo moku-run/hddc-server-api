@@ -1,13 +1,11 @@
 package dev.hddc.domains.hotdeal.application.ports.output.query
 
 import dev.hddc.domains.hotdeal.domain.model.CandidateDealModel
+import dev.hddc.framework.pagination.Pagination
 
 data class CandidateDealPageData(
     val content: List<CandidateDealModel>,
-    val page: Int,
-    val size: Int,
-    val totalElements: Long,
-    val totalPages: Int,
+    val pagination: Pagination,
 )
 
 interface CandidateDealQueryPort {

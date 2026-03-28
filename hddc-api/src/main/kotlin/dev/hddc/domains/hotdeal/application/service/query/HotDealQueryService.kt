@@ -133,7 +133,7 @@ class HotDealQueryService(
             HotDealWithUserState(
                 deal = deal,
                 nickname = nicknames[deal.userId] ?: "알 수 없음",
-                dealNumber = dealPage.totalElements - (dealPage.page.toLong() * dealPage.size) - index,
+                dealNumber = dealPage.pagination.totalItems - ((dealPage.pagination.currentPage - 1).toLong() * dealPage.pagination.perPage) - index,
                 isLiked = deal.id in likedIds,
                 isVotedExpired = deal.id in votedExpiredIds,
             )
@@ -141,10 +141,7 @@ class HotDealQueryService(
 
         return HotDealPageResult(
             content = content,
-            page = dealPage.page,
-            size = dealPage.size,
-            totalElements = dealPage.totalElements,
-            totalPages = dealPage.totalPages,
+            pagination = dealPage.pagination,
         )
     }
 }

@@ -67,9 +67,6 @@ class HotDealQueryApi(
             content = content.map { it ->
                 HotDealResponse.from(it.deal, it.nickname, it.dealNumber, it.isLiked, it.isVotedExpired)
             },
-            page = page,
-            size = size,
-            totalElements = totalElements,
-            totalPages = totalPages,
+            pagination = pagination,
         )
 }

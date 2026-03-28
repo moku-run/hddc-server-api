@@ -7,6 +7,7 @@ import dev.hddc.domains.hotdeal.domain.model.CandidateDealModel
 import dev.hddc.domains.hotdeal.domain.model.CandidateDealStatus
 import dev.hddc.framework.api.response.ApiResponseCode
 import dev.hddc.framework.api.response.BusinessException
+import dev.hddc.framework.pagination.Pagination
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Component
@@ -22,10 +23,7 @@ class CandidateDealPersistenceAdapter(
         val result = candidateDealRepository.findByStatus(status, pageable)
         return CandidateDealPageData(
             content = result.content.map { it.toDomain() },
-            page = result.number,
-            size = result.size,
-            totalElements = result.totalElements,
-            totalPages = result.totalPages,
+            pagination = Pagination.of(result),
         )
     }
 

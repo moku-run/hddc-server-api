@@ -2,7 +2,11 @@ package dev.hddc.domains.hotdeal.adapter.out.persistence
 
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealPageData
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealQueryPort
+import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealWithNicknameData
+import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealWithNicknamePageData
 import dev.hddc.domains.hotdeal.domain.model.HotDealModel
+import dev.hddc.domains.user.adapter.out.persistence.UserRepository
+import dev.hddc.framework.pagination.Pagination
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
@@ -11,6 +15,7 @@ import org.springframework.stereotype.Component
 @Component
 class HotDealQueryAdapter(
     private val hotDealRepository: HotDealRepository,
+    private val userRepository: UserRepository,
 ) : HotDealQueryPort {
 
     override fun findById(dealId: Long): HotDealModel? =
@@ -34,12 +39,25 @@ class HotDealQueryAdapter(
         return hotDealRepository.findAll(pageable).toPageData()
     }
 
+    override fun findAllWithNicknames(page: Int, size: Int): HotDealWithNicknamePageData {
+        val pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"))
+        val result = hotDealRepository.findAll(pageable)
+        val userIds = result.content.map { it.userId }.distinct()
+        val nicknames = userRepository.findAllByIdIn(userIds).associate { it.id!! to it.nickname }
+        return HotDealWithNicknamePageData(
+            content = result.content.map { entity ->
+                HotDealWithNicknameData(
+                    deal = entity.toDomain(),
+                    nickname = nicknames[entity.userId] ?: "알 수 없음",
+                )
+            },
+            pagination = Pagination.of(result),
+        )
+    }
+
     private fun Page<HotDealEntity>.toPageData() = HotDealPageData(
         content = content.map { it.toDomain() },
-        page = number,
-        size = size,
-        totalElements = totalElements,
-        totalPages = totalPages,
+        pagination = Pagination.of(this),
     )
 
     private fun resolveSort(sort: String): Sort = when (sort) {

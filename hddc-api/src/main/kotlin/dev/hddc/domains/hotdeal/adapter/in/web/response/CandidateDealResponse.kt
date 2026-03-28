@@ -2,6 +2,7 @@ package dev.hddc.domains.hotdeal.adapter.`in`.web.response
 
 import dev.hddc.domains.hotdeal.application.ports.output.query.CandidateDealPageData
 import dev.hddc.domains.hotdeal.domain.model.CandidateDealModel
+import dev.hddc.framework.pagination.Pagination
 
 data class CandidateDealResponse(
     val id: Long,
@@ -45,18 +46,12 @@ data class CandidateDealResponse(
 
 data class CandidateDealPageResponse(
     val content: List<CandidateDealResponse>,
-    val page: Int,
-    val size: Int,
-    val totalElements: Long,
-    val totalPages: Int,
+    val pagination: Pagination,
 ) {
     companion object {
         fun from(data: CandidateDealPageData) = CandidateDealPageResponse(
             content = data.content.map { CandidateDealResponse.from(it) },
-            page = data.page,
-            size = data.size,
-            totalElements = data.totalElements,
-            totalPages = data.totalPages,
+            pagination = data.pagination,
         )
     }
 }

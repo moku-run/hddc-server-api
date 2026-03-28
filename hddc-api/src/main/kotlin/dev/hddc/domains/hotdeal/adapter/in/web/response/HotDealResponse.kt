@@ -2,6 +2,7 @@ package dev.hddc.domains.hotdeal.adapter.`in`.web.response
 
 import dev.hddc.domains.hotdeal.domain.model.HotDealCommentModel
 import dev.hddc.domains.hotdeal.domain.model.HotDealModel
+import dev.hddc.framework.pagination.Pagination
 
 data class HotDealResponse(
     val dealNumber: Long,
@@ -55,10 +56,7 @@ data class HotDealResponse(
 
 data class HotDealPageResponse(
     val content: List<HotDealResponse>,
-    val page: Int,
-    val size: Int,
-    val totalElements: Long,
-    val totalPages: Int,
+    val pagination: Pagination,
 )
 
 data class CommentCursorResponse(
