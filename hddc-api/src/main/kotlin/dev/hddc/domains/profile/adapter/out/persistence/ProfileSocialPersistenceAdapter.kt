@@ -50,7 +50,7 @@ class ProfileSocialPersistenceAdapter(
         profileSocialRepository.existsByProfileIdAndPlatformAndIsDeletedFalse(profileId, platform)
 
     private fun createNewEntity(model: SocialLinkModel): ProfileSocialEntity {
-        val profile = profileRepository.findById(model.profileId!!).orElseThrow()
+        val profile = profileRepository.loadById(model.profileId!!)
         return ProfileSocialEntity(
             platform = model.platform,
             url = model.url,

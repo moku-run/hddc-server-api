@@ -50,7 +50,7 @@ class ProfileLinkPersistenceAdapter(
             .map { it.toDomain() }
 
     private fun createNewEntity(model: ProfileLinkModel): ProfileLinkEntity {
-        val profile = profileRepository.findById(model.profileId!!).orElseThrow()
+        val profile = profileRepository.loadById(model.profileId!!)
         return ProfileLinkEntity(
             title = model.title,
             url = model.url,

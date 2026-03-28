@@ -5,8 +5,6 @@ import dev.hddc.domains.hotdeal.application.ports.output.query.CandidateDealPage
 import dev.hddc.domains.hotdeal.application.ports.output.query.CandidateDealQueryPort
 import dev.hddc.domains.hotdeal.domain.model.CandidateDealModel
 import dev.hddc.domains.hotdeal.domain.model.CandidateDealStatus
-import dev.hddc.framework.api.response.ApiResponseCode
-import dev.hddc.framework.api.response.BusinessException
 import dev.hddc.framework.pagination.Pagination
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.PageRequest
@@ -32,15 +30,13 @@ class CandidateDealPersistenceAdapter(
         candidateDealRepository.findById(id).orElse(null)?.toDomain()
 
     override fun loadById(id: Long): CandidateDealModel =
-        candidateDealRepository.findById(id).orElseThrow {
-            BusinessException(ApiResponseCode.CANDIDATE_DEAL_NOT_FOUND)
-        }.toDomain()
+        candidateDealRepository.loadById(id).toDomain()
 
     override fun findAllByIdsAndStatus(ids: List<Long>, status: String): List<CandidateDealModel> =
         candidateDealRepository.findAllByIdInAndStatus(ids, status).map { it.toDomain() }
 
     override fun updateStatus(id: Long, status: String, transferredAt: Instant?) {
-        val entity = candidateDealRepository.findById(id).orElse(null) ?: return
+        val entity = candidateDealRepository.loadById(id)
         entity.status = status
         entity.transferredAt = transferredAt
         candidateDealRepository.save(entity)

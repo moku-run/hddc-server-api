@@ -1,7 +1,12 @@
 package dev.hddc.domains.profile.adapter.out.persistence
 
+import dev.hddc.framework.api.response.ApiResponseCode
+import dev.hddc.framework.api.response.BusinessException
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
+
+fun ProfileRepository.loadById(id: Long): ProfileEntity =
+    findById(id).orElseThrow { BusinessException(ApiResponseCode.PROFILE_NOT_FOUND) }
 
 interface ProfileRepository : JpaRepository<ProfileEntity, Long> {
     fun findByUserId(userId: Long): ProfileEntity?
