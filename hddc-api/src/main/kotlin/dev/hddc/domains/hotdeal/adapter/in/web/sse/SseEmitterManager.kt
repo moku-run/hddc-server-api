@@ -2,7 +2,7 @@ package dev.hddc.domains.hotdeal.adapter.`in`.web.sse
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
-import dev.hddc.domains.hotdeal.domain.event.DealSseEvent
+import dev.hddc.domains.hotdeal.domain.event.DealEvent
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -19,7 +19,7 @@ class SseEmitterManager(
     // SSE 전용 ObjectMapper: null 제외 + eventType 제외
     private val sseMapper = objectMapper.copy().apply {
         setSerializationInclusion(JsonInclude.Include.NON_NULL)
-        addMixIn(DealSseEvent::class.java, DealSseEventMixin::class.java)
+        addMixIn(DealEvent::class.java, DealEventMixin::class.java)
     }
 
     fun add(emitter: SseEmitter): SseEmitter {
@@ -31,7 +31,7 @@ class SseEmitterManager(
         return emitter
     }
 
-    fun broadcast(event: DealSseEvent) {
+    fun broadcast(event: DealEvent) {
         val data = sseMapper.writeValueAsString(event)
         val dead = mutableListOf<SseEmitter>()
 

@@ -5,7 +5,7 @@ import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommandP
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealExpiredVotePort
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealExpiredVoteQueryPort
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealQueryPort
-import dev.hddc.domains.hotdeal.domain.event.DealSseEvent
+import dev.hddc.domains.hotdeal.domain.event.DealEvent
 import dev.hddc.domains.hotdeal.domain.model.HotDealExpiredVoteModel
 import dev.hddc.domains.hotdeal.domain.spec.HotDealSpec
 import dev.hddc.domains.hotdeal.application.ports.output.event.DomainEventPublisher
@@ -27,23 +27,22 @@ class DealExpiredVoteService(
         if (hotDealExpiredVoteQueryPort.existsByDealIdAndUserId(dealId, userId)) return
 
         hotDealExpiredVotePort.save(HotDealExpiredVoteModel(dealId = dealId, userId = userId))
-        val newCount = deal.expiredVoteCount + 1
+        val newCount = deal.incrementedExpiredVoteCount()
         val expired = HotDealSpec.isExpiredThresholdReached(newCount)
         hotDealCommandPort.updateExpiredVote(dealId, newCount, expired)
-        eventPublisher.publish(DealSseEvent.DealUpdated(id = dealId, expiredVoteCount = newCount))
+        eventPublisher.publish(DealEvent.DealUpdated(id = dealId, expiredVoteCount = newCount))
         if (expired && !deal.isExpired) {
-            eventPublisher.publish(DealSseEvent.DealExpired(id = dealId))
+            eventPublisher.publish(DealEvent.DealExpired(id = dealId))
         }
     }
 
     @Transactional
     override fun unvote(userId: Long, dealId: Long) {
         val deal = hotDealQueryPort.loadById(dealId)
-        val vote = hotDealExpiredVoteQueryPort.findByDealIdAndUserId(dealId, userId) ?: return
+        if (!hotDealExpiredVotePort.deleteByDealIdAndUserId(dealId, userId)) return
 
-        hotDealExpiredVotePort.delete(vote)
-        val newCount = maxOf(0, deal.expiredVoteCount - 1)
+        val newCount = deal.decrementedExpiredVoteCount()
         hotDealCommandPort.updateExpiredVote(dealId, newCount, false)
-        eventPublisher.publish(DealSseEvent.DealUpdated(id = dealId, expiredVoteCount = newCount))
+        eventPublisher.publish(DealEvent.DealUpdated(id = dealId, expiredVoteCount = newCount))
     }
 }

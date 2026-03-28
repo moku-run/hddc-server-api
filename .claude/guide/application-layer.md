@@ -341,4 +341,12 @@ class SomeService(...) {
 class SomeService(...) {
     fun save() = transactionalOperator.transactional(...)  // 이중 감싸기 금지!
 }
+
+// 금지: 도메인 이벤트에 기술명 포함
+class DealSseEvent(...)    // 금지! "SSE"는 기술 관심사
+class DealEvent(...)       // 올바름. 비즈니스 이벤트
+
+// 금지: 서비스에서 ! 연산자로 부정 판단
+if (!deal.isActive) return null   // 금지!
+if (deal.isInactive) return null  // 올바름. 긍정형 프로퍼티 사용
 ```

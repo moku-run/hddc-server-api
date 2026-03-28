@@ -4,5 +4,5 @@ import dev.hddc.domains.hotdeal.domain.model.HotDealLikeModel
 
 interface HotDealLikePort {
     fun save(model: HotDealLikeModel): HotDealLikeModel
-    fun delete(model: HotDealLikeModel)
+    fun deleteByDealIdAndUserId(dealId: Long, userId: Long): Boolean
 }

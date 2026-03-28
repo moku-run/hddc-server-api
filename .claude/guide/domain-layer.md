@@ -460,6 +460,32 @@ override fun validateMySelf(authId: Long, targetUserId: Long): Mono<Void> =
     throwIf(DomainRule.isSameUser(authId, targetUserId), ApiResponseCode.MEMBER_INVITE_INVALID_MY_SELF)
 ```
 
+### 5.7 도메인 모델의 상태 연산 메서드
+
+카운터 증감, 상태 파생 같은 연산은 도메인 모델에 메서드로 표현한다. 서비스에서 인라인 산술(`deal.likeCount + 1`)을 하지 않는다.
+
+```kotlin
+// DO: 모델이 연산을 가짐
+data class HotDealModel(...) {
+    val isActive: Boolean get() = !isDeleted && !isExpired
+    val isInactive: Boolean get() = isDeleted || isExpired
+
+    fun incrementedLikeCount(): Int = likeCount + 1
+    fun decrementedLikeCount(): Int = maxOf(0, likeCount - 1)
+}
+
+// Service — 도메인 언어로 읽힘
+val newCount = deal.incrementedLikeCount()
+hotDealCommandPort.updateLikeCount(dealId, newCount)
+```
+
+```kotlin
+// DON'T: 서비스에서 인라인 산술
+val newCount = deal.likeCount + 1           // 금지
+val newCount = maxOf(0, deal.likeCount - 1) // 금지
+if (!deal.isActive) return null             // 금지 — deal.isInactive 사용
+```
+
 ### 5.6 판단 기준 요약
 
 코드를 작성할 때, 아래 질문으로 domain에 올릴 수 있는 로직인지 판단한다:

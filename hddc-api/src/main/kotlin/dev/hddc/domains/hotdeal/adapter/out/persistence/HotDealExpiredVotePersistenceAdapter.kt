@@ -29,7 +29,9 @@ class HotDealExpiredVotePersistenceAdapter(
         return HotDealExpiredVoteModel(id = saved.id, dealId = saved.dealId, userId = saved.userId, createdAt = saved.createdAt)
     }
 
-    override fun delete(model: HotDealExpiredVoteModel) {
-        model.id?.let { hotDealExpiredVoteRepository.deleteById(it) }
+    override fun deleteByDealIdAndUserId(dealId: Long, userId: Long): Boolean {
+        val entity = hotDealExpiredVoteRepository.findByDealIdAndUserId(dealId, userId) ?: return false
+        hotDealExpiredVoteRepository.delete(entity)
+        return true
     }
 }

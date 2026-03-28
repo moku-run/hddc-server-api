@@ -1,6 +1,6 @@
 package dev.hddc.domains.hotdeal.adapter.`in`.web.sse
 
-import dev.hddc.domains.hotdeal.domain.event.DealSseEvent
+import dev.hddc.domains.hotdeal.domain.event.DealEvent
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import org.springframework.transaction.event.TransactionPhase
@@ -12,7 +12,7 @@ class DealEventListener(
 ) {
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    fun handle(event: DealSseEvent) {
+    fun handle(event: DealEvent) {
         sseEmitterManager.broadcast(event)
     }
 }

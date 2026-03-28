@@ -5,7 +5,7 @@ import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommandP
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommentPort
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealCommentQueryPort
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealQueryPort
-import dev.hddc.domains.hotdeal.domain.event.DealSseEvent
+import dev.hddc.domains.hotdeal.domain.event.DealEvent
 import dev.hddc.domains.hotdeal.domain.model.CreateHotDealCommentModel
 import dev.hddc.domains.hotdeal.domain.model.HotDealCommentModel
 import dev.hddc.domains.user.application.ports.output.query.UserQueryPort
@@ -44,11 +44,11 @@ class DealCommentService(
                 content = content,
             )
         )
-        val newCount = deal.commentCount + 1
+        val newCount = deal.incrementedCommentCount()
         hotDealCommandPort.updateCommentCount(dealId, newCount)
 
         val nicknames = userQueryPort.findNicknamesByIds(listOf(userId))
-        eventPublisher.publish(DealSseEvent.NewComment(
+        eventPublisher.publish(DealEvent.NewComment(
             dealId = dealId,
             id = saved.id,
             nickname = nicknames[userId] ?: "알 수 없음",
@@ -56,7 +56,7 @@ class DealCommentService(
             parentId = parentId,
             createdAt = saved.createdAt,
         ))
-        eventPublisher.publish(DealSseEvent.DealUpdated(id = dealId, commentCount = newCount))
+        eventPublisher.publish(DealEvent.DealUpdated(id = dealId, commentCount = newCount))
 
         return saved
     }
@@ -70,9 +70,9 @@ class DealCommentService(
         }
 
         hotDealCommentPort.softDelete(commentId)
-        val newCount = maxOf(0, deal.commentCount - 1)
+        val newCount = deal.decrementedCommentCount()
         hotDealCommandPort.updateCommentCount(dealId, newCount)
-        eventPublisher.publish(DealSseEvent.CommentDeleted(dealId = dealId, id = commentId))
-        eventPublisher.publish(DealSseEvent.DealUpdated(id = dealId, commentCount = newCount))
+        eventPublisher.publish(DealEvent.CommentDeleted(dealId = dealId, id = commentId))
+        eventPublisher.publish(DealEvent.DealUpdated(id = dealId, commentCount = newCount))
     }
 }

@@ -25,5 +25,15 @@ data class HotDealModel(
 ) {
     val isActive: Boolean get() = !isDeleted && !isExpired
 
+    val isInactive: Boolean get() = isDeleted || isExpired
+
     val hasDiscount: Boolean get() = discountRate != null && discountRate > 0
+
+    fun incrementedLikeCount(): Int = likeCount + 1
+    fun decrementedLikeCount(): Int = maxOf(0, likeCount - 1)
+    fun incrementedCommentCount(): Int = commentCount + 1
+    fun decrementedCommentCount(): Int = maxOf(0, commentCount - 1)
+    fun incrementedClickCount(): Int = clickCount + 1
+    fun incrementedExpiredVoteCount(): Int = expiredVoteCount + 1
+    fun decrementedExpiredVoteCount(): Int = maxOf(0, expiredVoteCount - 1)
 }

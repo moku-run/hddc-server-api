@@ -1,7 +1,7 @@
 package dev.hddc.domains.hotdeal.adapter.out.event
 
 import dev.hddc.domains.hotdeal.application.ports.output.event.DomainEventPublisher
-import dev.hddc.domains.hotdeal.domain.event.DealSseEvent
+import dev.hddc.domains.hotdeal.domain.event.DealEvent
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
 
@@ -9,5 +9,5 @@ import org.springframework.stereotype.Component
 class SpringDomainEventPublisher(
     private val publisher: ApplicationEventPublisher,
 ) : DomainEventPublisher {
-    override fun publish(event: DealSseEvent) = publisher.publishEvent(event)
+    override fun publish(event: DealEvent) = publisher.publishEvent(event)
 }

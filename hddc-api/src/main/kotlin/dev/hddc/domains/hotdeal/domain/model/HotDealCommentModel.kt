@@ -20,4 +20,7 @@ data class HotDealCommentModel(
     fun isOwnedBy(userId: Long): Boolean = this.userId == userId
 
     fun belongsTo(dealId: Long): Boolean = this.dealId == dealId
+
+    fun incrementedLikeCount(): Int = likeCount + 1
+    fun decrementedLikeCount(): Int = maxOf(0, likeCount - 1)
 }

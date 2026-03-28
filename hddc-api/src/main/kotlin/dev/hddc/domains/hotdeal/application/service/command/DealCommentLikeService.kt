@@ -26,7 +26,7 @@ class DealCommentLikeService(
         if (hotDealCommentLikeQueryPort.existsByCommentIdAndUserId(commentId, userId)) return
 
         hotDealCommentLikePort.save(HotDealCommentLikeModel(commentId = commentId, userId = userId))
-        hotDealCommentPort.updateLikeCount(commentId, comment.likeCount + 1)
+        hotDealCommentPort.updateLikeCount(commentId, comment.incrementedLikeCount())
     }
 
     @Transactional
@@ -35,6 +35,6 @@ class DealCommentLikeService(
         val like = hotDealCommentLikeQueryPort.findByCommentIdAndUserId(commentId, userId) ?: return
 
         hotDealCommentLikePort.delete(like)
-        hotDealCommentPort.updateLikeCount(commentId, maxOf(0, comment.likeCount - 1))
+        hotDealCommentPort.updateLikeCount(commentId, comment.decrementedLikeCount())
     }
 }

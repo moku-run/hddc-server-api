@@ -4,5 +4,5 @@ import dev.hddc.domains.hotdeal.domain.model.HotDealExpiredVoteModel
 
 interface HotDealExpiredVotePort {
     fun save(model: HotDealExpiredVoteModel): HotDealExpiredVoteModel
-    fun delete(model: HotDealExpiredVoteModel)
+    fun deleteByDealIdAndUserId(dealId: Long, userId: Long): Boolean
 }

@@ -7,7 +7,7 @@ import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommandP
 import dev.hddc.domains.hotdeal.application.ports.input.query.HotDealWithNickname
 import dev.hddc.domains.hotdeal.application.ports.output.event.DomainEventPublisher
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealQueryPort
-import dev.hddc.domains.hotdeal.domain.event.DealSseEvent
+import dev.hddc.domains.hotdeal.domain.event.DealEvent
 import dev.hddc.domains.hotdeal.domain.model.CreateHotDealModel
 import dev.hddc.domains.hotdeal.domain.model.HotDealModel
 import dev.hddc.domains.user.application.ports.output.query.UserQueryPort
@@ -39,7 +39,7 @@ class HotDealAdminService(
             )
         )
         val nicknames = userQueryPort.findNicknamesByIds(listOf(saved.userId))
-        eventPublisher.publish(DealSseEvent.NewDeal(
+        eventPublisher.publish(DealEvent.NewDeal(
             id = saved.id,
             title = saved.title,
             dealPrice = saved.dealPrice,
@@ -82,6 +82,6 @@ class HotDealAdminService(
     override fun delete(dealId: Long) {
         hotDealQueryPort.loadById(dealId)
         hotDealCommandPort.softDelete(dealId)
-        eventPublisher.publish(DealSseEvent.DealDeleted(id = dealId))
+        eventPublisher.publish(DealEvent.DealDeleted(id = dealId))
     }
 }

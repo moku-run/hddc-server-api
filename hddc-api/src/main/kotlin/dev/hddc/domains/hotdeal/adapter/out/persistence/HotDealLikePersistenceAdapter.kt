@@ -24,8 +24,10 @@ class HotDealLikePersistenceAdapter(
         return HotDealLikeModel(id = saved.id, dealId = saved.dealId, userId = saved.userId, createdAt = saved.createdAt)
     }
 
-    override fun delete(model: HotDealLikeModel) {
-        model.id?.let { hotDealLikeRepository.deleteById(it) }
+    override fun deleteByDealIdAndUserId(dealId: Long, userId: Long): Boolean {
+        val entity = hotDealLikeRepository.findByDealIdAndUserId(dealId, userId) ?: return false
+        hotDealLikeRepository.delete(entity)
+        return true
     }
 
     override fun findAllByUserIdAndDealIds(userId: Long, dealIds: List<Long>): List<HotDealLikeModel> =
