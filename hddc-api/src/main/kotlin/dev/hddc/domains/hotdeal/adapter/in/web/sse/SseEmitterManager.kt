@@ -39,7 +39,7 @@ class SseEmitterManager(
             try {
                 emitter.send(
                     SseEmitter.event()
-                        .name(event.eventType)
+                        .name(event.eventType.value)
                         .data(data)
                 )
             } catch (_: Exception) {

@@ -25,7 +25,7 @@ class DealCommentService(
 
         if (parentId != null) {
             val parent = hotDealCommentPort.loadById(parentId)
-            require(parent.dealId == dealId && !parent.isDeleted) {
+            require(parent.belongsTo(dealId) && !parent.isDeleted) {
                 "Parent comment not found or deleted"
             }
         }
@@ -59,7 +59,7 @@ class DealCommentService(
     override fun deleteComment(userId: Long, dealId: Long, commentId: Long) {
         val deal = hotDealCommandPort.loadById(dealId)
         val comment = hotDealCommentPort.loadById(commentId)
-        require(comment.dealId == dealId && comment.userId == userId && !comment.isDeleted) {
+        require(comment.belongsTo(dealId) && comment.isOwnedBy(userId) && !comment.isDeleted) {
             "Comment not found or not authorized"
         }
 

@@ -19,7 +19,7 @@ class DealClickService(
     @Transactional
     override fun click(dealId: Long, userId: Long?, ip: String): DealClickResult? {
         val deal = hotDealCommandPort.findById(dealId) ?: return null
-        if (deal.isDeleted || deal.isExpired) return null
+        if (!deal.isActive) return null
 
         // TODO: 테스트 완료 후 중복 체크 복원
         // if (hotDealClickPort.isDuplicate(dealId, userId, ip)) {

@@ -1,7 +1,7 @@
 package dev.hddc.domains.hotdeal.adapter.out.persistence
 
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealClickPort
-import dev.hddc.domains.hotdeal.domain.spec.HotDealClickSpec
+import dev.hddc.domains.hotdeal.domain.spec.HotDealSpec
 import org.springframework.stereotype.Repository
 import java.time.Instant
 
@@ -11,7 +11,7 @@ class HotDealClickPersistenceAdapter(
 ) : HotDealClickPort {
 
     override fun isDuplicate(dealId: Long, userId: Long?, ip: String): Boolean {
-        val after = Instant.now().minusSeconds(HotDealClickSpec.DEDUP_MINUTES * 60)
+        val after = Instant.now().minusSeconds(HotDealSpec.CLICK_DEDUP_MINUTES * 60)
 
         return if (userId != null) {
             hotDealClickRepository.existsByDealIdAndUserIdAndCreatedAtAfter(dealId, userId, after)

@@ -12,4 +12,12 @@ data class HotDealCommentModel(
     val isDeleted: Boolean,
     val createdAt: Instant,
     val updatedAt: Instant,
-)
+) {
+    val isRootComment: Boolean get() = parentId == null
+
+    val isReply: Boolean get() = parentId != null
+
+    fun isOwnedBy(userId: Long): Boolean = this.userId == userId
+
+    fun belongsTo(dealId: Long): Boolean = this.dealId == dealId
+}
