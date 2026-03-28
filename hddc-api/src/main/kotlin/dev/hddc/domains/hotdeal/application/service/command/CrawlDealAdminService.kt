@@ -4,11 +4,10 @@ import dev.hddc.domains.hotdeal.application.ports.input.command.ApproveResult
 import dev.hddc.domains.hotdeal.application.ports.input.command.CrawlDealAdminUsecase
 import dev.hddc.domains.hotdeal.application.ports.output.command.CrawlHotDealPort
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommandPort
+import dev.hddc.domains.hotdeal.application.ports.output.command.CrawlHotDealPageData
 import dev.hddc.domains.hotdeal.domain.model.CrawlHotDealModel
 import dev.hddc.domains.hotdeal.domain.model.CreateHotDealModel
 import dev.hddc.domains.hotdeal.domain.spec.HotDealSpec
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -20,8 +19,8 @@ class CrawlDealAdminService(
 ) : CrawlDealAdminUsecase {
 
     @Transactional(readOnly = true)
-    override fun getCrawlDeals(status: String, pageable: Pageable): Page<CrawlHotDealModel> =
-        crawlHotDealPort.findByStatus(status, pageable)
+    override fun getCrawlDeals(status: String, page: Int, size: Int): CrawlHotDealPageData =
+        crawlHotDealPort.findByStatus(status, page, size)
 
     @Transactional
     override fun approve(crawlDealId: Long): Long {

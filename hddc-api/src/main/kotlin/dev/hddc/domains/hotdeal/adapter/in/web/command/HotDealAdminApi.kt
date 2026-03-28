@@ -60,16 +60,13 @@ class HotDealAdminApi(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @PageableDefault(size = 20, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable,
     ): ApiResult<HotDealPageResponse> {
-        val result = hotDealAdminUsecase.getAll(pageable)
-        val userIds = result.content.map { it.userId }.distinct()
-        val nicknames = userQueryPort.findNicknamesByIds(userIds)
-
+        val result = hotDealAdminUsecase.getAll(pageable.pageNumber, pageable.pageSize)
         val response = HotDealPageResponse(
             content = result.content.mapIndexed { index, it ->
-                val dealNumber = result.totalElements - (result.number.toLong() * result.size) - index
-                HotDealResponse.from(it, nicknames[it.userId] ?: "알 수 없음", dealNumber)
+                val dealNumber = result.totalElements - (result.page.toLong() * result.size) - index
+                HotDealResponse.from(it.deal, it.nickname, dealNumber)
             },
-            page = result.number,
+            page = result.page,
             size = result.size,
             totalElements = result.totalElements,
             totalPages = result.totalPages,

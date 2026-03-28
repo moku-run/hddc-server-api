@@ -6,7 +6,9 @@ import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommentP
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealExpiredVotePort
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealLikePort
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealReportPort
+import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealPageData
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealQueryPort
+import org.springframework.data.domain.Sort
 import dev.hddc.domains.hotdeal.domain.model.CreateHotDealCommentModel
 import dev.hddc.domains.hotdeal.domain.model.CreateHotDealModel
 import dev.hddc.domains.hotdeal.domain.model.HotDealCommentLikeModel
@@ -106,14 +108,34 @@ class HotDealQueryAdapter(
     private val hotDealRepository: HotDealRepository,
 ) : HotDealQueryPort {
 
-    override fun findActive(pageable: Pageable): Page<HotDealModel> =
-        hotDealRepository.findByIsDeletedFalseAndIsExpiredFalse(pageable).map { it.toDomain() }
+    override fun findActive(sort: String, page: Int, size: Int): HotDealPageData {
+        val pageable = PageRequest.of(page, size, resolveSort(sort))
+        return hotDealRepository.findByIsDeletedFalseAndIsExpiredFalse(pageable).toPageData()
+    }
 
-    override fun search(query: String, pageable: Pageable): Page<HotDealModel> =
-        hotDealRepository.search(query, pageable).map { it.toDomain() }
+    override fun search(query: String, page: Int, size: Int): HotDealPageData {
+        val pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"))
+        return hotDealRepository.search(query, pageable).toPageData()
+    }
 
-    override fun findAll(pageable: Pageable): Page<HotDealModel> =
-        hotDealRepository.findAll(pageable).map { it.toDomain() }
+    override fun findAll(page: Int, size: Int): HotDealPageData {
+        val pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"))
+        return hotDealRepository.findAll(pageable).toPageData()
+    }
+
+    private fun Page<HotDealEntity>.toPageData() = HotDealPageData(
+        content = content.map { it.toDomain() },
+        page = number,
+        size = size,
+        totalElements = totalElements,
+        totalPages = totalPages,
+    )
+
+    private fun resolveSort(sort: String): Sort = when (sort) {
+        "popular" -> Sort.by(Sort.Direction.DESC, "likeCount").and(Sort.by(Sort.Direction.DESC, "createdAt"))
+        "discount" -> Sort.by(Sort.Direction.DESC, "discountRate").and(Sort.by(Sort.Direction.DESC, "createdAt"))
+        else -> Sort.by(Sort.Direction.DESC, "createdAt")
+    }
 }
 
 @Component

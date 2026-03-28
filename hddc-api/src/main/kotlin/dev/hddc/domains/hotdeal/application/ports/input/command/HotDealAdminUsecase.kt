@@ -1,8 +1,7 @@
 package dev.hddc.domains.hotdeal.application.ports.input.command
 
+import dev.hddc.domains.hotdeal.application.ports.input.query.AdminHotDealPageResult
 import dev.hddc.domains.hotdeal.domain.model.HotDealModel
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 
 data class CreateHotDealCommand(
     val title: String,
@@ -29,7 +28,7 @@ data class UpdateHotDealCommand(
 )
 
 interface HotDealAdminUsecase {
-    fun getAll(pageable: Pageable): Page<HotDealModel>
+    fun getAll(page: Int, size: Int): AdminHotDealPageResult
     fun create(adminUserId: Long, command: CreateHotDealCommand): HotDealModel
     fun update(dealId: Long, command: UpdateHotDealCommand): HotDealModel
     fun delete(dealId: Long)

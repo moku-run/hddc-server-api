@@ -6,7 +6,6 @@ import dev.hddc.domains.hotdeal.adapter.`in`.web.response.HotDealPageResponse
 import dev.hddc.domains.hotdeal.adapter.`in`.web.response.HotDealResponse
 import dev.hddc.domains.hotdeal.application.ports.input.query.HotDealPageResult
 import dev.hddc.domains.hotdeal.application.ports.input.query.HotDealQueryUsecase
-import dev.hddc.domains.user.application.ports.output.query.UserQueryPort
 import dev.hddc.framework.api.response.ApiResponse
 import dev.hddc.framework.api.response.ApiResponseCode
 import dev.hddc.framework.api.response.ApiResult
@@ -25,7 +24,6 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class HotDealQueryApi(
     private val hotDealQueryUsecase: HotDealQueryUsecase,
-    private val userQueryPort: UserQueryPort,
 ) {
     @Operation(summary = "딜 목록 조회")
     @GetMapping("/api/hot-deals")
@@ -64,25 +62,15 @@ class HotDealQueryApi(
         return ApiResponse.of(ApiResponseCode.OK, response)
     }
 
-    private fun HotDealPageResult.toResponse(): HotDealPageResponse {
-        val userIds = content.map { it.deal.userId }.distinct()
-        val nicknames = userQueryPort.findNicknamesByIds(userIds)
-
-        return HotDealPageResponse(
+    private fun HotDealPageResult.toResponse(): HotDealPageResponse =
+        HotDealPageResponse(
             content = content.mapIndexed { index, it ->
                 val dealNumber = totalElements - (page.toLong() * size) - index
-                HotDealResponse.from(
-                    it.deal,
-                    nicknames[it.deal.userId] ?: "알 수 없음",
-                    dealNumber,
-                    it.isLiked,
-                    it.isVotedExpired
-                )
+                HotDealResponse.from(it.deal, it.nickname, dealNumber, it.isLiked, it.isVotedExpired)
             },
             page = page,
             size = size,
             totalElements = totalElements,
             totalPages = totalPages,
         )
-    }
 }

@@ -4,14 +4,14 @@ import dev.hddc.domains.hotdeal.application.ports.input.command.CreateHotDealCom
 import dev.hddc.domains.hotdeal.application.ports.input.command.HotDealAdminUsecase
 import dev.hddc.domains.hotdeal.application.ports.input.command.UpdateHotDealCommand
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommandPort
+import dev.hddc.domains.hotdeal.application.ports.input.query.AdminHotDealPageResult
+import dev.hddc.domains.hotdeal.application.ports.input.query.HotDealWithNickname
+import dev.hddc.domains.hotdeal.application.ports.output.event.DomainEventPublisher
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealQueryPort
 import dev.hddc.domains.hotdeal.domain.event.DealSseEvent
 import dev.hddc.domains.hotdeal.domain.model.CreateHotDealModel
 import dev.hddc.domains.hotdeal.domain.model.HotDealModel
 import dev.hddc.domains.user.application.ports.output.query.UserQueryPort
-import dev.hddc.domains.hotdeal.application.ports.output.event.DomainEventPublisher
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -24,8 +24,20 @@ class HotDealAdminService(
 ) : HotDealAdminUsecase {
 
     @Transactional(readOnly = true)
-    override fun getAll(pageable: Pageable): Page<HotDealModel> =
-        hotDealQueryPort.findAll(pageable)
+    override fun getAll(page: Int, size: Int): AdminHotDealPageResult {
+        val data = hotDealQueryPort.findAll(page, size)
+        val userIds = data.content.map { it.userId }.distinct()
+        val nicknames = userQueryPort.findNicknamesByIds(userIds)
+        return AdminHotDealPageResult(
+            content = data.content.map { deal ->
+                HotDealWithNickname(deal = deal, nickname = nicknames[deal.userId] ?: "알 수 없음")
+            },
+            page = data.page,
+            size = data.size,
+            totalElements = data.totalElements,
+            totalPages = data.totalPages,
+        )
+    }
 
     @Transactional
     override fun create(adminUserId: Long, command: CreateHotDealCommand): HotDealModel {

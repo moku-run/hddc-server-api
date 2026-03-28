@@ -1,11 +1,18 @@
 package dev.hddc.domains.hotdeal.application.ports.output.query
 
+import dev.hddc.domains.hotdeal.application.ports.input.query.HotDealPageResult
 import dev.hddc.domains.hotdeal.domain.model.HotDealModel
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 
 interface HotDealQueryPort {
-    fun findActive(pageable: Pageable): Page<HotDealModel>
-    fun search(query: String, pageable: Pageable): Page<HotDealModel>
-    fun findAll(pageable: Pageable): Page<HotDealModel>
+    fun findActive(sort: String, page: Int, size: Int): HotDealPageData
+    fun search(query: String, page: Int, size: Int): HotDealPageData
+    fun findAll(page: Int, size: Int): HotDealPageData
 }
+
+data class HotDealPageData(
+    val content: List<HotDealModel>,
+    val page: Int,
+    val size: Int,
+    val totalElements: Long,
+    val totalPages: Int,
+)

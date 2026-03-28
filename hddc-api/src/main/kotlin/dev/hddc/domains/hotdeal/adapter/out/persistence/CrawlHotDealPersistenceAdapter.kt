@@ -1,19 +1,29 @@
 package dev.hddc.domains.hotdeal.adapter.out.persistence
 
+import dev.hddc.domains.hotdeal.application.ports.output.command.CrawlHotDealPageData
 import dev.hddc.domains.hotdeal.application.ports.output.command.CrawlHotDealPort
 import dev.hddc.domains.hotdeal.domain.model.CrawlHotDealModel
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
-import org.springframework.stereotype.Repository
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
+import org.springframework.stereotype.Component
 import java.time.Instant
 
-@Repository
+@Component
 class CrawlHotDealPersistenceAdapter(
     private val crawlHotDealRepository: CrawlHotDealRepository,
 ) : CrawlHotDealPort {
 
-    override fun findByStatus(status: String, pageable: Pageable): Page<CrawlHotDealModel> =
-        crawlHotDealRepository.findByStatus(status, pageable).map { it.toDomain() }
+    override fun findByStatus(status: String, page: Int, size: Int): CrawlHotDealPageData {
+        val pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "crawledAt"))
+        val result = crawlHotDealRepository.findByStatus(status, pageable)
+        return CrawlHotDealPageData(
+            content = result.content.map { it.toDomain() },
+            page = result.number,
+            size = result.size,
+            totalElements = result.totalElements,
+            totalPages = result.totalPages,
+        )
+    }
 
     override fun findById(id: Long): CrawlHotDealModel? =
         crawlHotDealRepository.findById(id).orElse(null)?.toDomain()

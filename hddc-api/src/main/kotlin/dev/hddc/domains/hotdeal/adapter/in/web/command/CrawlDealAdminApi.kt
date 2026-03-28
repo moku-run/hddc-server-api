@@ -2,6 +2,7 @@ package dev.hddc.domains.hotdeal.adapter.`in`.web.command
 
 import dev.hddc.domains.hotdeal.application.ports.input.command.ApproveResult
 import dev.hddc.domains.hotdeal.application.ports.input.command.CrawlDealAdminUsecase
+import dev.hddc.domains.hotdeal.application.ports.output.command.CrawlHotDealPageData
 import dev.hddc.domains.hotdeal.domain.model.CrawlHotDealModel
 import dev.hddc.framework.api.response.ApiResponse
 import dev.hddc.framework.api.response.ApiResponseCode
@@ -9,7 +10,6 @@ import dev.hddc.framework.api.response.ApiResult
 import dev.hddc.framework.security.authentication.UserAuthenticationDTO
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.web.PageableDefault
@@ -78,7 +78,7 @@ class CrawlDealAdminApi(
         @RequestParam(defaultValue = "PENDING") status: String,
         @PageableDefault(size = 20, sort = ["crawledAt"], direction = Sort.Direction.DESC) pageable: Pageable,
     ): ApiResult<CrawlDealPageResponse> {
-        val result = crawlDealAdminUsecase.getCrawlDeals(status, pageable)
+        val result = crawlDealAdminUsecase.getCrawlDeals(status, pageable.pageNumber, pageable.pageSize)
         return ApiResponse.of(ApiResponseCode.OK, result.toResponse())
     }
 
@@ -108,9 +108,9 @@ class CrawlDealAdminApi(
     ): ApiResult<ApproveResult> =
         ApiResponse.of(ApiResponseCode.CREATED, crawlDealAdminUsecase.bulkApprove(request.ids))
 
-    private fun Page<CrawlHotDealModel>.toResponse() = CrawlDealPageResponse(
+    private fun CrawlHotDealPageData.toResponse() = CrawlDealPageResponse(
         content = content.map { CrawlDealResponse.from(it) },
-        page = number,
+        page = page,
         size = size,
         totalElements = totalElements,
         totalPages = totalPages,
