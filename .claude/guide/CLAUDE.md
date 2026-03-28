@@ -7,6 +7,7 @@
 
 1. **의존성 방향은 안쪽으로만 흐른다** — adapter → application → domain. 역방향 의존 금지
 2. **domain은 순수하다** — Spring 어노테이션, 인프라 라이브러리 import 금지
+   - **예외:** application 계층에서 `Pageable`, `Page` 등 Spring Data 페이징 타입은 허용
 3. **비즈니스 로직은 domain에** — use case는 오케스트레이션만, adapter는 변환만
 4. **인터페이스로 계층을 분리한다** — use case는 Input 포트, 인프라는 Output 포트
 5. **Spring Boot + VirtualThread 모델** — 동기 스타일, `@Transactional`로 트랜잭션 관리
