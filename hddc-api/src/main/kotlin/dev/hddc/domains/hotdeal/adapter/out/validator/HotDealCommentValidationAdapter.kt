@@ -13,14 +13,14 @@ class HotDealCommentValidationAdapter(
 
     override fun validateParentComment(parentId: Long, dealId: Long) {
         val parent = hotDealCommentQueryPort.loadById(parentId)
-        if (!parent.belongsTo(dealId) || parent.isDeleted) {
+        if (parent.doesNotBelongTo(dealId) || parent.isDeleted) {
             throw BusinessException(ApiResponseCode.HOT_DEAL_COMMENT_NOT_FOUND)
         }
     }
 
     override fun validateCommentOwnership(commentId: Long, userId: Long, dealId: Long) {
         val comment = hotDealCommentQueryPort.loadById(commentId)
-        if (!comment.belongsTo(dealId) || !comment.isOwnedBy(userId) || comment.isDeleted) {
+        if (comment.doesNotBelongTo(dealId) || comment.isNotOwnedBy(userId) || comment.isDeleted) {
             throw BusinessException(ApiResponseCode.HOT_DEAL_COMMENT_NOT_FOUND)
         }
     }

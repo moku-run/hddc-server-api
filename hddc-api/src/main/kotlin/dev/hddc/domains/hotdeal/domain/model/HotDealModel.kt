@@ -25,6 +25,8 @@ data class HotDealModel(
 ) {
     val isActive: Boolean get() = !isDeleted && !isExpired
 
+    val isNotExpired: Boolean get() = !isExpired
+
     val isInactive: Boolean get() = isDeleted || isExpired
 
     val hasDiscount: Boolean get() = discountRate != null && discountRate > 0

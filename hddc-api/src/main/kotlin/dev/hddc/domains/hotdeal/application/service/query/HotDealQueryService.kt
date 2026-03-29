@@ -57,7 +57,7 @@ class HotDealQueryService(
         val nicknames = userQueryPort.findNicknamesByIds(userIds)
 
         val likedCommentIds = if (userId != null) {
-            val commentIds = comments.filter { !it.isDeleted }.map { it.id }
+            val commentIds = comments.filter { it.isNotDeleted }.map { it.id }
             if (commentIds.isNotEmpty()) {
                 hotDealCommentLikeQueryPort.findAllByUserIdAndCommentIds(userId, commentIds)
                     .map { it.commentId }.toSet()
@@ -99,8 +99,8 @@ class HotDealQueryService(
             .map { it.parentId!! }
             .toSet()
 
-        val filteredRoots = pagedRoots.filter { !it.isDeleted || it.id in parentIdsWithReplies }
-        val filteredReplies = replies.filter { !it.isDeleted || it.id in parentIdsWithReplies }
+        val filteredRoots = pagedRoots.filter { it.isNotDeleted || it.id in parentIdsWithReplies }
+        val filteredReplies = replies.filter { it.isNotDeleted || it.id in parentIdsWithReplies }
 
         val comments = filteredRoots.flatMap { root ->
             val rootReplies = filteredReplies.filter { it.parentId == root.id }
