@@ -25,10 +25,11 @@ data class HotDealResponse(
     val isExpired: Boolean,
     val isLiked: Boolean,
     val isVotedExpired: Boolean,
+    val isClicked: Boolean,
     val createdAt: String,
 ) {
     companion object {
-        fun from(model: HotDealModel, nickname: String, dealNumber: Long = 0, isLiked: Boolean = false, isVotedExpired: Boolean = false) = HotDealResponse(
+        fun from(model: HotDealModel, nickname: String, dealNumber: Long = 0, isLiked: Boolean = false, isVotedExpired: Boolean = false, isClicked: Boolean = false) = HotDealResponse(
             dealNumber = dealNumber,
             id = model.id,
             userId = model.userId,
@@ -49,6 +50,7 @@ data class HotDealResponse(
             isExpired = model.isExpired,
             isLiked = isLiked,
             isVotedExpired = isVotedExpired,
+            isClicked = isClicked,
             createdAt = model.createdAt.toString(),
         )
     }

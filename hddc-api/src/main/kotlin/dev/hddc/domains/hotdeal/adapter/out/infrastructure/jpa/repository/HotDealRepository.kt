@@ -86,4 +86,6 @@ interface HotDealCommentLikeRepository : JpaRepository<HotDealCommentLikeEntity,
 interface HotDealClickRepository : JpaRepository<HotDealClickEntity, Long> {
     fun existsByDealIdAndUserIdAndCreatedAtAfter(dealId: Long, userId: Long, after: java.time.Instant): Boolean
     fun existsByDealIdAndIpAndUserIdIsNullAndCreatedAtAfter(dealId: Long, ip: String, after: java.time.Instant): Boolean
+    fun findAllByUserIdAndDealIdIn(userId: Long, dealIds: List<Long>): List<HotDealClickEntity>
+    fun existsByDealIdAndUserId(dealId: Long, userId: Long): Boolean
 }

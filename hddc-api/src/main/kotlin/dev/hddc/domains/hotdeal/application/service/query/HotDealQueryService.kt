@@ -5,6 +5,7 @@ import dev.hddc.domains.hotdeal.application.ports.input.query.CommentWithNicknam
 import dev.hddc.domains.hotdeal.application.ports.input.query.EnrichedCommentCursorResult
 import dev.hddc.domains.hotdeal.application.ports.input.query.HotDealPageResult
 import dev.hddc.domains.hotdeal.application.ports.input.query.HotDealQueryUsecase
+import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealClickQueryPort
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealCommentLikeQueryPort
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealCommentQueryPort
 import dev.hddc.domains.hotdeal.application.ports.output.query.HotDealExpiredVoteQueryPort
@@ -22,6 +23,7 @@ class HotDealQueryService(
     private val hotDealQueryPort: HotDealQueryPort,
     private val hotDealLikeQueryPort: HotDealLikeQueryPort,
     private val hotDealExpiredVoteQueryPort: HotDealExpiredVoteQueryPort,
+    private val hotDealClickQueryPort: HotDealClickQueryPort,
     private val hotDealCommentQueryPort: HotDealCommentQueryPort,
     private val hotDealCommentLikeQueryPort: HotDealCommentLikeQueryPort,
     private val userQueryPort: UserQueryPort,
@@ -121,6 +123,7 @@ class HotDealQueryService(
         val dealIds = deals.content.map { it.id }
         val likedIds = userId?.let { hotDealLikeQueryPort.findAllByUserIdAndDealIds(it, dealIds).map { it.dealId }.toSet() } ?: emptySet()
         val votedExpiredIds = userId?.let { hotDealExpiredVoteQueryPort.findAllByUserIdAndDealIds(it, dealIds).map { it.dealId }.toSet() } ?: emptySet()
-        return HotDealPageResult.of(deals, nicknames, likedIds, votedExpiredIds)
+        val clickedIds = userId?.let { hotDealClickQueryPort.findDealIdsByUserIdAndDealIds(it, dealIds) } ?: emptySet()
+        return HotDealPageResult.of(deals, nicknames, likedIds, votedExpiredIds, clickedIds)
     }
 }

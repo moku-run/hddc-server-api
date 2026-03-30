@@ -11,6 +11,7 @@ data class HotDealWithUserState(
     val dealNumber: Long,
     val isLiked: Boolean,
     val isVotedExpired: Boolean,
+    val isClicked: Boolean,
 )
 
 data class HotDealPageResult(
@@ -23,6 +24,7 @@ data class HotDealPageResult(
             nicknames: Map<Long, String>,
             likedIds: Set<Long>,
             votedExpiredIds: Set<Long>,
+            clickedIds: Set<Long>,
         ): HotDealPageResult = HotDealPageResult(
             content = deals.content.mapIndexed { index, deal ->
                 HotDealWithUserState(
@@ -31,6 +33,7 @@ data class HotDealPageResult(
                     dealNumber = deals.pagination.totalItems - ((deals.pagination.currentPage - 1).toLong() * deals.pagination.perPage) - index,
                     isLiked = deal.id in likedIds,
                     isVotedExpired = deal.id in votedExpiredIds,
+                    isClicked = deal.id in clickedIds,
                 )
             },
             pagination = deals.pagination,

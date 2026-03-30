@@ -64,8 +64,8 @@ class HotDealQueryApi(
 
     private fun HotDealPageResult.toResponse(): HotDealPageResponse =
         HotDealPageResponse(
-            content = content.map { it ->
-                HotDealResponse.from(it.deal, it.nickname, it.dealNumber, it.isLiked, it.isVotedExpired)
+            content = content.map {
+                HotDealResponse.from(it.deal, it.nickname, it.dealNumber, it.isLiked, it.isVotedExpired, it.isClicked)
             },
             pagination = pagination,
         )
