@@ -1,5 +1,6 @@
 package dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.entity
 
+import dev.hddc.domains.hotdeal.domain.model.CandidateDealStatus
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -15,23 +16,14 @@ class CandidateDealEntity(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
-    @Column(name = "source_site", nullable = false, length = 50)
-    val sourceSite: String,
-
-    @Column(name = "source_id", length = 100)
-    val sourceId: String? = null,
+    @Column(name = "user_id", nullable = false)
+    val userId: Long,
 
     @Column(length = 500)
     var title: String? = null,
 
-    @Column(length = 2000)
-    var description: String? = null,
-
-    @Column(name = "post_url", nullable = false, length = 1000)
-    val postUrl: String,
-
-    @Column(name = "deal_link", length = 1000)
-    var dealLink: String? = null,
+    @Column(length = 1000)
+    var url: String? = null,
 
     @Column(name = "image_url", length = 1000)
     var imageUrl: String? = null,
@@ -42,9 +34,6 @@ class CandidateDealEntity(
     @Column(name = "deal_price")
     var dealPrice: Int? = null,
 
-    @Column(name = "discount_rate")
-    var discountRate: Int? = null,
-
     @Column(length = 100)
     var store: String? = null,
 
@@ -52,11 +41,11 @@ class CandidateDealEntity(
     var category: String? = null,
 
     @Column(nullable = false, length = 20)
-    var status: String = "PENDING",
+    var status: String = CandidateDealStatus.PENDING.name,
 
-    @Column(name = "crawled_at", nullable = false)
-    val crawledAt: Instant = Instant.now(),
+    @Column(name = "created_at", nullable = false, updatable = false)
+    val createdAt: Instant = Instant.now(),
 
-    @Column(name = "transferred_at")
-    var transferredAt: Instant? = null,
+    @Column(name = "updated_at", nullable = false)
+    var updatedAt: Instant = Instant.now(),
 )

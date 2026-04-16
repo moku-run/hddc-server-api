@@ -1,6 +1,7 @@
 package dev.hddc.domains.hotdeal.adapter.out.validator
 
-import dev.hddc.domains.hotdeal.application.ports.output.query.CandidateDealQueryPort
+import dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.repository.CandidateDealRepository
+import dev.hddc.domains.hotdeal.adapter.out.infrastructure.jpa.repository.loadById
 import dev.hddc.domains.hotdeal.application.ports.output.validator.CandidateDealValidator
 import dev.hddc.domains.hotdeal.domain.model.CandidateDealStatus
 import dev.hddc.framework.api.response.ApiResponseCode
@@ -9,13 +10,13 @@ import org.springframework.stereotype.Component
 
 @Component
 class CandidateDealValidationAdapter(
-    private val candidateDealQueryPort: CandidateDealQueryPort,
+    private val candidateDealRepository: CandidateDealRepository,
 ) : CandidateDealValidator {
 
-    override fun validatePendingStatus(candidateDealId: Long) {
-        val candidate = candidateDealQueryPort.loadById(candidateDealId)
-        if (candidate.status != CandidateDealStatus.PENDING) {
-            throw BusinessException(ApiResponseCode.INVALID_REQUEST)
+    override fun validatePending(id: Long) {
+        val entity = candidateDealRepository.loadById(id)
+        if (entity.status != CandidateDealStatus.PENDING.name) {
+            throw BusinessException(ApiResponseCode.CANDIDATE_DEAL_INVALID_STATUS)
         }
     }
 }

@@ -2,6 +2,7 @@ package dev.hddc.domains.hotdeal.adapter.`in`.web.query
 
 import dev.hddc.domains.hotdeal.adapter.`in`.web.response.CandidateDealPageResponse
 import dev.hddc.domains.hotdeal.application.ports.input.query.CandidateDealAdminQueryUsecase
+import dev.hddc.domains.hotdeal.domain.model.CandidateDealStatus
 import dev.hddc.framework.api.response.ApiResponse
 import dev.hddc.framework.api.response.ApiResponseCode
 import dev.hddc.framework.api.response.ApiResult
@@ -26,9 +27,9 @@ class CandidateDealAdminQueryApi(
     fun getCandidateDeals(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @RequestParam(defaultValue = "PENDING") status: String,
-        @PageableDefault(size = 20, sort = ["crawledAt"], direction = Sort.Direction.DESC) pageable: Pageable,
+        @PageableDefault(size = 20, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable,
     ): ApiResult<CandidateDealPageResponse> {
-        val result = candidateDealAdminQueryUsecase.getCandidateDeals(status, pageable)
+        val result = candidateDealAdminQueryUsecase.getAll(CandidateDealStatus.valueOf(status), pageable)
         return ApiResponse.of(ApiResponseCode.OK, CandidateDealPageResponse.from(result))
     }
 }

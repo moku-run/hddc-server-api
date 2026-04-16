@@ -1,45 +1,38 @@
 package dev.hddc.domains.hotdeal.adapter.`in`.web.response
 
-import dev.hddc.domains.hotdeal.application.ports.output.query.CandidateDealPageData
+import dev.hddc.domains.hotdeal.application.ports.input.command.BulkApproveResult
+import dev.hddc.domains.hotdeal.application.ports.input.query.CandidateDealPageResult
 import dev.hddc.domains.hotdeal.domain.model.CandidateDealModel
 import dev.hddc.framework.pagination.Pagination
 
 data class CandidateDealResponse(
     val id: Long,
-    val sourceSite: String,
-    val sourceId: String?,
+    val userId: Long,
     val title: String?,
-    val description: String?,
-    val postUrl: String,
-    val dealLink: String?,
+    val url: String?,
     val imageUrl: String?,
     val originalPrice: Int?,
     val dealPrice: Int?,
-    val discountRate: Int?,
     val store: String?,
     val category: String?,
     val status: String,
-    val crawledAt: String,
-    val transferredAt: String?,
+    val createdAt: String,
+    val updatedAt: String,
 ) {
     companion object {
         fun from(model: CandidateDealModel) = CandidateDealResponse(
-            id = model.id!!,
-            sourceSite = model.sourceSite,
-            sourceId = model.sourceId,
+            id = model.id,
+            userId = model.userId,
             title = model.title,
-            description = model.description,
-            postUrl = model.postUrl,
-            dealLink = model.dealLink,
+            url = model.url,
             imageUrl = model.imageUrl,
             originalPrice = model.originalPrice,
             dealPrice = model.dealPrice,
-            discountRate = model.discountRate,
             store = model.store,
             category = model.category,
-            status = model.status.value,
-            crawledAt = model.crawledAt.toString(),
-            transferredAt = model.transferredAt?.toString(),
+            status = model.status.name,
+            createdAt = model.createdAt.toString(),
+            updatedAt = model.updatedAt.toString(),
         )
     }
 }
@@ -49,9 +42,21 @@ data class CandidateDealPageResponse(
     val pagination: Pagination,
 ) {
     companion object {
-        fun from(data: CandidateDealPageData) = CandidateDealPageResponse(
-            content = data.content.map { CandidateDealResponse.from(it) },
-            pagination = data.pagination,
+        fun from(result: CandidateDealPageResult) = CandidateDealPageResponse(
+            content = result.content.map { CandidateDealResponse.from(it) },
+            pagination = result.pagination,
+        )
+    }
+}
+
+data class BulkApproveResponse(
+    val succeeded: List<Long>,
+    val failed: List<Long>,
+) {
+    companion object {
+        fun from(result: BulkApproveResult) = BulkApproveResponse(
+            succeeded = result.succeeded,
+            failed = result.failed,
         )
     }
 }
