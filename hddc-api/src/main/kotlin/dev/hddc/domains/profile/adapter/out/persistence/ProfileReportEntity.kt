@@ -6,7 +6,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.Table
 
 @Entity
-@Table(name = "his_profile_report")
+@Table(name = "profile_report")
 class ProfileReportEntity(
     @Column(name = "profile_id", nullable = false)
     val profileId: Long,
@@ -19,7 +19,7 @@ class ProfileReportEntity(
 ) : BaseEntity()
 
 @Entity
-@Table(name = "his_profile_link_report")
+@Table(name = "profile_link_report")
 class ProfileLinkReportEntity(
     @Column(name = "link_id", nullable = false)
     val linkId: Long,

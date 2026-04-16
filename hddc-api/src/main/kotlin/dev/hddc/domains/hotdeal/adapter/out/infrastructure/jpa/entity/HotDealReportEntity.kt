@@ -6,7 +6,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.Table
 
 @Entity
-@Table(name = "his_hot_deal_report")
+@Table(name = "hot_deal_report")
 class HotDealReportEntity(
     @Column(name = "deal_id", nullable = false)
     val dealId: Long,

@@ -1,5 +1,5 @@
 package dev.hddc.domains.hotdeal.application.ports.output.validator
 
 interface CandidateDealValidator {
-    fun validatePendingStatus(candidateDealId: Long)
+    fun validatePending(id: Long)
 }

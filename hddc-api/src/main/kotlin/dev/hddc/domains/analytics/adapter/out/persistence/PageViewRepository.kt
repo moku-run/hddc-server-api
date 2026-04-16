@@ -10,7 +10,7 @@ interface PageViewRepository : JpaRepository<PageViewEntity, Long> {
     @Query(
         """
         SELECT CAST(pv.created_at AS DATE) as date, COUNT(pv) as cnt
-        FROM his_page_view pv
+        FROM page_view pv
         WHERE pv.profile_id = :profileId AND pv.created_at >= :after
         GROUP BY CAST(pv.created_at AS DATE)
         ORDER BY date

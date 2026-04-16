@@ -9,7 +9,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 
 @Entity
-@Table(name = "mst_profile_link")
+@Table(name = "profile_link")
 class ProfileLinkEntity(
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profile_id", nullable = false)

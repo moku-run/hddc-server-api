@@ -10,7 +10,7 @@ interface LinkClickRepository : JpaRepository<LinkClickEntity, Long> {
     @Query(
         """
         SELECT CAST(lc.created_at AS DATE) as date, COUNT(lc) as cnt
-        FROM his_link_click lc
+        FROM link_click lc
         WHERE lc.profile_id = :profileId AND lc.created_at >= :after
         GROUP BY CAST(lc.created_at AS DATE)
         ORDER BY date
@@ -22,7 +22,7 @@ interface LinkClickRepository : JpaRepository<LinkClickEntity, Long> {
     @Query(
         """
         SELECT lc.link_id, COUNT(lc) as cnt
-        FROM his_link_click lc
+        FROM link_click lc
         WHERE lc.profile_id = :profileId AND lc.created_at >= :after
         GROUP BY lc.link_id
         ORDER BY cnt DESC

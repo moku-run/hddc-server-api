@@ -7,7 +7,7 @@ import jakarta.persistence.Table
 import java.time.Instant
 
 @Entity
-@Table(name = "mst_hot_deal_comment")
+@Table(name = "hot_deal_comment")
 class HotDealCommentEntity(
     @Column(name = "deal_id", nullable = false)
     val dealId: Long,

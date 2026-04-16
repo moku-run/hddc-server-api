@@ -10,7 +10,7 @@ import jakarta.persistence.OrderBy
 import jakarta.persistence.Table
 
 @Entity
-@Table(name = "mst_profile")
+@Table(name = "profile")
 class ProfileEntity(
     @Column(name = "user_id", nullable = false, unique = true)
     val userId: Long,

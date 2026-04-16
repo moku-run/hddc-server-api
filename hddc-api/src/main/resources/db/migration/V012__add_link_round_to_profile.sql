@@ -1,1 +1,0 @@
-ALTER TABLE mst_profile ADD COLUMN link_round VARCHAR(10) NOT NULL DEFAULT 'sm';

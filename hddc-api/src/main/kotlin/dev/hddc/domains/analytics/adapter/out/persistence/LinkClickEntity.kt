@@ -6,7 +6,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.Table
 
 @Entity
-@Table(name = "his_link_click")
+@Table(name = "link_click")
 class LinkClickEntity(
     @Column(name = "profile_id", nullable = false)
     val profileId: Long,

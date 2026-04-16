@@ -1,9 +1,12 @@
 package dev.hddc.domains.hotdeal.application.ports.input.command
 
-data class ApproveResult(val approvedCount: Int)
+data class BulkApproveResult(
+    val succeeded: List<Long>,
+    val failed: List<Long>,
+)
 
 interface CandidateDealAdminUsecase {
-    fun approve(candidateDealId: Long): Long
-    fun reject(candidateDealId: Long)
-    fun bulkApprove(candidateDealIds: List<Long>): ApproveResult
+    fun approve(id: Long): Long
+    fun reject(id: Long)
+    fun bulkApprove(ids: List<Long>): BulkApproveResult
 }

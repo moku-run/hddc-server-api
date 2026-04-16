@@ -6,7 +6,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.Table
 
 @Entity
-@Table(name = "his_page_view")
+@Table(name = "page_view")
 class PageViewEntity(
     @Column(name = "profile_id", nullable = false)
     val profileId: Long,

@@ -57,6 +57,7 @@ enum class ApiResponseCode(
     HOT_DEAL_NOT_FOUND(HttpStatus.NOT_FOUND, false, "H001", "핫딜을 찾을 수 없습니다."),
     HOT_DEAL_COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, false, "H002", "댓글을 찾을 수 없습니다."),
     CANDIDATE_DEAL_NOT_FOUND(HttpStatus.NOT_FOUND, false, "H003", "후보 딜을 찾을 수 없습니다."),
+    CANDIDATE_DEAL_INVALID_STATUS(HttpStatus.CONFLICT, false, "H004", "승인 또는 거부 처리할 수 없는 상태입니다."),
 
     // Upload
     UPLOAD_FILE_EMPTY(HttpStatus.BAD_REQUEST, false, "F001", "파일이 비어있습니다."),

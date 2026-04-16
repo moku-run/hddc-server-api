@@ -8,7 +8,7 @@ import jakarta.persistence.Table
 import java.time.Instant
 
 @Entity
-@Table(name = "mst_user")
+@Table(name = "users")
 class UserEntity(
     @Column(nullable = false, unique = true)
     val email: String,
