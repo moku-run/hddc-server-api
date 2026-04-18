@@ -1,6 +1,7 @@
 package dev.hddc.domains.hotdeal.application.service.command
 
 import dev.hddc.domains.hotdeal.application.ports.input.command.BulkApproveResult
+import dev.hddc.domains.hotdeal.application.ports.input.command.BulkRejectResult
 import dev.hddc.domains.hotdeal.application.ports.input.command.CandidateDealAdminUsecase
 import dev.hddc.domains.hotdeal.application.ports.output.command.CandidateDealCommandPort
 import dev.hddc.domains.hotdeal.application.ports.output.command.HotDealCommandPort
@@ -47,6 +48,39 @@ class CandidateDealCommandService(
     override fun reject(id: Long) {
         candidateDealValidator.validatePending(id)
         candidateDealCommandPort.updateStatus(id, CandidateDealStatus.REJECTED)
+    }
+
+    @Transactional
+    override fun registerWithModifications(id: Long, command: CandidateDealAdminUsecase.RegisterCommand): Long {
+        candidateDealValidator.validatePending(id)
+        val candidate = candidateDealQueryPort.loadById(id)
+        val hotDeal = hotDealCommandPort.create(
+            CreateHotDealModel(
+                userId = candidate.userId,
+                title = command.title,
+                url = command.url,
+                imageUrl = command.imageUrl,
+                originalPrice = command.originalPrice,
+                dealPrice = command.dealPrice,
+                category = command.category,
+                store = command.store,
+                description = command.description,
+                discountRate = command.discountRate,
+            )
+        )
+        eventPublisher.publish(DealEvent.DealCreated(dealId = hotDeal.id))
+        candidateDealCommandPort.updateStatus(id, CandidateDealStatus.TRANSFERRED)
+        return hotDeal.id
+    }
+
+    @Transactional
+    override fun bulkReject(ids: List<Long>): BulkRejectResult {
+        val succeeded = ids.map { id ->
+            candidateDealValidator.validatePending(id)
+            candidateDealCommandPort.updateStatus(id, CandidateDealStatus.REJECTED)
+            id
+        }
+        return BulkRejectResult(succeeded = succeeded, failed = emptyList())
     }
 
     @Transactional

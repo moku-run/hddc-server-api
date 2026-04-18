@@ -1,6 +1,7 @@
 package dev.hddc.domains.hotdeal.adapter.`in`.web.response
 
 import dev.hddc.domains.hotdeal.application.ports.input.command.BulkApproveResult
+import dev.hddc.domains.hotdeal.application.ports.input.command.BulkRejectResult
 import dev.hddc.domains.hotdeal.application.ports.input.query.CandidateDealPageResult
 import dev.hddc.domains.hotdeal.domain.model.CandidateDealModel
 import dev.hddc.framework.pagination.Pagination
@@ -55,6 +56,18 @@ data class BulkApproveResponse(
 ) {
     companion object {
         fun from(result: BulkApproveResult) = BulkApproveResponse(
+            succeeded = result.succeeded,
+            failed = result.failed,
+        )
+    }
+}
+
+data class BulkRejectResponse(
+    val succeeded: List<Long>,
+    val failed: List<Long>,
+) {
+    companion object {
+        fun from(result: BulkRejectResult) = BulkRejectResponse(
             succeeded = result.succeeded,
             failed = result.failed,
         )

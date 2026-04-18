@@ -1,7 +1,10 @@
 package dev.hddc.domains.hotdeal.adapter.`in`.web.command
 
 import dev.hddc.domains.hotdeal.adapter.`in`.web.command.request.BulkApproveRequest
+import dev.hddc.domains.hotdeal.adapter.`in`.web.command.request.BulkRejectRequest
+import dev.hddc.domains.hotdeal.adapter.`in`.web.command.request.RegisterCandidateDealRequest
 import dev.hddc.domains.hotdeal.adapter.`in`.web.response.BulkApproveResponse
+import dev.hddc.domains.hotdeal.adapter.`in`.web.response.BulkRejectResponse
 import dev.hddc.domains.hotdeal.application.ports.input.command.CandidateDealAdminUsecase
 import dev.hddc.framework.api.response.ApiResponse
 import dev.hddc.framework.api.response.ApiResponseCode
@@ -20,6 +23,15 @@ import org.springframework.web.bind.annotation.RestController
 class CandidateDealAdminApi(
     private val candidateDealAdminUsecase: CandidateDealAdminUsecase,
 ) {
+    @Operation(summary = "후보 딜 값 수정 후 hot_deal 등록")
+    @PostMapping("/api/admin/candidate-deals/{id}/register")
+    fun register(
+        @AuthenticationPrincipal user: UserAuthenticationDTO,
+        @PathVariable id: Long,
+        @RequestBody request: RegisterCandidateDealRequest,
+    ): ApiResult<Map<String, Long>> =
+        ApiResponse.of(ApiResponseCode.CREATED, mapOf("hotDealId" to candidateDealAdminUsecase.registerWithModifications(id, request.toCommand())))
+
     @Operation(summary = "후보 딜 승인 → hot_deal 생성")
     @PostMapping("/api/admin/candidate-deals/{id}/approve")
     fun approve(
@@ -45,4 +57,12 @@ class CandidateDealAdminApi(
         @RequestBody request: BulkApproveRequest,
     ): ApiResult<BulkApproveResponse> =
         ApiResponse.of(ApiResponseCode.CREATED, BulkApproveResponse.from(candidateDealAdminUsecase.bulkApprove(request.ids)))
+
+    @Operation(summary = "후보 딜 일괄 거절")
+    @PostMapping("/api/admin/candidate-deals/bulk-reject")
+    fun bulkReject(
+        @AuthenticationPrincipal user: UserAuthenticationDTO,
+        @RequestBody request: BulkRejectRequest,
+    ): ApiResult<BulkRejectResponse> =
+        ApiResponse.of(ApiResponseCode.OK, BulkRejectResponse.from(candidateDealAdminUsecase.bulkReject(request.ids)))
 }

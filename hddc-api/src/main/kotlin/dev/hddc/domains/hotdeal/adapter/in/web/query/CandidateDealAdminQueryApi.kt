@@ -26,10 +26,10 @@ class CandidateDealAdminQueryApi(
     @GetMapping("/api/admin/candidate-deals")
     fun getCandidateDeals(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
-        @RequestParam(defaultValue = "PENDING") status: String,
+        @RequestParam(defaultValue = "PENDING") status: CandidateDealStatus,
         @PageableDefault(size = 20, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable,
     ): ApiResult<CandidateDealPageResponse> {
-        val result = candidateDealAdminQueryUsecase.getAll(CandidateDealStatus.valueOf(status), pageable)
+        val result = candidateDealAdminQueryUsecase.getAll(status, pageable)
         return ApiResponse.of(ApiResponseCode.OK, CandidateDealPageResponse.from(result))
     }
 }
