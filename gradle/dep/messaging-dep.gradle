@@ -1,5 +1,0 @@
-dependencies {
-    implementation(MessagingLibs.KAFKA)
-
-    testImplementation(MessagingLibs.KAFKA_TEST)
-}

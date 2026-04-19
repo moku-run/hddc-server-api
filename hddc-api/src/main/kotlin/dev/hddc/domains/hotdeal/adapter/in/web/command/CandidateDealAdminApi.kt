@@ -29,16 +29,16 @@ class CandidateDealAdminApi(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @PathVariable id: Long,
         @RequestBody request: RegisterCandidateDealRequest,
-    ): ApiResult<Map<String, Long>> =
-        ApiResponse.of(ApiResponseCode.CREATED, mapOf("hotDealId" to candidateDealAdminUsecase.registerWithModifications(id, request.toCommand())))
+    ): ApiResult<Map<String, Long?>> =
+        ApiResponse.of(ApiResponseCode.OK, mapOf("hotDealId" to candidateDealAdminUsecase.registerWithModifications(id, request.toCommand())))
 
     @Operation(summary = "후보 딜 승인 → hot_deal 생성")
     @PostMapping("/api/admin/candidate-deals/{id}/approve")
     fun approve(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @PathVariable id: Long,
-    ): ApiResult<Map<String, Long>> =
-        ApiResponse.of(ApiResponseCode.CREATED, mapOf("hotDealId" to candidateDealAdminUsecase.approve(id)))
+    ): ApiResult<Map<String, Long?>> =
+        ApiResponse.of(ApiResponseCode.OK, mapOf("hotDealId" to candidateDealAdminUsecase.approve(id)))
 
     @Operation(summary = "후보 딜 거부")
     @PostMapping("/api/admin/candidate-deals/{id}/reject")
@@ -56,7 +56,7 @@ class CandidateDealAdminApi(
         @AuthenticationPrincipal user: UserAuthenticationDTO,
         @RequestBody request: BulkApproveRequest,
     ): ApiResult<BulkApproveResponse> =
-        ApiResponse.of(ApiResponseCode.CREATED, BulkApproveResponse.from(candidateDealAdminUsecase.bulkApprove(request.ids)))
+        ApiResponse.of(ApiResponseCode.OK, BulkApproveResponse.from(candidateDealAdminUsecase.bulkApprove(request.ids)))
 
     @Operation(summary = "후보 딜 일괄 거절")
     @PostMapping("/api/admin/candidate-deals/bulk-reject")

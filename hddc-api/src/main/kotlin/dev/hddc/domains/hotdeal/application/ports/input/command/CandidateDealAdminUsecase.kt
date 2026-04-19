@@ -11,11 +11,11 @@ data class BulkRejectResult(
 )
 
 interface CandidateDealAdminUsecase {
-    fun approve(id: Long): Long
+    fun approve(id: Long): Long?
     fun reject(id: Long)
     fun bulkApprove(ids: List<Long>): BulkApproveResult
     fun bulkReject(ids: List<Long>): BulkRejectResult
-    fun registerWithModifications(id: Long, command: RegisterCommand): Long
+    fun registerWithModifications(id: Long, command: RegisterCommand): Long?
 
     data class RegisterCommand(
         val title: String,

@@ -4,4 +4,5 @@ enum class CandidateDealStatus {
     PENDING,
     TRANSFERRED,
     REJECTED,
+    DUPLICATE_URL,
 }

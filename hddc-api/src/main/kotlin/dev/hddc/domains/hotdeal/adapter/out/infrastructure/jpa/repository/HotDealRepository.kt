@@ -22,6 +22,7 @@ fun HotDealCommentRepository.loadById(id: Long): HotDealCommentEntity =
     findById(id).orElseThrow { BusinessException(ApiResponseCode.HOT_DEAL_COMMENT_NOT_FOUND) }
 
 interface HotDealRepository : JpaRepository<HotDealEntity, Long> {
+    fun existsByUrlAndIsDeletedFalse(url: String): Boolean
     fun findByIsDeletedFalseAndIsExpiredFalse(pageable: Pageable): Page<HotDealEntity>
 
     @Query(

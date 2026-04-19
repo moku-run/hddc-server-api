@@ -255,3 +255,23 @@ gradle-app.setting
 ### AI Chat Context (Claude CLI 자동생성 파일) ###
 hivetalk-backoffice/src/main/resources/ai-chat-context/.claude.json
 hivetalk-backoffice/src/main/resources/ai-chat-context/.claude/
+
+### Project-specific ###
+# JOOQ generated sources
+generated/
+**/generated/
+
+# Secrets & local configs
+**/secret/
+application-local.yml
+application-dev.yml
+application-prod.yml
+
+# Claude CLI
+.claude/
+
+# Uploads
+uploads/
+
+# Logs
+*.log

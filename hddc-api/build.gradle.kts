@@ -22,7 +22,6 @@ apply {
     from("$root/${JooqLibs.CONFIG_PATH}")
     from("$root/${FlywayLibs.PATH}")
     from("$root/${FlywayLibs.CONFIG_PATH}")
-    from("$root/${MessagingLibs.PATH}")
     from("$root/${CacheLibs.PATH}")
     from("$root/${LogLibs.PATH}")
     from("$root/${StorageLibs.PATH}")
